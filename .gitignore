@@ -1,0 +1,15 @@
+# Секреты
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Зависимости и сборка
+node_modules/
+dist/
+
+# Worktree конвейера
+.claude/worktrees/
+
+.DS_Store
