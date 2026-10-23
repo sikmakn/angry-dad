@@ -1,0 +1,5278 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "angry-dad",
+    "version": "0.1.0",
+    "license": {
+      "name": "Proprietary",
+      "identifier": "LicenseRef-Proprietary"
+    },
+    "description": "HTTP-контракт Mini App и вебхука бота «Батя», MVP (этапы 1 и 2).\nИсточник: `docs/architecture/mvp` (каталог сущностей, столбец «в API») и `docs/specs/mvp`.\nКарта «сценарий → операции»: `docs/architecture/mvp/contract-map.md`.\n\n**Вход.** Mini App шлёт подписанные данные запуска Telegram в каждом запросе:\n`Authorization: tma <initData>`. Своих сессий и токенов нет (A8). Первый запрос\nнеизвестного Telegram ID создаёт гостя (`onboarding = guest`).\n\n**Гость и пользователь.** Операции с пометкой «Требует завершённый старт» отвечают гостю\n403 `onboarding_required`. Операции владельца (путь начинается с `/owner`) отвечают всем,\nкроме владельца, 403 `owner_only`.\n\n**Реплики персонажа.** Поле `reply` в ответах действий — готовый текст фразы пула после\nподстановки рода и переменных (то же, что `FeedMessage.text`). `null` — персонаж молчит.\n"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "security": [
+    {
+      "telegramInitData": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "Профиль, старт, настройки, удаление аккаунта"
+    },
+    {
+      "name": "tasks",
+      "description": "Задачи, периоды и действия над текущим периодом"
+    },
+    {
+      "name": "delivery",
+      "description": "«История» сообщений персонажа и ответы на проверки"
+    },
+    {
+      "name": "phrases",
+      "description": "Оценка фраз (пользователь) и пул фраз (владелец)"
+    },
+    {
+      "name": "battle",
+      "description": "Диалог боя и ходы"
+    },
+    {
+      "name": "strikes",
+      "description": "Баланс и история ударов"
+    },
+    {
+      "name": "payments",
+      "description": "Пакеты, счёт Stars, платежи и обращения"
+    },
+    {
+      "name": "sharing",
+      "description": "Карточка для шеринга"
+    },
+    {
+      "name": "leaderboard",
+      "description": "Общий рейтинг"
+    },
+    {
+      "name": "analytics",
+      "description": "Метрики, журнал и настройки игры (владелец)"
+    },
+    {
+      "name": "bot",
+      "description": "Вебхук Telegram"
+    }
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "getMe",
+        "summary": "Мой профиль",
+        "description": "Возвращает профиль текущего пользователя. Для неизвестного Telegram ID создаёт гостя.\nДоступно гостю. Mini App сравнивает `timeZone` с поясом устройства и при расхождении\nпредлагает обновить его через `updateMe`.\n",
+        "responses": {
+          "200": {
+            "description": "Профиль",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "updateMe",
+        "summary": "Изменить настройки",
+        "description": "Меняет только переданные поля: родитель, пол, часовой пояс, тихие часы.\nТребует завершённый старт. Уже отправленные сообщения не меняются. Моменты дедлайнов\nне сдвигаются при смене пояса. Участие в рейтинге меняет `setLeaderboardParticipation`.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённый профиль",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "deleteMe",
+        "summary": "Удалить аккаунт",
+        "description": "Физически стирает профиль, задачи, ленту, диалоги и карточку в рейтинге. Остаются\nплатежи, операции ударов и признак «уже был». Неизрасходованные удары сгорают без возврата\nStars. Два подтверждения делает Mini App до вызова; число сгорающих ударов экран берёт\nиз `getMyStrikes`. Доступно гостю. Данные скрываются с начала удаления; ход боя в работе\nотменяется. 204 приходит только после стирания по всем модулям; при 5xx повтор того же\nзапроса безопасно завершает удаление.\n",
+        "responses": {
+          "204": {
+            "description": "Аккаунт удалён"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/me/onboarding": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "completeOnboarding",
+        "summary": "Завершить старт",
+        "description": "Сохраняет родителя и пол, пояс устройства (по умолчанию `Europe/Moscow`) и переводит\nгостя в `done`. Уважение на старте 12. Повторный вызов уже прошедшего старт получает\n409 `already_onboarded`, профиль не меняется. Доступно гостю.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Старт пройден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/me/leaderboard-participation": {
+      "put": {
+        "tags": [
+          "leaderboard"
+        ],
+        "operationId": "setLeaderboardParticipation",
+        "summary": "Участие в рейтинге",
+        "description": "Выход из рейтинга и возвращение. Требует завершённый старт.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderboardParticipationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Новое состояние",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardParticipationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "listTasks",
+        "summary": "Мои задачи",
+        "description": "Задачи пользователя, от новых к старым. Удалённые не показываются. У каждой задачи\nвложен текущий период (причина вложения в описании схемы `TaskResponse`). Главная\nстраница загружает все активные страницы подряд. Требует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Фильтр по статусу задачи",
+            "schema": {
+              "$ref": "#/components/schemas/TaskStatus"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "Фильтр по виду задачи",
+            "schema": {
+              "$ref": "#/components/schemas/TaskKind"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Порядок. `deadline` — по сроку текущего периода, ближайшие первыми (для главной); по умолчанию `-createdAt`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deadline",
+                "-createdAt"
+              ],
+              "default": "-createdAt"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница задач",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "createTask",
+        "summary": "Поставить задачу",
+        "description": "Проверяет конкретность названия и определяет размер лёгкой моделью (до 3 с), затем\nсохраняет задачу и открывает первый период. Разовая задача: `kind = one_time` и `deadline`.\nПовторяющаяся: `kind = recurring` и `recurrence`, необязательный `anchorTime`.\nДедлайн: не раньше чем через 15 минут и не позже чем через 365 дней. Кнопки «Сегодня» и\n«Завтра» без времени Mini App превращает в 22:00 местного времени. Расплывчатое название:\n400 `task_vague` с фразой onVague в `reply`. Модель недоступна: 503 `ai_unavailable`,\nзадача не сохранена. Больше 50 проверок в сутки: 429 `daily_limit_reached`.\nТребует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OptionalIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Задача создана",
+            "headers": {
+              "Location": {
+                "description": "Адрес созданной задачи",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskActionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TaskId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "getTask",
+        "summary": "Задача",
+        "description": "Одна задача с текущим периодом. Чужая или удалённая задача: 404. Требует завершённый старт.",
+        "responses": {
+          "200": {
+            "description": "Задача",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "updateTask",
+        "summary": "Переименовать или остановить задачу",
+        "description": "`title` меняет название активной задачи (с проверкой конкретности и суточным лимитом, как\nпри постановке); дедлайн меняется только продлением. `status = stopped` останавливает\nактивную повторяющуюся задачу: новые периоды не открываются, сообщения отменяются, текущий\nпериод закрывается без изменения уважения, персонаж отвечает фразой onDelete в `reply`.\nОстальные переходы статуса не принимаются. Закрытая или остановленная задача: 409\n`period_not_active`. Требует завершённый старт.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлённая задача",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskActionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "deleteTask",
+        "summary": "Удалить задачу",
+        "description": "Удаляет задачу в любом статусе (подтверждение делает Mini App). Уважение не откатывается,\nзакрытые периоды перестают считаться в рейтинге. Отвечает 200, а не 204: тело несёт фразу\nonDelete (расхождение с каноном записано в `decisions.md` контракта). Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Задача удалена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}/periods": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TaskId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "listTaskPeriods",
+        "summary": "Периоды задачи",
+        "description": "Периоды задачи от новых к старым. У разовой задачи один период. Требует завершённый старт.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница периодов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/periods/{periodId}/completion": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PeriodId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "completePeriod",
+        "summary": "«Готово»",
+        "description": "Закрывает активный период как `done` (`closedBy = done_button`), начисляет уважение по\nразмеру задачи (+1, +3, +5) и отвечает фразой onSuccess. Выполнение засчитывается по слову\nпользователя. Период не активен: 409 `period_not_active`. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Период закрыт",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodActionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/periods/{periodId}/extension": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PeriodId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "extendPeriod",
+        "summary": "«Мне нужно больше времени…»",
+        "description": "Бесплатно продлевает срок на 1 час, не больше раза в календарные сутки пользователя на\nзадачу; отвечает фразой onExcuse. Для повторяющейся задачи новый срок не должен быть\nпозже начала следующего периода. Повторное продление в те же сутки или выход за начало\nследующего периода: 409 `extension_denied` с фразой onExcuseDenied в `reply` ошибки.\nТребует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Срок продлён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodActionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/periods/{periodId}/surrender": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PeriodId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "surrenderPeriod",
+        "summary": "«Сдаюсь»",
+        "description": "Переводит активный период в `failed` (`closedBy = give_up`) и снимает 1 уважение.\nПодтверждение делает Mini App до вызова. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Период провален",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodActionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/periods/{periodId}/retry": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PeriodId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "operationId": "retryPeriod",
+        "summary": "«Сделаю за час»",
+        "description": "Возвращает проваленный период в `active` со сроком через час, один раз на период\n(`retryUsed`) и только пока следующий период не начался. Снятое уважение не\nвозвращается. Задача (в том числе разовая, ставшая `closed`) возвращается в `active`.\nИначе 409 `retry_unavailable`. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Период снова активен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodActionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/feed": {
+      "get": {
+        "tags": [
+          "delivery"
+        ],
+        "operationId": "listFeed",
+        "summary": "«История»",
+        "description": "Сообщения персонажа от новых к старым. Фильтры `periodId` и `category` нужны странице\nзадачи: последняя проверка периода без ответа берётся из первой записи с\n`category = on_check_in`. Требует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "periodId",
+            "in": "query",
+            "description": "Только сообщения этого периода",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Только сообщения этой категории",
+            "schema": {
+              "$ref": "#/components/schemas/PhraseCategory"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница ленты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/feed/{feedMessageId}/rating": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/FeedMessageId"
+        }
+      ],
+      "put": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "rateFeedMessage",
+        "summary": "Оценить фразу",
+        "description": "Ставит оценку фразе сообщения: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один голос\nна пару «пользователь, фраза», изменить нельзя: та же оценка повторно (потерянный ответ)\nвозвращает 200 с текущим состоянием, другая оценка (в том числе под повторным показом той же\nфразы) получает 409 `already_rated`. В запросе поле `score`, в ответе оно же как `rating`. Категории без оценки: 400.\nТребует завершённый старт.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateFeedMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Оценка записана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/feed/{feedMessageId}/check-in-answer": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/FeedMessageId"
+        }
+      ],
+      "put": {
+        "tags": [
+          "delivery"
+        ],
+        "operationId": "answerCheckIn",
+        "summary": "Ответить на проверку",
+        "description": "Ответ «Сделано», «Частично» или «Не начинал(а)» на проверку «покажи, что сделано».\n«Сделано» закрывает период как «Готово» (`closedBy = check_in`). «Частично» и «Не начинал(а)»\nзапускают серию проверок на сервере, персонаж отвечает фразой onCheckInReply. Ответ\nпосле 15 минут молчания принимается, штраф не возвращается. Задача уже закрыта,\nпровалена, остановлена или удалена: 409 `period_not_active`. Тот же ответ дают кнопки в\nботе. Требует завершённый старт.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInAnswerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ответ принят",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodActionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/battle/{role}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BattleRole"
+        }
+      ],
+      "get": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "getBattleDialog",
+        "summary": "Диалог боя",
+        "description": "Диалог пользователя с ролью: побеждённость и момент её записи. `defeat` уже учитывает\nоткат 25 пунктов в сутки на момент запроса, `defeatAt` — момент последней записи\nзначения. Первое обращение к пустому диалогу (этой операцией или `listBattleMessages`)\nодин раз добавляет реплику onBattleStart атомарно и идемпотентно: после первого ответа\nлюбой из двух операций реплика уже есть, повторные вызовы диалог не меняют. Доступен\nтолько диалог текущей роли пользователя, иначе 409 `role_mismatch`. Уровень побеждённости 1–4 считает клиент по границам\n0/20/50/80. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Диалог",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleDialogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/battle/{role}/messages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BattleRole"
+        }
+      ],
+      "get": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "listBattleMessages",
+        "summary": "Реплики диалога",
+        "description": "Вся история диалога от новых к старым, сжатие контекста на видимость не влияет. Для\nпустого диалога первая реплика onBattleStart создаётся так же, как в `getBattleDialog`.\nТолько диалог текущей роли, иначе 409 `role_mismatch`.\nТребует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница реплик",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleMessageListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "createBattleMessage",
+        "summary": "Сделать ход",
+        "description": "Реплика игрока стоит один удар. Ход выполняется целиком: резерв удара, судья, пересчёт\nшкал, ответ актёра, фиксация. Не больше одного незавершённого хода на диалог. Нет ударов:\n409 `insufficient_strikes`. Техническая ошибка, таймаут 30 с или отказ провайдера: 502\n`turn_failed`, удар возвращён, шкалы не менялись. Короче 2 непробельных символов или\nдлиннее 300: 400 без списания. Ход не меняет статусы задач. Клиентский таймаут запроса\nне меньше 35 с. Требует завершённый старт. Доступен диалог только текущей роли\nпользователя, иначе 409 `role_mismatch`.\n\nПовтор с тем же `Idempotency-Key`:\n\n| состояние первого хода | ответ на повтор |\n|---|---|\n| засчитан | 200 с тем же телом, удар второй раз не списывается |\n| в работе | 409 `turn_in_progress` |\n| не засчитан (502) | тот же 502, новая попытка требует нового ключа |\n| тот же ключ, другой текст | 409 `idempotency_key_reused` |\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBattleMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Повтор того же ключа, прежний результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Ход засчитан",
+            "headers": {
+              "Location": {
+                "description": "Список реплик диалога",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/battle/{role}/quotes": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BattleRole"
+        }
+      ],
+      "post": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "createBattleQuote",
+        "summary": "«Ответить» на сообщение персонажа",
+        "description": "Добавляет сообщение персонажа из «Истории» (под ботом, в «Истории», на экране «Провал») в\nдиалог текущей роли как его реплику с названием задачи (`taskTitle`). Удар не списывается.\nКаждый вызов без `Idempotency-Key` добавляет новую цитату (осознанный повторный ответ на то же\nсообщение допустим); с ключом повтор после обрыва дубля не создаёт. Чужое или\nнесуществующее сообщение: 404. Требует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OptionalIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBattleQuoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Реплика добавлена",
+            "headers": {
+              "Location": {
+                "description": "Список реплик диалога",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BattleMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/me/strikes": {
+      "get": {
+        "tags": [
+          "strikes"
+        ],
+        "operationId": "getMyStrikes",
+        "summary": "Баланс ударов",
+        "description": "Баланс — сумма остатков партий. Партии от старых к новым: удары расходуются из самой\nранней партии с остатком. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Баланс",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrikeBalanceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/me/strike-operations": {
+      "get": {
+        "tags": [
+          "strikes"
+        ],
+        "operationId": "listMyStrikeOperations",
+        "summary": "История операций с ударами",
+        "description": "Покупки, списания, возвраты, ручные начисления и возвраты Stars от новых к старым. Требует завершённый старт.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница операций",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrikeOperationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/packages": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "listPackages",
+        "summary": "Пакеты ударов",
+        "description": "Активные пакеты магазина по порядку показа с ценой в Stars. Маленький закрытый список,\nотдаётся целиком. Требует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Пакеты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/packages/{packageId}/invoices": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PackageId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "createInvoice",
+        "summary": "Создать счёт Stars",
+        "description": "Создаёт счёт в валюте XTR по цене пакета на этот момент. Mini App открывает\n`invoiceUrl` окном оплаты Telegram. Удары начисляются после подтверждения платежа,\nне позже чем через минуту; клиент опрашивает `listMyStrikeOperations` до первой новой\nзаписи `type = purchase` (она и есть признак начисления) и перечитывает `getMyStrikes`. Неактивный или\nнесуществующий пакет: 404. Требует завершённый старт.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OptionalIdempotencyKey"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Счёт создан",
+            "headers": {
+              "Location": {
+                "description": "Адрес пакета",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/shares": {
+      "post": {
+        "tags": [
+          "sharing"
+        ],
+        "operationId": "createShare",
+        "summary": "Карточка для шеринга",
+        "description": "Рисует карточку из фразы пула (без имени, username и названия задачи) и готовит\nсообщение для выбора чата. Mini App передаёт `preparedMessageId` в `shareMessage`.\n`done` и `fail` требуют `periodId`, `battle` требует `role`. Ошибка создания: 503\n`share_failed` («Не получилось, ещё раз?»). Требует завершённый старт.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Карточка готова",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/leaderboard": {
+      "get": {
+        "tags": [
+          "leaderboard"
+        ],
+        "operationId": "getLeaderboard",
+        "summary": "Рейтинг",
+        "description": "До 100 участников по числу закрытых задач; при равенстве выше тот, кто достиг числа\nраньше. Пользователи без закрытых задач в таблицу не попадают. `me` — своя карточка и\nместо (в том числе под таблицей). Маленький закрытый список, без пагинации.\nТребует завершённый старт.\n",
+        "responses": {
+          "200": {
+            "description": "Рейтинг",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/telegram/webhook": {
+      "post": {
+        "tags": [
+          "bot"
+        ],
+        "operationId": "receiveTelegramUpdate",
+        "summary": "Вебхук Telegram",
+        "description": "Принимает обновления Bot API: `/start`, `/terms`, `/paysupport`, нажатия кнопок под\nсообщениями (ответы на проверки, «Готово», продление, «Сдаюсь», оценки), `pre_checkout_query`,\n`successful_payment`, `my_chat_member`. Подлинность — секретный токен вебхука. Бот\nтолько разбирает обновление и передаёт его модулям.\n\nОтвечает 200 только когда обновление обработано или осознанно проигнорировано\n(неподдерживаемый тип, повтор того же `update_id` или `telegram_payment_charge_id`).\nПри временной ошибке (база недоступна, сбой обработчика) отвечает 503: Telegram повторит\nдоставку, обработка идемпотентна. Так не теряется `successful_payment`.\nОтвет на `pre_checkout_query` уходит вызовом Bot API в пределах 10 секунд и не зависит\nот тела ответа вебхука.\n",
+        "security": [
+          {
+            "telegramWebhookSecret": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TelegramUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновление обработано или проигнорировано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAck"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/owner/users/{telegramId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TelegramId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "getOwnerUser",
+        "summary": "Владелец. Пользователь по Telegram ID",
+        "description": "Поиск пользователя для начисления ударов и разбора платежей. Задач и диалогов владелец\nне видит. Для удалённого пользователя профиля нет: 404, но его платежи и операции\nударов остаются доступны по тому же Telegram ID.\n",
+        "responses": {
+          "200": {
+            "description": "Пользователь",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/owner/users/{telegramId}/strikes": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TelegramId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "strikes"
+        ],
+        "operationId": "getOwnerUserStrikes",
+        "summary": "Владелец. Баланс ударов пользователя",
+        "responses": {
+          "200": {
+            "description": "Баланс и партии",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerStrikeBalanceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/owner/users/{telegramId}/strike-operations": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TelegramId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "strikes"
+        ],
+        "operationId": "listOwnerUserStrikeOperations",
+        "summary": "Владелец. История операций пользователя",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница операций",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrikeOperationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "strikes"
+        ],
+        "operationId": "createOwnerStrikeOperation",
+        "summary": "Владелец. Начислить или вернуть удары",
+        "description": "Ручное начисление (`manual_grant`) или списание (`manual_revoke`) с обязательной причиной.\nБез причины: 400 «Укажите причину». Списать больше остатка: 409 `revoke_exceeds_balance`. Действие пишется в\nжурнал владельца.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OptionalIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStrikeOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Операция записана",
+            "headers": {
+              "Location": {
+                "description": "Список операций пользователя",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrikeOperationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/owner/phrases": {
+      "get": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "listOwnerPhrases",
+        "summary": "Владелец. Пул фраз",
+        "description": "Фразы со статистикой. Выключенные и «ниже порога» — фильтры `status = disabled` и\n`belowThreshold = true`; перефразы на одобрении — `status = pending_review`.\nСредний балл клиент считает как `scoreSum / max(votes, 1)`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PhraseRole"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PhraseCategory"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PhraseStatus"
+            }
+          },
+          {
+            "name": "belowThreshold",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Порядок. `avg` — по среднему баллу, худшие первыми; `-shows` — по показам; по умолчанию `-shows`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "avg",
+                "-shows"
+              ],
+              "default": "-shows"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница фраз",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhraseListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "createOwnerPhrase",
+        "summary": "Владелец. Добавить фразу",
+        "description": "Новая фраза сразу включена (`status = enabled`). Автор виден только владельцу.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePhraseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Фраза добавлена",
+            "headers": {
+              "Location": {
+                "description": "Адрес фразы",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhraseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/phrases/{phraseId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PhraseId"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "updateOwnerPhrase",
+        "summary": "Владелец. Включить, выключить, одобрить перефраз",
+        "description": "Меняет статус фразы. Одобрение перефраза — `pending_review` → `enabled`, отклонение —\n`pending_review` → `disabled`. Выключить последнюю включённую фразу ячейки с уровнем\nпобеждённости `any` и сочетанием `any`: 409 `last_enabled_phrase`.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePhraseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Фраза обновлена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhraseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/owner/phrases/{phraseId}/paraphrases": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PhraseId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "createOwnerParaphrases",
+        "summary": "Владелец. Создать перефразы",
+        "description": "Модель делает перефразы фразы в той же структуре. Они попадают в пул как отдельные\nфразы со статусом `pending_review` и `source = paraphrase`, пока владелец их не одобрит.\nВсё или ничего: при отказе модели на любом перефразе ничего не сохраняется, 503\n`ai_unavailable`. Общий таймаут 30 с.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateParaphrasesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Перефразы созданы",
+            "headers": {
+              "Location": {
+                "description": "Список фраз на одобрении",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhraseItemsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/owner/phrase-coverage": {
+      "get": {
+        "tags": [
+          "phrases"
+        ],
+        "operationId": "getOwnerPhraseCoverage",
+        "summary": "Владелец. Отчёт наполнения пула",
+        "description": "Число включённых фраз по ячейкам (роль, категория, уровень, уровень побеждённости,\nсочетание) против минимума из ТЗ. Закрытый справочный отчёт, отдаётся целиком.\n",
+        "responses": {
+          "200": {
+            "description": "Отчёт",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhraseCoverageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/role-cards/{role}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/BattleRole"
+        }
+      ],
+      "get": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "getOwnerRoleCard",
+        "summary": "Владелец. Карточка роли",
+        "responses": {
+          "200": {
+            "description": "Карточка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleCardResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "battle"
+        ],
+        "operationId": "replaceOwnerRoleCard",
+        "summary": "Владелец. Заменить карточку роли",
+        "description": "Меняет описание характера и больные места; действует на новые ходы. Больных мест не меньше 5.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceRoleCardRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Карточка сохранена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleCardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/packages": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "listOwnerPackages",
+        "summary": "Владелец. Все пакеты",
+        "description": "Включая неактивные. Маленький закрытый список, отдаётся целиком.",
+        "responses": {
+          "200": {
+            "description": "Пакеты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerPackageListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "createOwnerPackage",
+        "summary": "Владелец. Добавить пакет",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnerPackageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пакет добавлен",
+            "headers": {
+              "Location": {
+                "description": "Адрес пакета",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerPackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/packages/{packageId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PackageId"
+        }
+      ],
+      "put": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "replaceOwnerPackage",
+        "summary": "Владелец. Заменить пакет",
+        "description": "Меняет состав, цену, активность и порядок. Уже созданные счета сохраняют цену на момент создания.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnerPackageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Пакет сохранён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerPackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/owner/payments": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "listOwnerPayments",
+        "summary": "Владелец. Платежи",
+        "description": "Платежи Stars от новых к старым, в том числе удалённых пользователей.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "telegramId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PaymentStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница платежей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/payments/{paymentId}/refund": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PaymentId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "refundOwnerPayment",
+        "summary": "Владелец. Вернуть Stars",
+        "description": "Возвращает Stars за платёж целиком и списывает партию. Возможно только для платежа в\nстатусе `credited`, из партии которого не израсходовано ни одного удара, и пользователь\nне удалён; иначе 409 `refund_not_allowed` (см. `PaymentResponse.refundable`). Причина\nобязательна. Порядок: партия блокируется, затем вызов Telegram `refundStarPayment`, затем\nфиксация (статус `refunded`, операция, журнал). 503 до вызова Telegram оставляет всё как\nбыло, повтор безопасен; сбой между Telegram и фиксацией доводит воркер.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Платёж возвращён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/owner/support-tickets": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "listOwnerSupportTickets",
+        "summary": "Владелец. Обращения /paysupport",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница обращений",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/support-tickets/{ticketId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/TicketId"
+        }
+      ],
+      "patch": {
+        "tags": [
+          "payments"
+        ],
+        "operationId": "updateOwnerSupportTicket",
+        "summary": "Владелец. Закрыть или открыть обращение",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSupportTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обращение обновлено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportTicketResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/owner/metrics": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "operationId": "getOwnerMetrics",
+        "summary": "Владелец. Метрики за период",
+        "description": "Метрики из раздела «Метрики» ТЗ за период `[from, to)`, не длиннее 92 дней (иначе 400). Метрика без данных за период\nравна `null`. Тексты задач и реплик в метриках не участвуют.\n",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Метрики",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/journal": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "operationId": "listOwnerJournal",
+        "summary": "Владелец. Журнал действий",
+        "description": "Записи только добавляются; от новых к старым.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/OwnerActionType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Страница журнала",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerJournalListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/owner/game-settings": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "operationId": "getOwnerGameSettings",
+        "summary": "Владелец. Настройки игры",
+        "responses": {
+          "200": {
+            "description": "Настройки",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameSettingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "analytics"
+        ],
+        "operationId": "replaceOwnerGameSettings",
+        "summary": "Владелец. Заменить настройки игры",
+        "description": "Единственный документ. Действует без выпуска версии; правка пишется в журнал.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Настройки сохранены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "telegramInitData": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "`tma <initData>` — подписанные данные запуска Mini App. Сервер проверяет подпись и срок\n(`auth_date` не старше 24 часов) в каждом запросе. Неверная подпись: 401 `unauthorized`;\nпросроченные данные: 401 `init_data_expired`, клиент получает свежие данные запуска у Telegram. Операции `/owner/*` дополнительно проверяют, что Telegram ID равен\nID владельца из настройки.\n"
+      },
+      "telegramWebhookSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Telegram-Bot-Api-Secret-Token",
+        "description": "Секретный токен, заданный при установке вебхука."
+      }
+    },
+    "parameters": {
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "description": "Размер страницы. По умолчанию 50, максимум 100.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "description": "Непрозрачный курсор из `nextCursor` предыдущей страницы.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "OptionalIdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний\nрезультат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.\n",
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 64
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Клиентский идентификатор хода (UUID). Повтор с тем же ключом возвращает прежний результат.",
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 64
+        }
+      },
+      "TaskId": {
+        "name": "taskId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PeriodId": {
+        "name": "periodId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "FeedMessageId": {
+        "name": "feedMessageId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "BattleRole": {
+        "name": "role",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Role"
+        }
+      },
+      "PackageId": {
+        "name": "packageId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PhraseId": {
+        "name": "phraseId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PaymentId": {
+        "name": "paymentId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TicketId": {
+        "name": "ticketId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TelegramId": {
+        "name": "telegramId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Неверный запрос или не прошла валидация (`validation_failed`, `task_vague`, `deadline_out_of_range` и др.)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "examples": {
+              "validation": {
+                "value": {
+                  "type": "urn:angry-dad:problem:validation_failed",
+                  "title": "Validation failed",
+                  "status": 400,
+                  "errors": [
+                    {
+                      "field": "quietHours",
+                      "message": "Quiet hours must not exceed 12 hours"
+                    }
+                  ]
+                }
+              },
+              "vague": {
+                "value": {
+                  "type": "urn:angry-dad:problem:task_vague",
+                  "title": "Task is too vague",
+                  "status": 400,
+                  "reply": "Это что за задача? Конкретно."
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Нет или не годятся данные запуска Telegram",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Нет прав (`onboarding_required` для гостя, `owner_only` для не-владельца)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Не найдено (в том числе чужой ресурс)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Конфликт состояния (`period_not_active`, `extension_denied`, `already_rated`, `insufficient_strikes` и др.)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "examples": {
+              "closed": {
+                "value": {
+                  "type": "urn:angry-dad:problem:period_not_active",
+                  "title": "Period is not active",
+                  "status": 409,
+                  "periodStatus": "failed"
+                }
+              },
+              "noStrikes": {
+                "value": {
+                  "type": "urn:angry-dad:problem:insufficient_strikes",
+                  "title": "No strikes left",
+                  "status": 409
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Превышен суточный лимит (`daily_limit_reached`)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "Внешний сервис не дал результата (`turn_failed`)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "examples": {
+              "failed": {
+                "value": {
+                  "type": "urn:angry-dad:problem:turn_failed",
+                  "title": "Turn was not counted",
+                  "status": 502,
+                  "detail": "Strike refunded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Внешний сервис недоступен (`ai_unavailable`, `share_failed`, `payment_gateway_unavailable`)",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "description": "Ошибка по RFC 9457. Тексты `title` и `detail` на английском, без внутренних подробностей.",
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProblemType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Ошибки полей для `validation_failed`",
+            "items": {
+              "type": "object",
+              "required": [
+                "field",
+                "message"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "reply": {
+            "type": "string",
+            "description": "Фраза персонажа для показа пользователю (onVague, onExcuseDenied). Русский текст из пула."
+          },
+          "periodStatus": {
+            "type": "string",
+            "enum": [
+              "done",
+              "failed",
+              "stopped",
+              "deleted"
+            ],
+            "description": "Для `period_not_active`: почему действие невозможно. Клиент выбирает текст\n(«Задача уже закрыта» или «Задача уже провалена»). Период удалённой задачи\nсвоего пользователя отвечает так же (`deleted`), а не 404.\n"
+          }
+        },
+        "example": {
+          "type": "urn:angry-dad:problem:extension_denied",
+          "title": "Extension denied",
+          "status": 409,
+          "detail": "Already extended today",
+          "reply": "Один раз в сутки. Хватит."
+        }
+      },
+      "ProblemType": {
+        "type": "string",
+        "enum": [
+          "urn:angry-dad:problem:validation_failed",
+          "urn:angry-dad:problem:unauthorized",
+          "urn:angry-dad:problem:onboarding_required",
+          "urn:angry-dad:problem:owner_only",
+          "urn:angry-dad:problem:not_found",
+          "urn:angry-dad:problem:already_onboarded",
+          "urn:angry-dad:problem:task_vague",
+          "urn:angry-dad:problem:deadline_out_of_range",
+          "urn:angry-dad:problem:daily_limit_reached",
+          "urn:angry-dad:problem:ai_unavailable",
+          "urn:angry-dad:problem:period_not_active",
+          "urn:angry-dad:problem:extension_denied",
+          "urn:angry-dad:problem:retry_unavailable",
+          "urn:angry-dad:problem:already_rated",
+          "urn:angry-dad:problem:insufficient_strikes",
+          "urn:angry-dad:problem:turn_in_progress",
+          "urn:angry-dad:problem:turn_failed",
+          "urn:angry-dad:problem:last_enabled_phrase",
+          "urn:angry-dad:problem:refund_not_allowed",
+          "urn:angry-dad:problem:idempotency_key_reused",
+          "urn:angry-dad:problem:revoke_exceeds_balance",
+          "urn:angry-dad:problem:role_mismatch",
+          "urn:angry-dad:problem:init_data_expired",
+          "urn:angry-dad:problem:share_failed",
+          "urn:angry-dad:problem:payment_gateway_unavailable"
+        ]
+      },
+      "Role": {
+        "type": "string",
+        "description": "Вредный родитель",
+        "enum": [
+          "father",
+          "mother"
+        ],
+        "example": "father"
+      },
+      "Gender": {
+        "type": "string",
+        "enum": [
+          "male",
+          "female"
+        ],
+        "example": "male"
+      },
+      "QuietHours": {
+        "type": "object",
+        "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до\nконца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.\n",
+        "required": [
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1410,
+            "multipleOf": 30
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1410,
+            "multipleOf": 30
+          }
+        },
+        "example": {
+          "start": 1380,
+          "end": 480
+        }
+      },
+      "ReplyResponse": {
+        "type": "object",
+        "required": [
+          "reply"
+        ],
+        "properties": {
+          "reply": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Фраза персонажа или `null`, если персонаж молчит"
+          }
+        },
+        "example": {
+          "reply": "Бросаешь всё, что начинаешь."
+        }
+      },
+      "OnboardingState": {
+        "type": "string",
+        "enum": [
+          "guest",
+          "done"
+        ]
+      },
+      "MeResponse": {
+        "type": "object",
+        "description": "Профиль владельцу записи. Telegram ID пользователю не возвращается.",
+        "required": [
+          "id",
+          "onboarding",
+          "timeZone",
+          "quietHours",
+          "respect",
+          "inLeaderboard",
+          "closedCount",
+          "isOwner"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isOwner": {
+            "type": "boolean",
+            "description": "Пользователь — владелец продукта (Telegram ID из настройки); вычисляется, показывать раздел «Владелец»"
+          },
+          "returning": {
+            "type": "boolean",
+            "description": "Только у гостя: аккаунт был удалён раньше. Тогда после выбора родителя Mini App\nпоказывает постоянную фразу «Снова начинаем…» (R-8) с окончанием по роли.\n"
+          },
+          "username": {
+            "type": "string",
+            "description": "Нет у пользователей без username"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "onboarding": {
+            "$ref": "#/components/schemas/OnboardingState"
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ],
+            "description": "Задан после старта"
+          },
+          "gender": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Gender"
+              }
+            ],
+            "description": "Задан после старта"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "IANA-зона, по умолчанию Europe/Moscow"
+          },
+          "quietHours": {
+            "$ref": "#/components/schemas/QuietHours"
+          },
+          "respect": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.5,
+            "description": "Уважение. Экран показывает целую часть с округлением вниз."
+          },
+          "inLeaderboard": {
+            "type": "boolean"
+          },
+          "closedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "closedCountAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "u_01",
+          "isOwner": false,
+          "username": "ivan",
+          "firstName": "Иван",
+          "onboarding": "done",
+          "role": "father",
+          "gender": "male",
+          "timeZone": "Europe/Minsk",
+          "quietHours": {
+            "start": 1380,
+            "end": 480
+          },
+          "respect": 13.5,
+          "inLeaderboard": true,
+          "closedCount": 7,
+          "closedCountAt": "2026-10-23T09:00:00Z"
+        }
+      },
+      "UpdateMeRequest": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "IANA-зона"
+          },
+          "quietHours": {
+            "$ref": "#/components/schemas/QuietHours"
+          }
+        },
+        "example": {
+          "timeZone": "Asia/Yekaterinburg"
+        }
+      },
+      "OnboardingRequest": {
+        "type": "object",
+        "required": [
+          "role",
+          "gender"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "IANA-зона с устройства; без неё Europe/Moscow"
+          }
+        },
+        "example": {
+          "role": "mother",
+          "gender": "female",
+          "timeZone": "Europe/Minsk"
+        }
+      },
+      "OnboardingResponse": {
+        "type": "object",
+        "required": [
+          "user",
+          "replies"
+        ],
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/MeResponse"
+          },
+          "replies": {
+            "type": "array",
+            "description": "Тексты экранов после выбора по порядку: «Соболезнуем Вам. Крепитесь…», «Опять ничего…\nЧто тебе надо сделать?», «Мечты сюда не пиши…». С подстановкой рода. «Снова начинаем…»\nсюда не входит (см. `MeResponse.returning`). В «Историю» эти тексты не попадают.\nКлиент вызывает `completeOnboarding` после выбора родителя и пола, до экрана «Соболезнуем».\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "user": {
+            "id": "u_01",
+            "isOwner": false,
+            "onboarding": "done",
+            "role": "father",
+            "gender": "male",
+            "timeZone": "Europe/Moscow",
+            "quietHours": {
+              "start": 1380,
+              "end": 480
+            },
+            "respect": 12,
+            "inLeaderboard": true,
+            "closedCount": 0
+          },
+          "replies": [
+            "Соболезнуем Вам. Крепитесь…",
+            "Опять ничего сам не можешь? Ну, что тебе надо сделать?",
+            "Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?"
+          ]
+        }
+      },
+      "OwnerUserResponse": {
+        "type": "object",
+        "description": "Что владелец продукта видит о пользователе",
+        "required": [
+          "telegramId"
+        ],
+        "properties": {
+          "telegramId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "telegramId": 123456789,
+          "username": "ivan",
+          "firstName": "Иван"
+        }
+      },
+      "TaskKind": {
+        "type": "string",
+        "enum": [
+          "one_time",
+          "recurring"
+        ]
+      },
+      "TaskSize": {
+        "type": "string",
+        "description": "Размер определяет лёгкая модель при постановке; награда за закрытие +1, +3, +5 уважения",
+        "enum": [
+          "micro",
+          "medium",
+          "large"
+        ]
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "stopped",
+          "closed"
+        ]
+      },
+      "PeriodStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "done",
+          "failed"
+        ]
+      },
+      "PeriodClosedBy": {
+        "type": "string",
+        "enum": [
+          "done_button",
+          "check_in",
+          "deadline",
+          "give_up"
+        ]
+      },
+      "Recurrence": {
+        "type": "object",
+        "description": "`daily` — каждый день; `weekdays` — по будням; `weekly` — раз в неделю (`days` из одного\nдня недели или без `days` — календарная неделя); `days_of_week` — выбранные дни (`days`\nот 1 до 6 значений); `every_n_days` — окно из `n` дней (от 2 до 30).\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekdays",
+              "weekly",
+              "days_of_week",
+              "every_n_days"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "description": "Дни недели, 1 — понедельник, 7 — воскресенье",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true
+          },
+          "n": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 30
+          }
+        },
+        "example": {
+          "type": "days_of_week",
+          "days": [
+            2,
+            4
+          ]
+        }
+      },
+      "PeriodResponse": {
+        "type": "object",
+        "description": "Один срок задачи. Настроение клиент считает сам: от `moodFrom` до `anchorAt` (если есть,\nиначе до `deadline`): до 25% — neutral, до 60% — watching, до 85% — annoyed, до 100% —\nangry; после этого срока и после `deadline` — very_angry.\n",
+        "required": [
+          "id",
+          "startsAt",
+          "moodFrom",
+          "deadline",
+          "status",
+          "retryUsed"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "moodFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "anchorAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ориентир повторяющейся задачи"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PeriodStatus"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedBy": {
+            "$ref": "#/components/schemas/PeriodClosedBy"
+          },
+          "retryUsed": {
+            "type": "boolean",
+            "description": "«Сделаю за час» уже использовано"
+          },
+          "respectDelta": {
+            "type": "number",
+            "multipleOf": 0.5,
+            "description": "Изменение уважения за закрытие периода (с учётом потолков). Есть только у закрытого периода."
+          },
+          "failMessage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeedMessageResponse"
+              }
+            ],
+            "description": "Сообщение на экране «Провал» (фраза onFail), есть только у проваленного периода.\nВложено как снимок, чтобы экран не зависел от момента отправки onFail ботом\n(ночью она переносится на утро) и мог процитировать её в бою через `createBattleQuote`.\nСервер создаёт запись «Истории» при провале, в том числе после «Сдаюсь».\n"
+          }
+        },
+        "example": {
+          "id": "p_01",
+          "startsAt": "2026-10-23T00:00:00Z",
+          "moodFrom": "2026-10-23T05:00:00Z",
+          "deadline": "2026-10-23T19:00:00Z",
+          "status": "active",
+          "retryUsed": false
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "description": "Задача. `currentPeriod` вложен как исключение из правила «чужую модель не вкладывать»:\nглавная страница показывает таймер и настроение каждой активной задачи (25 и более) и\nоткрывается за один запрос (A4, N-5). Для остальных периодов — `listTaskPeriods`.\nДля остановленной и закрытой задачи это последний период.\n",
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "size",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TaskKind"
+          },
+          "size": {
+            "$ref": "#/components/schemas/TaskSize"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/Recurrence"
+          },
+          "anchorTime": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+            "description": "Ориентир, время суток ЧЧ:ММ в поясе пользователя"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus"
+          },
+          "currentPeriod": {
+            "$ref": "#/components/schemas/PeriodResponse"
+          },
+          "nextPeriodStartsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Начало следующего периода. Есть у активной повторяющейся задачи, когда активного\nпериода сейчас нет (например «по будням» в субботу): тогда `currentPeriod` — последний\nзакрытый период. Вычисляется сервером по правилам периодов.\n"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "t_01",
+          "title": "Написать отчёт по продажам",
+          "kind": "one_time",
+          "size": "medium",
+          "status": "active",
+          "currentPeriod": {
+            "id": "p_01",
+            "startsAt": "2026-10-23T09:00:00Z",
+            "moodFrom": "2026-10-23T09:00:00Z",
+            "deadline": "2026-10-23T19:00:00Z",
+            "status": "active",
+            "retryUsed": false
+          },
+          "createdAt": "2026-10-23T09:00:00Z"
+        }
+      },
+      "TaskListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "PeriodListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeriodResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "description": "Ровно одно из двух: `deadline` (с `kind = one_time`) или `recurrence` (с `kind = recurring`).\n`anchorTime` допустим только у повторяющейся задачи.\n",
+        "required": [
+          "title",
+          "kind"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "После обрезки пробелов по краям"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TaskKind"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/Recurrence"
+          },
+          "anchorTime": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          }
+        },
+        "example": {
+          "title": "Повторять английский",
+          "kind": "recurring",
+          "recurrence": {
+            "type": "daily"
+          },
+          "anchorTime": "20:00"
+        }
+      },
+      "UpdateTaskRequest": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "stopped"
+            ],
+            "description": "Единственный допустимый переход — остановка повторяющейся задачи"
+          }
+        },
+        "example": {
+          "status": "stopped"
+        }
+      },
+      "TaskActionResponse": {
+        "type": "object",
+        "required": [
+          "task",
+          "reply"
+        ],
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/TaskResponse"
+          },
+          "reply": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Фраза персонажа (onTaskSet при постановке, onDelete при остановке), `null` при переименовании"
+          }
+        },
+        "example": {
+          "task": {
+            "id": "t_01",
+            "title": "Написать отчёт по продажам",
+            "kind": "one_time",
+            "size": "medium",
+            "status": "active",
+            "createdAt": "2026-10-23T09:00:00Z"
+          },
+          "reply": "Записал. Посмотрим."
+        }
+      },
+      "PeriodActionResponse": {
+        "type": "object",
+        "description": "Результат действия над периодом",
+        "required": [
+          "task",
+          "respect",
+          "respectDelta",
+          "reply"
+        ],
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/TaskResponse"
+          },
+          "respectDelta": {
+            "type": "number",
+            "multipleOf": 0.5,
+            "description": "Точное изменение уважения от этого действия (после потолков), для «Уважение: 15 (+3)»"
+          },
+          "respect": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.5,
+            "description": "Уважение после действия"
+          },
+          "reply": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Фраза персонажа (onSuccess, onExcuse, onRetry, onCheckInReply) или `null`"
+          }
+        },
+        "example": {
+          "task": {
+            "id": "t_01",
+            "title": "Написать отчёт по продажам",
+            "kind": "one_time",
+            "size": "medium",
+            "status": "closed",
+            "createdAt": "2026-10-23T09:00:00Z"
+          },
+          "respect": 15,
+          "respectDelta": 3,
+          "reply": "Ну наконец-то."
+        }
+      },
+      "CheckInAnswerRequest": {
+        "type": "object",
+        "required": [
+          "answer"
+        ],
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/CheckInAnswer"
+          }
+        },
+        "example": {
+          "answer": "partial"
+        }
+      },
+      "CheckInAnswer": {
+        "type": "string",
+        "enum": [
+          "done",
+          "partial",
+          "not_started"
+        ]
+      },
+      "PhraseCategory": {
+        "type": "string",
+        "enum": [
+          "on_greeting",
+          "on_task_set",
+          "on_delete",
+          "on_vague",
+          "on_reminder",
+          "on_check_in",
+          "on_check_in_reply",
+          "on_check_in_missed",
+          "on_fail",
+          "on_excuse",
+          "on_excuse_denied",
+          "on_retry",
+          "on_success",
+          "on_absent",
+          "on_battle_start",
+          "on_break",
+          "on_recovery"
+        ]
+      },
+      "PhraseRole": {
+        "type": "string",
+        "enum": [
+          "father",
+          "mother",
+          "any"
+        ]
+      },
+      "PhraseStatus": {
+        "type": "string",
+        "enum": [
+          "enabled",
+          "disabled",
+          "pending_review"
+        ]
+      },
+      "Rating": {
+        "type": "integer",
+        "description": "0 «слабо», 1 «неприятно», 2 «в самое больное»",
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      },
+      "FeedMessageResponse": {
+        "type": "object",
+        "description": "Отправленное сообщение персонажа; `text` — снимок после подстановки, старые сообщения не\nменяются. Оцениваются категории on_reminder, on_check_in, on_check_in_missed, on_fail,\non_absent; без `rating` оценка ещё не поставлена.\n",
+        "required": [
+          "id",
+          "category",
+          "text",
+          "rateable",
+          "sentAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PhraseCategory"
+          },
+          "rateable": {
+            "type": "boolean",
+            "description": "Категория оценивается; кнопки оценки показывать, пока нет rating"
+          },
+          "text": {
+            "type": "string"
+          },
+          "periodId": {
+            "type": "string"
+          },
+          "taskTitle": {
+            "type": "string",
+            "description": "Снимок названия задачи для «Ответить»"
+          },
+          "checkIn": {
+            "type": "object",
+            "description": "Только у проверок. Без `answer` и `missedAt` проверка ждёт ответа.",
+            "properties": {
+              "answer": {
+                "$ref": "#/components/schemas/CheckInAnswer"
+              },
+              "answeredAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "missedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/Rating"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "f_01",
+          "category": "on_check_in",
+          "text": "Покажи, что сделано. Две минуты.",
+          "periodId": "p_01",
+          "taskTitle": "Написать отчёт по продажам",
+          "rateable": true,
+          "checkIn": {},
+          "sentAt": "2026-10-23T12:00:00Z"
+        }
+      },
+      "FeedListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedMessageResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "RateFeedMessageRequest": {
+        "type": "object",
+        "required": [
+          "score"
+        ],
+        "properties": {
+          "score": {
+            "$ref": "#/components/schemas/Rating"
+          }
+        },
+        "example": {
+          "score": 2
+        }
+      },
+      "BattleDialogResponse": {
+        "type": "object",
+        "required": [
+          "role",
+          "defeat",
+          "defeatAt",
+          "mode",
+          "turnInProgress"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BattleMode"
+              }
+            ],
+            "description": "Режим персонажа по `defeat` (границы 40/70/90), для аватара при открытии экрана"
+          },
+          "turnInProgress": {
+            "type": "boolean",
+            "description": "Ход этого диалога идёт сейчас; кнопка отправки неактивна"
+          },
+          "defeat": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Побеждённость на момент запроса, с учётом отката"
+          },
+          "defeatAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "role": "father",
+          "defeat": 42.5,
+          "defeatAt": "2026-10-23T12:00:00Z",
+          "mode": "defense",
+          "turnInProgress": false
+        }
+      },
+      "BattleAuthor": {
+        "type": "string",
+        "enum": [
+          "player",
+          "character"
+        ]
+      },
+      "BattleOrigin": {
+        "type": "string",
+        "enum": [
+          "turn",
+          "reply_to_feed",
+          "battle_start",
+          "break"
+        ]
+      },
+      "BattleMessageResponse": {
+        "type": "object",
+        "required": [
+          "seq",
+          "author",
+          "text",
+          "origin"
+        ],
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Порядковый номер реплики в диалоге"
+          },
+          "author": {
+            "$ref": "#/components/schemas/BattleAuthor"
+          },
+          "text": {
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/BattleOrigin"
+          },
+          "taskTitle": {
+            "type": "string",
+            "description": "Название задачи для реплики из «Истории»"
+          }
+        },
+        "example": {
+          "seq": 3,
+          "author": "character",
+          "text": "Я тебе не верю.",
+          "origin": "turn"
+        }
+      },
+      "BattleMessageListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BattleMessageResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "CreateBattleMessageRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 300,
+            "pattern": "^[\\s\\S]*\\S[\\s\\S]*\\S[\\s\\S]*$",
+            "description": "Не меньше 2 непробельных символов"
+          }
+        },
+        "example": {
+          "text": "Ты сам три года ничего не доделал."
+        }
+      },
+      "CreateBattleQuoteRequest": {
+        "type": "object",
+        "required": [
+          "feedMessageId"
+        ],
+        "properties": {
+          "feedMessageId": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "feedMessageId": "f_01"
+        }
+      },
+      "BattleMode": {
+        "type": "string",
+        "enum": [
+          "aggression",
+          "defense",
+          "confusion",
+          "softening"
+        ]
+      },
+      "TurnResponse": {
+        "type": "object",
+        "description": "Итог засчитанного хода. Слом — когда `defeatAfter` равно 100 и в `messages` есть реплика с `origin = break`.",
+        "required": [
+          "damage",
+          "defeatBefore",
+          "defeatAfter",
+          "mode",
+          "respectDelta",
+          "respect",
+          "messages",
+          "strikesBalance"
+        ],
+        "properties": {
+          "damage": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "defeatBefore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "defeatAfter": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "mode": {
+            "$ref": "#/components/schemas/BattleMode"
+          },
+          "respectDelta": {
+            "type": "number",
+            "multipleOf": 0.5,
+            "description": "Изменение уважения за ход, включая +12 за слом"
+          },
+          "respect": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.5,
+            "description": "Уважение после хода"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Реплика игрока, ответ персонажа и (при сломе) финальная реплика, по порядку",
+            "items": {
+              "$ref": "#/components/schemas/BattleMessageResponse"
+            }
+          },
+          "strikesBalance": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Баланс ударов после хода"
+          }
+        },
+        "example": {
+          "damage": 21,
+          "defeatBefore": 0,
+          "defeatAfter": 21,
+          "mode": "aggression",
+          "respectDelta": 1,
+          "respect": 13,
+          "messages": [
+            {
+              "seq": 2,
+              "author": "player",
+              "text": "Ты сам три года ничего не доделал.",
+              "origin": "turn"
+            },
+            {
+              "seq": 3,
+              "author": "character",
+              "text": "Не тебе меня учить.",
+              "origin": "turn"
+            }
+          ],
+          "strikesBalance": 2
+        }
+      },
+      "StrikeLotSource": {
+        "type": "string",
+        "enum": [
+          "purchase",
+          "manual"
+        ]
+      },
+      "StrikeLotResponse": {
+        "type": "object",
+        "required": [
+          "source",
+          "total",
+          "remaining",
+          "createdAt"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/StrikeLotSource"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "remaining": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "source": "purchase",
+          "total": 3,
+          "remaining": 1,
+          "createdAt": "2026-10-23T10:00:00Z"
+        }
+      },
+      "StrikeBalanceResponse": {
+        "type": "object",
+        "required": [
+          "balance",
+          "lots"
+        ],
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Сумма остатков партий"
+          },
+          "lots": {
+            "type": "array",
+            "description": "Партии от старых к новым, расход идёт из самой ранней с остатком",
+            "items": {
+              "$ref": "#/components/schemas/StrikeLotResponse"
+            }
+          }
+        },
+        "example": {
+          "balance": 1,
+          "lots": [
+            {
+              "source": "purchase",
+              "total": 3,
+              "remaining": 1,
+              "createdAt": "2026-10-23T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "OwnerStrikeLotResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StrikeLotResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "refundedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Момент возврата Stars"
+              }
+            }
+          }
+        ],
+        "example": {
+          "source": "purchase",
+          "total": 3,
+          "remaining": 3,
+          "createdAt": "2026-10-23T10:00:00Z",
+          "refundedAt": "2026-10-23T11:00:00Z"
+        }
+      },
+      "OwnerStrikeBalanceResponse": {
+        "type": "object",
+        "required": [
+          "balance",
+          "lots"
+        ],
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnerStrikeLotResponse"
+            }
+          }
+        },
+        "example": {
+          "balance": 0,
+          "lots": []
+        }
+      },
+      "StrikeOperationType": {
+        "type": "string",
+        "enum": [
+          "purchase",
+          "spend",
+          "turn_refund",
+          "manual_grant",
+          "manual_revoke",
+          "stars_refund"
+        ]
+      },
+      "StrikeOperationResponse": {
+        "type": "object",
+        "required": [
+          "type",
+          "amount",
+          "at"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/StrikeOperationType"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "description": "Для ручных операций и возвратов; русский текст, который формирует сервер («Возврат: ошибка хода»)"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "type": "turn_refund",
+          "amount": 1,
+          "reason": "Возврат: ошибка хода",
+          "at": "2026-10-23T12:00:00Z"
+        }
+      },
+      "StrikeOperationListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StrikeOperationResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "CreateStrikeOperationRequest": {
+        "type": "object",
+        "required": [
+          "type",
+          "amount",
+          "reason"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "manual_grant",
+              "manual_revoke"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "example": {
+          "type": "manual_grant",
+          "amount": 2,
+          "reason": "Возврат по жалобе"
+        }
+      },
+      "PackageResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "strikes",
+          "priceStars"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "strikes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "priceStars": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Цена в Telegram Stars (XTR)"
+          }
+        },
+        "example": {
+          "id": "pk_3",
+          "strikes": 3,
+          "priceStars": 39
+        }
+      },
+      "PackageListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageResponse"
+            }
+          }
+        },
+        "example": {
+          "items": [
+            {
+              "id": "pk_1",
+              "strikes": 1,
+              "priceStars": 15
+            }
+          ]
+        }
+      },
+      "OwnerPackageResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PackageResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "active",
+              "order"
+            ],
+            "properties": {
+              "active": {
+                "type": "boolean"
+              },
+              "order": {
+                "type": "integer"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "pk_3",
+          "strikes": 3,
+          "priceStars": 39,
+          "active": true,
+          "order": 2
+        }
+      },
+      "OwnerPackageListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnerPackageResponse"
+            }
+          }
+        },
+        "example": {
+          "items": []
+        }
+      },
+      "OwnerPackageRequest": {
+        "type": "object",
+        "required": [
+          "strikes",
+          "priceStars",
+          "active",
+          "order"
+        ],
+        "properties": {
+          "strikes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "priceStars": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer"
+          }
+        },
+        "example": {
+          "strikes": 3,
+          "priceStars": 42,
+          "active": true,
+          "order": 2
+        }
+      },
+      "PackageSnapshot": {
+        "type": "object",
+        "description": "Состав и цена на момент создания счёта",
+        "required": [
+          "strikes",
+          "priceStars"
+        ],
+        "properties": {
+          "strikes": {
+            "type": "integer"
+          },
+          "priceStars": {
+            "type": "integer"
+          }
+        },
+        "example": {
+          "strikes": 3,
+          "priceStars": 39
+        }
+      },
+      "InvoiceResponse": {
+        "type": "object",
+        "required": [
+          "invoiceUrl",
+          "packageSnapshot"
+        ],
+        "properties": {
+          "invoiceUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Ссылка на счёт для окна оплаты Telegram"
+          },
+          "packageSnapshot": {
+            "$ref": "#/components/schemas/PackageSnapshot"
+          }
+        },
+        "example": {
+          "invoiceUrl": "https://t.me/$abc123",
+          "packageSnapshot": {
+            "strikes": 3,
+            "priceStars": 39
+          }
+        }
+      },
+      "PaymentStatus": {
+        "type": "string",
+        "enum": [
+          "invoiced",
+          "paid",
+          "credited",
+          "refunded"
+        ]
+      },
+      "PaymentResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "telegramId",
+          "packageSnapshot",
+          "status",
+          "refundable"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "refundable": {
+            "type": "boolean",
+            "description": "Возврат Stars возможен сейчас (статус `credited`, из партии не израсходовано ни одного удара, пользователь не удалён)"
+          },
+          "telegramId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packageSnapshot": {
+            "$ref": "#/components/schemas/PackageSnapshot"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "telegramChargeId": {
+            "type": "string"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "creditedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "pay_01",
+          "telegramId": 123456789,
+          "packageSnapshot": {
+            "strikes": 3,
+            "priceStars": 39
+          },
+          "status": "credited",
+          "refundable": true,
+          "telegramChargeId": "ch_abc",
+          "paidAt": "2026-10-23T10:00:05Z",
+          "creditedAt": "2026-10-23T10:00:08Z"
+        }
+      },
+      "PaymentListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "RefundRequest": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "example": {
+          "reason": "Возврат по /paysupport"
+        }
+      },
+      "SupportTicketStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "resolved"
+        ]
+      },
+      "SupportTicketResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "telegramId",
+          "text",
+          "status",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "telegramId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "text": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupportTicketStatus"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "st_01",
+          "telegramId": 123456789,
+          "text": "Оплатил, ударов нет",
+          "status": "open",
+          "at": "2026-10-23T10:05:00Z"
+        }
+      },
+      "SupportTicketListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportTicketResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "UpdateSupportTicketRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SupportTicketStatus"
+          }
+        },
+        "example": {
+          "status": "resolved"
+        }
+      },
+      "PhraseCombo": {
+        "type": "string",
+        "enum": [
+          "father_son",
+          "father_daughter",
+          "mother_son",
+          "mother_daughter",
+          "any"
+        ]
+      },
+      "PhraseDefeatLevel": {
+        "type": "string",
+        "description": "Уровень побеждённости 1–4 или `any`",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "any"
+        ]
+      },
+      "PhraseSource": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "subscriber",
+          "paraphrase"
+        ]
+      },
+      "PhraseResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "category",
+          "defeatLevel",
+          "combo",
+          "template",
+          "source",
+          "status",
+          "shows",
+          "votes",
+          "scoreSum",
+          "belowThreshold"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/PhraseRole"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PhraseCategory"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "Только у категорий с уровнями"
+          },
+          "defeatLevel": {
+            "$ref": "#/components/schemas/PhraseDefeatLevel"
+          },
+          "combo": {
+            "$ref": "#/components/schemas/PhraseCombo"
+          },
+          "template": {
+            "type": "string",
+            "description": "Шаблон с вариантами рода и переменными"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PhraseSource"
+          },
+          "author": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PhraseStatus"
+          },
+          "shows": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "votes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "scoreSum": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "belowThreshold": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "id": "ph_01",
+          "role": "father",
+          "category": "on_check_in",
+          "level": 1,
+          "defeatLevel": "any",
+          "combo": "any",
+          "template": "Покажи, что сделано. Две минуты.",
+          "source": "owner",
+          "status": "enabled",
+          "shows": 120,
+          "votes": 40,
+          "scoreSum": 52,
+          "belowThreshold": false
+        }
+      },
+      "PhraseListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhraseResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "PhraseItemsResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhraseResponse"
+            }
+          }
+        },
+        "example": {
+          "items": []
+        }
+      },
+      "CreatePhraseRequest": {
+        "type": "object",
+        "required": [
+          "role",
+          "category",
+          "defeatLevel",
+          "combo",
+          "template",
+          "source"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/PhraseRole"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PhraseCategory"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "defeatLevel": {
+            "$ref": "#/components/schemas/PhraseDefeatLevel"
+          },
+          "combo": {
+            "$ref": "#/components/schemas/PhraseCombo"
+          },
+          "template": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "subscriber"
+            ]
+          },
+          "author": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "role": "mother",
+          "category": "on_fail",
+          "defeatLevel": "any",
+          "combo": "any",
+          "template": "Опять не сделал(а). Я не удивлена.",
+          "source": "owner"
+        }
+      },
+      "UpdatePhraseRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ]
+          }
+        },
+        "example": {
+          "status": "enabled"
+        }
+      },
+      "CreateParaphrasesRequest": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 3
+          }
+        },
+        "example": {
+          "count": 3
+        }
+      },
+      "PhraseCoverageItem": {
+        "type": "object",
+        "required": [
+          "role",
+          "category",
+          "defeatLevel",
+          "combo",
+          "enabledCount",
+          "required"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/PhraseRole"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PhraseCategory"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "defeatLevel": {
+            "$ref": "#/components/schemas/PhraseDefeatLevel"
+          },
+          "combo": {
+            "$ref": "#/components/schemas/PhraseCombo"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "required": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Минимум из таблицы категорий ТЗ"
+          }
+        },
+        "example": {
+          "role": "father",
+          "category": "on_fail",
+          "defeatLevel": "any",
+          "combo": "any",
+          "enabledCount": 14,
+          "required": 12
+        }
+      },
+      "PhraseCoverageResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhraseCoverageItem"
+            }
+          }
+        },
+        "example": {
+          "items": []
+        }
+      },
+      "WeakSpot": {
+        "type": "object",
+        "required": [
+          "key",
+          "description"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "example": {
+          "key": "unfinished_things",
+          "description": "Ненавидит, когда не доводят до конца"
+        }
+      },
+      "RoleCardResponse": {
+        "type": "object",
+        "required": [
+          "role",
+          "character",
+          "weakSpots"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "character": {
+            "type": "string"
+          },
+          "weakSpots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeakSpot"
+            }
+          }
+        },
+        "example": {
+          "role": "father",
+          "character": "Строгий, ворчливый, всё знает лучше",
+          "weakSpots": [
+            {
+              "key": "unfinished_things",
+              "description": "Ненавидит, когда не доводят до конца"
+            }
+          ]
+        }
+      },
+      "ReplaceRoleCardRequest": {
+        "type": "object",
+        "required": [
+          "character",
+          "weakSpots"
+        ],
+        "properties": {
+          "character": {
+            "type": "string",
+            "minLength": 1
+          },
+          "weakSpots": {
+            "type": "array",
+            "minItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/WeakSpot"
+            }
+          }
+        },
+        "example": {
+          "character": "Строгий, ворчливый",
+          "weakSpots": [
+            {
+              "key": "a",
+              "description": "a"
+            },
+            {
+              "key": "b",
+              "description": "b"
+            },
+            {
+              "key": "c",
+              "description": "c"
+            },
+            {
+              "key": "d",
+              "description": "d"
+            },
+            {
+              "key": "e",
+              "description": "e"
+            }
+          ]
+        }
+      },
+      "ShareKind": {
+        "type": "string",
+        "enum": [
+          "done",
+          "fail",
+          "battle"
+        ]
+      },
+      "CreateShareRequest": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/ShareKind"
+          },
+          "periodId": {
+            "type": "string",
+            "description": "Для `done` и `fail`"
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ],
+            "description": "Для `battle`"
+          }
+        },
+        "example": {
+          "kind": "done",
+          "periodId": "p_01"
+        }
+      },
+      "ShareResponse": {
+        "type": "object",
+        "required": [
+          "preparedMessageId"
+        ],
+        "properties": {
+          "preparedMessageId": {
+            "type": "string",
+            "description": "Идентификатор подготовленного сообщения для `shareMessage` Mini App"
+          }
+        },
+        "example": {
+          "preparedMessageId": "pm_abc"
+        }
+      },
+      "LeaderboardEntry": {
+        "type": "object",
+        "description": "Карточка участника — username (или имя) и число закрытых задач",
+        "required": [
+          "rank",
+          "closedCount"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "closedCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "example": {
+          "rank": 1,
+          "username": "ivan",
+          "closedCount": 42
+        }
+      },
+      "LeaderboardMe": {
+        "type": "object",
+        "required": [
+          "closedCount",
+          "inLeaderboard"
+        ],
+        "properties": {
+          "rank": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Место; `null`, если пользователь вышел из рейтинга"
+          },
+          "closedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inLeaderboard": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "rank": 340,
+          "closedCount": 12,
+          "inLeaderboard": true
+        }
+      },
+      "LeaderboardResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "me"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/LeaderboardEntry"
+            }
+          },
+          "me": {
+            "$ref": "#/components/schemas/LeaderboardMe"
+          }
+        },
+        "example": {
+          "items": [
+            {
+              "rank": 1,
+              "username": "ivan",
+              "closedCount": 42
+            }
+          ],
+          "me": {
+            "rank": 340,
+            "closedCount": 12,
+            "inLeaderboard": true
+          }
+        }
+      },
+      "LeaderboardParticipationRequest": {
+        "type": "object",
+        "required": [
+          "inLeaderboard"
+        ],
+        "properties": {
+          "inLeaderboard": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "inLeaderboard": false
+        }
+      },
+      "LeaderboardParticipationResponse": {
+        "type": "object",
+        "required": [
+          "inLeaderboard"
+        ],
+        "properties": {
+          "inLeaderboard": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "inLeaderboard": false
+        }
+      },
+      "MetricsResponse": {
+        "type": "object",
+        "description": "Значения метрик за период; `null` — данных нет",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "day7Retention": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Возврат на 7-й день"
+          },
+          "closedShare": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Доля закрытых задач и периодов"
+          },
+          "checkInAnswerRate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Доля отвеченных проверок"
+          },
+          "firstPurchaseConversion": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Конверсия в первую покупку"
+          },
+          "turnCostToStrikeRevenue": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Стоимость токенов хода к выручке с удара после комиссии"
+          },
+          "botBlockedShare": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Доля заблокировавших бота"
+          },
+          "avgPhraseScore": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 2,
+            "description": "Средний балл фраз"
+          },
+          "sharesPer100Active": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Пересылок карточки на 100 активных пользователей"
+          },
+          "medianStartToFirstTaskSeconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Медиана времени от /start до первой сохранённой задачи"
+          }
+        },
+        "example": {
+          "from": "2026-10-16T00:00:00Z",
+          "to": "2026-10-23T00:00:00Z",
+          "day7Retention": 0.31,
+          "closedShare": 0.58,
+          "checkInAnswerRate": 0.64,
+          "firstPurchaseConversion": 0.07,
+          "turnCostToStrikeRevenue": 0.22,
+          "botBlockedShare": 0.04,
+          "avgPhraseScore": 1.1,
+          "sharesPer100Active": 3.5,
+          "medianStartToFirstTaskSeconds": 95
+        }
+      },
+      "OwnerActionType": {
+        "type": "string",
+        "enum": [
+          "phrase_add",
+          "phrase_toggle",
+          "paraphrase_review",
+          "role_card_edit",
+          "package_edit",
+          "strikes_grant",
+          "strikes_revoke",
+          "stars_refund",
+          "settings_edit"
+        ]
+      },
+      "OwnerJournalEntry": {
+        "type": "object",
+        "required": [
+          "action",
+          "at"
+        ],
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/OwnerActionType"
+          },
+          "targetTelegramId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Пользователь, над которым совершено действие"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "Идентификатор объекта действия: фраза, пакет, платёж, роль"
+          },
+          "details": {
+            "type": "object",
+            "description": "Числа и причина",
+            "additionalProperties": true
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "action": "strikes_grant",
+          "targetTelegramId": 123456789,
+          "details": {
+            "amount": 2,
+            "reason": "Возврат по жалобе"
+          },
+          "at": "2026-10-23T12:00:00Z"
+        }
+      },
+      "OwnerJournalListResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnerJournalEntry"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "items": [],
+          "nextCursor": null
+        }
+      },
+      "OtherName": {
+        "type": "object",
+        "description": "Имя для переменной `{other}` в фразах",
+        "required": [
+          "name",
+          "gender",
+          "cases"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "cases": {
+            "type": "array",
+            "description": "Формы имени по падежам",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "name": "Вася",
+          "gender": "male",
+          "cases": [
+            "Вася",
+            "Васи",
+            "Васе",
+            "Васю",
+            "Васей",
+            "Васе"
+          ]
+        }
+      },
+      "GameSettingsRequest": {
+        "type": "object",
+        "required": [
+          "battleCoefficients",
+          "aiDailyLimit",
+          "otherNames",
+          "banditParams"
+        ],
+        "properties": {
+          "battleCoefficients": {
+            "type": "object",
+            "required": [
+              "base",
+              "damage",
+              "weakSpot",
+              "crit"
+            ],
+            "properties": {
+              "base": {
+                "type": "number"
+              },
+              "damage": {
+                "type": "number"
+              },
+              "weakSpot": {
+                "type": "number"
+              },
+              "crit": {
+                "type": "number"
+              }
+            }
+          },
+          "aiDailyLimit": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Проверок конкретности на пользователя в сутки"
+          },
+          "otherNames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OtherName"
+            }
+          },
+          "banditParams": {
+            "type": "object",
+            "required": [
+              "trialShows",
+              "disableAvg",
+              "disableVotes"
+            ],
+            "properties": {
+              "trialShows": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "disableAvg": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "disableVotes": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "example": {
+          "battleCoefficients": {
+            "base": 1,
+            "damage": 1,
+            "weakSpot": 1.5,
+            "crit": 1.2
+          },
+          "aiDailyLimit": 50,
+          "otherNames": [
+            {
+              "name": "Вася",
+              "gender": "male",
+              "cases": [
+                "Вася",
+                "Васи",
+                "Васе",
+                "Васю",
+                "Васей",
+                "Васе"
+              ]
+            }
+          ],
+          "banditParams": {
+            "trialShows": 50,
+            "disableAvg": 0.4,
+            "disableVotes": 100
+          }
+        }
+      },
+      "GameSettingsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GameSettingsRequest"
+          }
+        ],
+        "example": {
+          "battleCoefficients": {
+            "base": 1,
+            "damage": 1,
+            "weakSpot": 1.5,
+            "crit": 1.2
+          },
+          "aiDailyLimit": 50,
+          "otherNames": [],
+          "banditParams": {
+            "trialShows": 50,
+            "disableAvg": 0.4,
+            "disableVotes": 100
+          }
+        }
+      },
+      "TelegramUpdate": {
+        "type": "object",
+        "description": "Обновление Bot API; разбирает grammY, контракт требует только `update_id`.",
+        "required": [
+          "update_id"
+        ],
+        "properties": {
+          "update_id": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true,
+        "example": {
+          "update_id": 1001,
+          "message": {
+            "text": "/start"
+          }
+        }
+      },
+      "WebhookAck": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "ok": true
+        }
+      }
+    }
+  }
+}

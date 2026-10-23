@@ -3,15 +3,3871 @@
  * Do not make direct changes to the file.
  */
 
-export type paths = Record<string, never>;
+export interface paths {
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мой профиль
+         * @description Возвращает профиль текущего пользователя. Для неизвестного Telegram ID создаёт гостя.
+         *     Доступно гостю. Mini App сравнивает `timeZone` с поясом устройства и при расхождении
+         *     предлагает обновить его через `updateMe`.
+         */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
+        /**
+         * Удалить аккаунт
+         * @description Физически стирает профиль, задачи, ленту, диалоги и карточку в рейтинге. Остаются
+         *     платежи, операции ударов и признак «уже был». Неизрасходованные удары сгорают без возврата
+         *     Stars. Два подтверждения делает Mini App до вызова; число сгорающих ударов экран берёт
+         *     из `getMyStrikes`. Доступно гостю. Данные скрываются с начала удаления; ход боя в работе
+         *     отменяется. 204 приходит только после стирания по всем модулям; при 5xx повтор того же
+         *     запроса безопасно завершает удаление.
+         */
+        delete: operations["deleteMe"];
+        options?: never;
+        head?: never;
+        /**
+         * Изменить настройки
+         * @description Меняет только переданные поля: родитель, пол, часовой пояс, тихие часы.
+         *     Требует завершённый старт. Уже отправленные сообщения не меняются. Моменты дедлайнов
+         *     не сдвигаются при смене пояса. Участие в рейтинге меняет `setLeaderboardParticipation`.
+         */
+        patch: operations["updateMe"];
+        trace?: never;
+    };
+    "/me/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Завершить старт
+         * @description Сохраняет родителя и пол, пояс устройства (по умолчанию `Europe/Moscow`) и переводит
+         *     гостя в `done`. Уважение на старте 12. Повторный вызов уже прошедшего старт получает
+         *     409 `already_onboarded`, профиль не меняется. Доступно гостю.
+         */
+        post: operations["completeOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/leaderboard-participation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Участие в рейтинге
+         * @description Выход из рейтинга и возвращение. Требует завершённый старт.
+         */
+        put: operations["setLeaderboardParticipation"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мои задачи
+         * @description Задачи пользователя, от новых к старым. Удалённые не показываются. У каждой задачи
+         *     вложен текущий период (причина вложения в описании схемы `TaskResponse`). Главная
+         *     страница загружает все активные страницы подряд. Требует завершённый старт.
+         */
+        get: operations["listTasks"];
+        put?: never;
+        /**
+         * Поставить задачу
+         * @description Проверяет конкретность названия и определяет размер лёгкой моделью (до 3 с), затем
+         *     сохраняет задачу и открывает первый период. Разовая задача: `kind = one_time` и `deadline`.
+         *     Повторяющаяся: `kind = recurring` и `recurrence`, необязательный `anchorTime`.
+         *     Дедлайн: не раньше чем через 15 минут и не позже чем через 365 дней. Кнопки «Сегодня» и
+         *     «Завтра» без времени Mini App превращает в 22:00 местного времени. Расплывчатое название:
+         *     400 `task_vague` с фразой onVague в `reply`. Модель недоступна: 503 `ai_unavailable`,
+         *     задача не сохранена. Больше 50 проверок в сутки: 429 `daily_limit_reached`.
+         *     Требует завершённый старт.
+         */
+        post: operations["createTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Задача
+         * @description Одна задача с текущим периодом. Чужая или удалённая задача: 404. Требует завершённый старт.
+         */
+        get: operations["getTask"];
+        put?: never;
+        post?: never;
+        /**
+         * Удалить задачу
+         * @description Удаляет задачу в любом статусе (подтверждение делает Mini App). Уважение не откатывается,
+         *     закрытые периоды перестают считаться в рейтинге. Отвечает 200, а не 204: тело несёт фразу
+         *     onDelete (расхождение с каноном записано в `decisions.md` контракта). Требует завершённый старт.
+         */
+        delete: operations["deleteTask"];
+        options?: never;
+        head?: never;
+        /**
+         * Переименовать или остановить задачу
+         * @description `title` меняет название активной задачи (с проверкой конкретности и суточным лимитом, как
+         *     при постановке); дедлайн меняется только продлением. `status = stopped` останавливает
+         *     активную повторяющуюся задачу: новые периоды не открываются, сообщения отменяются, текущий
+         *     период закрывается без изменения уважения, персонаж отвечает фразой onDelete в `reply`.
+         *     Остальные переходы статуса не принимаются. Закрытая или остановленная задача: 409
+         *     `period_not_active`. Требует завершённый старт.
+         */
+        patch: operations["updateTask"];
+        trace?: never;
+    };
+    "/tasks/{taskId}/periods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Периоды задачи
+         * @description Периоды задачи от новых к старым. У разовой задачи один период. Требует завершённый старт.
+         */
+        get: operations["listTaskPeriods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{periodId}/completion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Готово»
+         * @description Закрывает активный период как `done` (`closedBy = done_button`), начисляет уважение по
+         *     размеру задачи (+1, +3, +5) и отвечает фразой onSuccess. Выполнение засчитывается по слову
+         *     пользователя. Период не активен: 409 `period_not_active`. Требует завершённый старт.
+         */
+        post: operations["completePeriod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{periodId}/extension": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Мне нужно больше времени…»
+         * @description Бесплатно продлевает срок на 1 час, не больше раза в календарные сутки пользователя на
+         *     задачу; отвечает фразой onExcuse. Для повторяющейся задачи новый срок не должен быть
+         *     позже начала следующего периода. Повторное продление в те же сутки или выход за начало
+         *     следующего периода: 409 `extension_denied` с фразой onExcuseDenied в `reply` ошибки.
+         *     Требует завершённый старт.
+         */
+        post: operations["extendPeriod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{periodId}/surrender": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Сдаюсь»
+         * @description Переводит активный период в `failed` (`closedBy = give_up`) и снимает 1 уважение.
+         *     Подтверждение делает Mini App до вызова. Требует завершённый старт.
+         */
+        post: operations["surrenderPeriod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/periods/{periodId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Сделаю за час»
+         * @description Возвращает проваленный период в `active` со сроком через час, один раз на период
+         *     (`retryUsed`) и только пока следующий период не начался. Снятое уважение не
+         *     возвращается. Задача (в том числе разовая, ставшая `closed`) возвращается в `active`.
+         *     Иначе 409 `retry_unavailable`. Требует завершённый старт.
+         */
+        post: operations["retryPeriod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * «История»
+         * @description Сообщения персонажа от новых к старым. Фильтры `periodId` и `category` нужны странице
+         *     задачи: последняя проверка периода без ответа берётся из первой записи с
+         *     `category = on_check_in`. Требует завершённый старт.
+         */
+        get: operations["listFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feed/{feedMessageId}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedMessageId: components["parameters"]["FeedMessageId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Оценить фразу
+         * @description Ставит оценку фразе сообщения: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один голос
+         *     на пару «пользователь, фраза», изменить нельзя: та же оценка повторно (потерянный ответ)
+         *     возвращает 200 с текущим состоянием, другая оценка (в том числе под повторным показом той же
+         *     фразы) получает 409 `already_rated`. В запросе поле `score`, в ответе оно же как `rating`. Категории без оценки: 400.
+         *     Требует завершённый старт.
+         */
+        put: operations["rateFeedMessage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feed/{feedMessageId}/check-in-answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedMessageId: components["parameters"]["FeedMessageId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Ответить на проверку
+         * @description Ответ «Сделано», «Частично» или «Не начинал(а)» на проверку «покажи, что сделано».
+         *     «Сделано» закрывает период как «Готово» (`closedBy = check_in`). «Частично» и «Не начинал(а)»
+         *     запускают серию проверок на сервере, персонаж отвечает фразой onCheckInReply. Ответ
+         *     после 15 минут молчания принимается, штраф не возвращается. Задача уже закрыта,
+         *     провалена, остановлена или удалена: 409 `period_not_active`. Тот же ответ дают кнопки в
+         *     боте. Требует завершённый старт.
+         */
+        put: operations["answerCheckIn"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/battle/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Диалог боя
+         * @description Диалог пользователя с ролью: побеждённость и момент её записи. `defeat` уже учитывает
+         *     откат 25 пунктов в сутки на момент запроса, `defeatAt` — момент последней записи
+         *     значения. Первое обращение к пустому диалогу (этой операцией или `listBattleMessages`)
+         *     один раз добавляет реплику onBattleStart атомарно и идемпотентно: после первого ответа
+         *     любой из двух операций реплика уже есть, повторные вызовы диалог не меняют. Доступен
+         *     только диалог текущей роли пользователя, иначе 409 `role_mismatch`. Уровень побеждённости 1–4 считает клиент по границам
+         *     0/20/50/80. Требует завершённый старт.
+         */
+        get: operations["getBattleDialog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/battle/{role}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Реплики диалога
+         * @description Вся история диалога от новых к старым, сжатие контекста на видимость не влияет. Для
+         *     пустого диалога первая реплика onBattleStart создаётся так же, как в `getBattleDialog`.
+         *     Только диалог текущей роли, иначе 409 `role_mismatch`.
+         *     Требует завершённый старт.
+         */
+        get: operations["listBattleMessages"];
+        put?: never;
+        /**
+         * Сделать ход
+         * @description Реплика игрока стоит один удар. Ход выполняется целиком: резерв удара, судья, пересчёт
+         *     шкал, ответ актёра, фиксация. Не больше одного незавершённого хода на диалог. Нет ударов:
+         *     409 `insufficient_strikes`. Техническая ошибка, таймаут 30 с или отказ провайдера: 502
+         *     `turn_failed`, удар возвращён, шкалы не менялись. Короче 2 непробельных символов или
+         *     длиннее 300: 400 без списания. Ход не меняет статусы задач. Клиентский таймаут запроса
+         *     не меньше 35 с. Требует завершённый старт. Доступен диалог только текущей роли
+         *     пользователя, иначе 409 `role_mismatch`.
+         *
+         *     Повтор с тем же `Idempotency-Key`:
+         *
+         *     | состояние первого хода | ответ на повтор |
+         *     |---|---|
+         *     | засчитан | 200 с тем же телом, удар второй раз не списывается |
+         *     | в работе | 409 `turn_in_progress` |
+         *     | не засчитан (502) | тот же 502, новая попытка требует нового ключа |
+         *     | тот же ключ, другой текст | 409 `idempotency_key_reused` |
+         */
+        post: operations["createBattleMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/battle/{role}/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Ответить» на сообщение персонажа
+         * @description Добавляет сообщение персонажа из «Истории» (под ботом, в «Истории», на экране «Провал») в
+         *     диалог текущей роли как его реплику с названием задачи (`taskTitle`). Удар не списывается.
+         *     Каждый вызов без `Idempotency-Key` добавляет новую цитату (осознанный повторный ответ на то же
+         *     сообщение допустим); с ключом повтор после обрыва дубля не создаёт. Чужое или
+         *     несуществующее сообщение: 404. Требует завершённый старт.
+         */
+        post: operations["createBattleQuote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/strikes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Баланс ударов
+         * @description Баланс — сумма остатков партий. Партии от старых к новым: удары расходуются из самой
+         *     ранней партии с остатком. Требует завершённый старт.
+         */
+        get: operations["getMyStrikes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/strike-operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * История операций с ударами
+         * @description Покупки, списания, возвраты, ручные начисления и возвраты Stars от новых к старым. Требует завершённый старт.
+         */
+        get: operations["listMyStrikeOperations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Пакеты ударов
+         * @description Активные пакеты магазина по порядку показа с ценой в Stars. Маленький закрытый список,
+         *     отдаётся целиком. Требует завершённый старт.
+         */
+        get: operations["listPackages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/packages/{packageId}/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packageId: components["parameters"]["PackageId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Создать счёт Stars
+         * @description Создаёт счёт в валюте XTR по цене пакета на этот момент. Mini App открывает
+         *     `invoiceUrl` окном оплаты Telegram. Удары начисляются после подтверждения платежа,
+         *     не позже чем через минуту; клиент опрашивает `listMyStrikeOperations` до первой новой
+         *     записи `type = purchase` (она и есть признак начисления) и перечитывает `getMyStrikes`. Неактивный или
+         *     несуществующий пакет: 404. Требует завершённый старт.
+         */
+        post: operations["createInvoice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/shares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Карточка для шеринга
+         * @description Рисует карточку из фразы пула (без имени, username и названия задачи) и готовит
+         *     сообщение для выбора чата. Mini App передаёт `preparedMessageId` в `shareMessage`.
+         *     `done` и `fail` требуют `periodId`, `battle` требует `role`. Ошибка создания: 503
+         *     `share_failed` («Не получилось, ещё раз?»). Требует завершённый старт.
+         */
+        post: operations["createShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Рейтинг
+         * @description До 100 участников по числу закрытых задач; при равенстве выше тот, кто достиг числа
+         *     раньше. Пользователи без закрытых задач в таблицу не попадают. `me` — своя карточка и
+         *     место (в том числе под таблицей). Маленький закрытый список, без пагинации.
+         *     Требует завершённый старт.
+         */
+        get: operations["getLeaderboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Вебхук Telegram
+         * @description Принимает обновления Bot API: `/start`, `/terms`, `/paysupport`, нажатия кнопок под
+         *     сообщениями (ответы на проверки, «Готово», продление, «Сдаюсь», оценки), `pre_checkout_query`,
+         *     `successful_payment`, `my_chat_member`. Подлинность — секретный токен вебхука. Бот
+         *     только разбирает обновление и передаёт его модулям.
+         *
+         *     Отвечает 200 только когда обновление обработано или осознанно проигнорировано
+         *     (неподдерживаемый тип, повтор того же `update_id` или `telegram_payment_charge_id`).
+         *     При временной ошибке (база недоступна, сбой обработчика) отвечает 503: Telegram повторит
+         *     доставку, обработка идемпотентна. Так не теряется `successful_payment`.
+         *     Ответ на `pre_checkout_query` уходит вызовом Bot API в пределах 10 секунд и не зависит
+         *     от тела ответа вебхука.
+         */
+        post: operations["receiveTelegramUpdate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/users/{telegramId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Владелец. Пользователь по Telegram ID
+         * @description Поиск пользователя для начисления ударов и разбора платежей. Задач и диалогов владелец
+         *     не видит. Для удалённого пользователя профиля нет: 404, но его платежи и операции
+         *     ударов остаются доступны по тому же Telegram ID.
+         */
+        get: operations["getOwnerUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/users/{telegramId}/strikes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        /** Владелец. Баланс ударов пользователя */
+        get: operations["getOwnerUserStrikes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/users/{telegramId}/strike-operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        /** Владелец. История операций пользователя */
+        get: operations["listOwnerUserStrikeOperations"];
+        put?: never;
+        /**
+         * Владелец. Начислить или вернуть удары
+         * @description Ручное начисление (`manual_grant`) или списание (`manual_revoke`) с обязательной причиной.
+         *     Без причины: 400 «Укажите причину». Списать больше остатка: 409 `revoke_exceeds_balance`. Действие пишется в
+         *     журнал владельца.
+         */
+        post: operations["createOwnerStrikeOperation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/phrases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Пул фраз
+         * @description Фразы со статистикой. Выключенные и «ниже порога» — фильтры `status = disabled` и
+         *     `belowThreshold = true`; перефразы на одобрении — `status = pending_review`.
+         *     Средний балл клиент считает как `scoreSum / max(votes, 1)`.
+         */
+        get: operations["listOwnerPhrases"];
+        put?: never;
+        /**
+         * Владелец. Добавить фразу
+         * @description Новая фраза сразу включена (`status = enabled`). Автор виден только владельцу.
+         */
+        post: operations["createOwnerPhrase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/phrases/{phraseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phraseId: components["parameters"]["PhraseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Владелец. Включить, выключить, одобрить перефраз
+         * @description Меняет статус фразы. Одобрение перефраза — `pending_review` → `enabled`, отклонение —
+         *     `pending_review` → `disabled`. Выключить последнюю включённую фразу ячейки с уровнем
+         *     побеждённости `any` и сочетанием `any`: 409 `last_enabled_phrase`.
+         */
+        patch: operations["updateOwnerPhrase"];
+        trace?: never;
+    };
+    "/owner/phrases/{phraseId}/paraphrases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phraseId: components["parameters"]["PhraseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Владелец. Создать перефразы
+         * @description Модель делает перефразы фразы в той же структуре. Они попадают в пул как отдельные
+         *     фразы со статусом `pending_review` и `source = paraphrase`, пока владелец их не одобрит.
+         *     Всё или ничего: при отказе модели на любом перефразе ничего не сохраняется, 503
+         *     `ai_unavailable`. Общий таймаут 30 с.
+         */
+        post: operations["createOwnerParaphrases"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/phrase-coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Отчёт наполнения пула
+         * @description Число включённых фраз по ячейкам (роль, категория, уровень, уровень побеждённости,
+         *     сочетание) против минимума из ТЗ. Закрытый справочный отчёт, отдаётся целиком.
+         */
+        get: operations["getOwnerPhraseCoverage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/role-cards/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        /** Владелец. Карточка роли */
+        get: operations["getOwnerRoleCard"];
+        /**
+         * Владелец. Заменить карточку роли
+         * @description Меняет описание характера и больные места; действует на новые ходы. Больных мест не меньше 5.
+         */
+        put: operations["replaceOwnerRoleCard"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Все пакеты
+         * @description Включая неактивные. Маленький закрытый список, отдаётся целиком.
+         */
+        get: operations["listOwnerPackages"];
+        put?: never;
+        /** Владелец. Добавить пакет */
+        post: operations["createOwnerPackage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/packages/{packageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packageId: components["parameters"]["PackageId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Владелец. Заменить пакет
+         * @description Меняет состав, цену, активность и порядок. Уже созданные счета сохраняют цену на момент создания.
+         */
+        put: operations["replaceOwnerPackage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Платежи
+         * @description Платежи Stars от новых к старым, в том числе удалённых пользователей.
+         */
+        get: operations["listOwnerPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/payments/{paymentId}/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                paymentId: components["parameters"]["PaymentId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Владелец. Вернуть Stars
+         * @description Возвращает Stars за платёж целиком и списывает партию. Возможно только для платежа в
+         *     статусе `credited`, из партии которого не израсходовано ни одного удара, и пользователь
+         *     не удалён; иначе 409 `refund_not_allowed` (см. `PaymentResponse.refundable`). Причина
+         *     обязательна. Порядок: партия блокируется, затем вызов Telegram `refundStarPayment`, затем
+         *     фиксация (статус `refunded`, операция, журнал). 503 до вызова Telegram оставляет всё как
+         *     было, повтор безопасен; сбой между Telegram и фиксацией доводит воркер.
+         */
+        post: operations["refundOwnerPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/support-tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Владелец. Обращения /paysupport */
+        get: operations["listOwnerSupportTickets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/support-tickets/{ticketId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticketId: components["parameters"]["TicketId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Владелец. Закрыть или открыть обращение */
+        patch: operations["updateOwnerSupportTicket"];
+        trace?: never;
+    };
+    "/owner/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Метрики за период
+         * @description Метрики из раздела «Метрики» ТЗ за период `[from, to)`, не длиннее 92 дней (иначе 400). Метрика без данных за период
+         *     равна `null`. Тексты задач и реплик в метриках не участвуют.
+         */
+        get: operations["getOwnerMetrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/journal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Владелец. Журнал действий
+         * @description Записи только добавляются; от новых к старым.
+         */
+        get: operations["listOwnerJournal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/owner/game-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Владелец. Настройки игры */
+        get: operations["getOwnerGameSettings"];
+        /**
+         * Владелец. Заменить настройки игры
+         * @description Единственный документ. Действует без выпуска версии; правка пишется в журнал.
+         */
+        put: operations["replaceOwnerGameSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
-    responses: never;
-    parameters: never;
+    schemas: {
+        /**
+         * @description Ошибка по RFC 9457. Тексты `title` и `detail` на английском, без внутренних подробностей.
+         * @example {
+         *       "type": "urn:angry-dad:problem:extension_denied",
+         *       "title": "Extension denied",
+         *       "status": 409,
+         *       "detail": "Already extended today",
+         *       "reply": "Один раз в сутки. Хватит."
+         *     }
+         */
+        Problem: {
+            type: components["schemas"]["ProblemType"];
+            title: string;
+            status: number;
+            detail?: string;
+            /** @description Ошибки полей для `validation_failed` */
+            errors?: {
+                field: string;
+                message: string;
+            }[];
+            /** @description Фраза персонажа для показа пользователю (onVague, onExcuseDenied). Русский текст из пула. */
+            reply?: string;
+            /**
+             * @description Для `period_not_active`: почему действие невозможно. Клиент выбирает текст
+             *     («Задача уже закрыта» или «Задача уже провалена»). Период удалённой задачи
+             *     своего пользователя отвечает так же (`deleted`), а не 404.
+             * @enum {string}
+             */
+            periodStatus?: "done" | "failed" | "stopped" | "deleted";
+        };
+        /** @enum {string} */
+        ProblemType: "urn:angry-dad:problem:validation_failed" | "urn:angry-dad:problem:unauthorized" | "urn:angry-dad:problem:onboarding_required" | "urn:angry-dad:problem:owner_only" | "urn:angry-dad:problem:not_found" | "urn:angry-dad:problem:already_onboarded" | "urn:angry-dad:problem:task_vague" | "urn:angry-dad:problem:deadline_out_of_range" | "urn:angry-dad:problem:daily_limit_reached" | "urn:angry-dad:problem:ai_unavailable" | "urn:angry-dad:problem:period_not_active" | "urn:angry-dad:problem:extension_denied" | "urn:angry-dad:problem:retry_unavailable" | "urn:angry-dad:problem:already_rated" | "urn:angry-dad:problem:insufficient_strikes" | "urn:angry-dad:problem:turn_in_progress" | "urn:angry-dad:problem:turn_failed" | "urn:angry-dad:problem:last_enabled_phrase" | "urn:angry-dad:problem:refund_not_allowed" | "urn:angry-dad:problem:idempotency_key_reused" | "urn:angry-dad:problem:revoke_exceeds_balance" | "urn:angry-dad:problem:role_mismatch" | "urn:angry-dad:problem:init_data_expired" | "urn:angry-dad:problem:share_failed" | "urn:angry-dad:problem:payment_gateway_unavailable";
+        /**
+         * @description Вредный родитель
+         * @example father
+         * @enum {string}
+         */
+        Role: "father" | "mother";
+        /**
+         * @example male
+         * @enum {string}
+         */
+        Gender: "male" | "female";
+        /**
+         * @description Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до
+         *     конца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.
+         * @example {
+         *       "start": 1380,
+         *       "end": 480
+         *     }
+         */
+        QuietHours: {
+            start: number;
+            end: number;
+        };
+        /**
+         * @example {
+         *       "reply": "Бросаешь всё, что начинаешь."
+         *     }
+         */
+        ReplyResponse: {
+            /** @description Фраза персонажа или `null`, если персонаж молчит */
+            reply: string | null;
+        };
+        /** @enum {string} */
+        OnboardingState: "guest" | "done";
+        /**
+         * @description Профиль владельцу записи. Telegram ID пользователю не возвращается.
+         * @example {
+         *       "id": "u_01",
+         *       "isOwner": false,
+         *       "username": "ivan",
+         *       "firstName": "Иван",
+         *       "onboarding": "done",
+         *       "role": "father",
+         *       "gender": "male",
+         *       "timeZone": "Europe/Minsk",
+         *       "quietHours": {
+         *         "start": 1380,
+         *         "end": 480
+         *       },
+         *       "respect": 13.5,
+         *       "inLeaderboard": true,
+         *       "closedCount": 7,
+         *       "closedCountAt": "2026-10-23T09:00:00Z"
+         *     }
+         */
+        MeResponse: {
+            id: string;
+            /** @description Пользователь — владелец продукта (Telegram ID из настройки); вычисляется, показывать раздел «Владелец» */
+            isOwner: boolean;
+            /**
+             * @description Только у гостя: аккаунт был удалён раньше. Тогда после выбора родителя Mini App
+             *     показывает постоянную фразу «Снова начинаем…» (R-8) с окончанием по роли.
+             */
+            returning?: boolean;
+            /** @description Нет у пользователей без username */
+            username?: string;
+            firstName?: string;
+            onboarding: components["schemas"]["OnboardingState"];
+            /** @description Задан после старта */
+            role?: components["schemas"]["Role"];
+            /** @description Задан после старта */
+            gender?: components["schemas"]["Gender"];
+            /** @description IANA-зона, по умолчанию Europe/Moscow */
+            timeZone: string;
+            quietHours: components["schemas"]["QuietHours"];
+            /** @description Уважение. Экран показывает целую часть с округлением вниз. */
+            respect: number;
+            inLeaderboard: boolean;
+            closedCount: number;
+            /** Format: date-time */
+            closedCountAt?: string;
+        };
+        /**
+         * @example {
+         *       "timeZone": "Asia/Yekaterinburg"
+         *     }
+         */
+        UpdateMeRequest: {
+            role?: components["schemas"]["Role"];
+            gender?: components["schemas"]["Gender"];
+            /** @description IANA-зона */
+            timeZone?: string;
+            quietHours?: components["schemas"]["QuietHours"];
+        };
+        /**
+         * @example {
+         *       "role": "mother",
+         *       "gender": "female",
+         *       "timeZone": "Europe/Minsk"
+         *     }
+         */
+        OnboardingRequest: {
+            role: components["schemas"]["Role"];
+            gender: components["schemas"]["Gender"];
+            /** @description IANA-зона с устройства; без неё Europe/Moscow */
+            timeZone?: string;
+        };
+        /**
+         * @example {
+         *       "user": {
+         *         "id": "u_01",
+         *         "isOwner": false,
+         *         "onboarding": "done",
+         *         "role": "father",
+         *         "gender": "male",
+         *         "timeZone": "Europe/Moscow",
+         *         "quietHours": {
+         *           "start": 1380,
+         *           "end": 480
+         *         },
+         *         "respect": 12,
+         *         "inLeaderboard": true,
+         *         "closedCount": 0
+         *       },
+         *       "replies": [
+         *         "Соболезнуем Вам. Крепитесь…",
+         *         "Опять ничего сам не можешь? Ну, что тебе надо сделать?",
+         *         "Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?"
+         *       ]
+         *     }
+         */
+        OnboardingResponse: {
+            user: components["schemas"]["MeResponse"];
+            /**
+             * @description Тексты экранов после выбора по порядку: «Соболезнуем Вам. Крепитесь…», «Опять ничего…
+             *     Что тебе надо сделать?», «Мечты сюда не пиши…». С подстановкой рода. «Снова начинаем…»
+             *     сюда не входит (см. `MeResponse.returning`). В «Историю» эти тексты не попадают.
+             *     Клиент вызывает `completeOnboarding` после выбора родителя и пола, до экрана «Соболезнуем».
+             */
+            replies: string[];
+        };
+        /**
+         * @description Что владелец продукта видит о пользователе
+         * @example {
+         *       "telegramId": 123456789,
+         *       "username": "ivan",
+         *       "firstName": "Иван"
+         *     }
+         */
+        OwnerUserResponse: {
+            /** Format: int64 */
+            telegramId: number;
+            username?: string;
+            firstName?: string;
+        };
+        /** @enum {string} */
+        TaskKind: "one_time" | "recurring";
+        /**
+         * @description Размер определяет лёгкая модель при постановке; награда за закрытие +1, +3, +5 уважения
+         * @enum {string}
+         */
+        TaskSize: "micro" | "medium" | "large";
+        /** @enum {string} */
+        TaskStatus: "active" | "stopped" | "closed";
+        /** @enum {string} */
+        PeriodStatus: "active" | "done" | "failed";
+        /** @enum {string} */
+        PeriodClosedBy: "done_button" | "check_in" | "deadline" | "give_up";
+        /**
+         * @description `daily` — каждый день; `weekdays` — по будням; `weekly` — раз в неделю (`days` из одного
+         *     дня недели или без `days` — календарная неделя); `days_of_week` — выбранные дни (`days`
+         *     от 1 до 6 значений); `every_n_days` — окно из `n` дней (от 2 до 30).
+         * @example {
+         *       "type": "days_of_week",
+         *       "days": [
+         *         2,
+         *         4
+         *       ]
+         *     }
+         */
+        Recurrence: {
+            /** @enum {string} */
+            type: "daily" | "weekdays" | "weekly" | "days_of_week" | "every_n_days";
+            /** @description Дни недели, 1 — понедельник, 7 — воскресенье */
+            days?: number[];
+            n?: number;
+        };
+        /**
+         * @description Один срок задачи. Настроение клиент считает сам: от `moodFrom` до `anchorAt` (если есть,
+         *     иначе до `deadline`): до 25% — neutral, до 60% — watching, до 85% — annoyed, до 100% —
+         *     angry; после этого срока и после `deadline` — very_angry.
+         * @example {
+         *       "id": "p_01",
+         *       "startsAt": "2026-10-23T00:00:00Z",
+         *       "moodFrom": "2026-10-23T05:00:00Z",
+         *       "deadline": "2026-10-23T19:00:00Z",
+         *       "status": "active",
+         *       "retryUsed": false
+         *     }
+         */
+        PeriodResponse: {
+            id: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            moodFrom: string;
+            /** Format: date-time */
+            deadline: string;
+            /**
+             * Format: date-time
+             * @description Ориентир повторяющейся задачи
+             */
+            anchorAt?: string;
+            status: components["schemas"]["PeriodStatus"];
+            /** Format: date-time */
+            closedAt?: string;
+            closedBy?: components["schemas"]["PeriodClosedBy"];
+            /** @description «Сделаю за час» уже использовано */
+            retryUsed: boolean;
+            /** @description Изменение уважения за закрытие периода (с учётом потолков). Есть только у закрытого периода. */
+            respectDelta?: number;
+            /**
+             * @description Сообщение на экране «Провал» (фраза onFail), есть только у проваленного периода.
+             *     Вложено как снимок, чтобы экран не зависел от момента отправки onFail ботом
+             *     (ночью она переносится на утро) и мог процитировать её в бою через `createBattleQuote`.
+             *     Сервер создаёт запись «Истории» при провале, в том числе после «Сдаюсь».
+             */
+            failMessage?: components["schemas"]["FeedMessageResponse"];
+        };
+        /**
+         * @description Задача. `currentPeriod` вложен как исключение из правила «чужую модель не вкладывать»:
+         *     главная страница показывает таймер и настроение каждой активной задачи (25 и более) и
+         *     открывается за один запрос (A4, N-5). Для остальных периодов — `listTaskPeriods`.
+         *     Для остановленной и закрытой задачи это последний период.
+         * @example {
+         *       "id": "t_01",
+         *       "title": "Написать отчёт по продажам",
+         *       "kind": "one_time",
+         *       "size": "medium",
+         *       "status": "active",
+         *       "currentPeriod": {
+         *         "id": "p_01",
+         *         "startsAt": "2026-10-23T09:00:00Z",
+         *         "moodFrom": "2026-10-23T09:00:00Z",
+         *         "deadline": "2026-10-23T19:00:00Z",
+         *         "status": "active",
+         *         "retryUsed": false
+         *       },
+         *       "createdAt": "2026-10-23T09:00:00Z"
+         *     }
+         */
+        TaskResponse: {
+            id: string;
+            title: string;
+            kind: components["schemas"]["TaskKind"];
+            size: components["schemas"]["TaskSize"];
+            recurrence?: components["schemas"]["Recurrence"];
+            /** @description Ориентир, время суток ЧЧ:ММ в поясе пользователя */
+            anchorTime?: string;
+            status: components["schemas"]["TaskStatus"];
+            currentPeriod?: components["schemas"]["PeriodResponse"];
+            /**
+             * Format: date-time
+             * @description Начало следующего периода. Есть у активной повторяющейся задачи, когда активного
+             *     периода сейчас нет (например «по будням» в субботу): тогда `currentPeriod` — последний
+             *     закрытый период. Вычисляется сервером по правилам периодов.
+             */
+            nextPeriodStartsAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        TaskListResponse: {
+            items: components["schemas"]["TaskResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        PeriodListResponse: {
+            items: components["schemas"]["PeriodResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @description Ровно одно из двух: `deadline` (с `kind = one_time`) или `recurrence` (с `kind = recurring`).
+         *     `anchorTime` допустим только у повторяющейся задачи.
+         * @example {
+         *       "title": "Повторять английский",
+         *       "kind": "recurring",
+         *       "recurrence": {
+         *         "type": "daily"
+         *       },
+         *       "anchorTime": "20:00"
+         *     }
+         */
+        CreateTaskRequest: {
+            /** @description После обрезки пробелов по краям */
+            title: string;
+            kind: components["schemas"]["TaskKind"];
+            /** Format: date-time */
+            deadline?: string;
+            recurrence?: components["schemas"]["Recurrence"];
+            anchorTime?: string;
+        };
+        /**
+         * @example {
+         *       "status": "stopped"
+         *     }
+         */
+        UpdateTaskRequest: {
+            title?: string;
+            /**
+             * @description Единственный допустимый переход — остановка повторяющейся задачи
+             * @enum {string}
+             */
+            status?: "stopped";
+        };
+        /**
+         * @example {
+         *       "task": {
+         *         "id": "t_01",
+         *         "title": "Написать отчёт по продажам",
+         *         "kind": "one_time",
+         *         "size": "medium",
+         *         "status": "active",
+         *         "createdAt": "2026-10-23T09:00:00Z"
+         *       },
+         *       "reply": "Записал. Посмотрим."
+         *     }
+         */
+        TaskActionResponse: {
+            task: components["schemas"]["TaskResponse"];
+            /** @description Фраза персонажа (onTaskSet при постановке, onDelete при остановке), `null` при переименовании */
+            reply: string | null;
+        };
+        /**
+         * @description Результат действия над периодом
+         * @example {
+         *       "task": {
+         *         "id": "t_01",
+         *         "title": "Написать отчёт по продажам",
+         *         "kind": "one_time",
+         *         "size": "medium",
+         *         "status": "closed",
+         *         "createdAt": "2026-10-23T09:00:00Z"
+         *       },
+         *       "respect": 15,
+         *       "respectDelta": 3,
+         *       "reply": "Ну наконец-то."
+         *     }
+         */
+        PeriodActionResponse: {
+            task: components["schemas"]["TaskResponse"];
+            /** @description Точное изменение уважения от этого действия (после потолков), для «Уважение: 15 (+3)» */
+            respectDelta: number;
+            /** @description Уважение после действия */
+            respect: number;
+            /** @description Фраза персонажа (onSuccess, onExcuse, onRetry, onCheckInReply) или `null` */
+            reply: string | null;
+        };
+        /**
+         * @example {
+         *       "answer": "partial"
+         *     }
+         */
+        CheckInAnswerRequest: {
+            answer: components["schemas"]["CheckInAnswer"];
+        };
+        /** @enum {string} */
+        CheckInAnswer: "done" | "partial" | "not_started";
+        /** @enum {string} */
+        PhraseCategory: "on_greeting" | "on_task_set" | "on_delete" | "on_vague" | "on_reminder" | "on_check_in" | "on_check_in_reply" | "on_check_in_missed" | "on_fail" | "on_excuse" | "on_excuse_denied" | "on_retry" | "on_success" | "on_absent" | "on_battle_start" | "on_break" | "on_recovery";
+        /** @enum {string} */
+        PhraseRole: "father" | "mother" | "any";
+        /** @enum {string} */
+        PhraseStatus: "enabled" | "disabled" | "pending_review";
+        /**
+         * @description 0 «слабо», 1 «неприятно», 2 «в самое больное»
+         * @enum {integer}
+         */
+        Rating: 0 | 1 | 2;
+        /**
+         * @description Отправленное сообщение персонажа; `text` — снимок после подстановки, старые сообщения не
+         *     меняются. Оцениваются категории on_reminder, on_check_in, on_check_in_missed, on_fail,
+         *     on_absent; без `rating` оценка ещё не поставлена.
+         * @example {
+         *       "id": "f_01",
+         *       "category": "on_check_in",
+         *       "text": "Покажи, что сделано. Две минуты.",
+         *       "periodId": "p_01",
+         *       "taskTitle": "Написать отчёт по продажам",
+         *       "rateable": true,
+         *       "checkIn": {},
+         *       "sentAt": "2026-10-23T12:00:00Z"
+         *     }
+         */
+        FeedMessageResponse: {
+            id: string;
+            category: components["schemas"]["PhraseCategory"];
+            /** @description Категория оценивается; кнопки оценки показывать, пока нет rating */
+            rateable: boolean;
+            text: string;
+            periodId?: string;
+            /** @description Снимок названия задачи для «Ответить» */
+            taskTitle?: string;
+            /** @description Только у проверок. Без `answer` и `missedAt` проверка ждёт ответа. */
+            checkIn?: {
+                answer?: components["schemas"]["CheckInAnswer"];
+                /** Format: date-time */
+                answeredAt?: string;
+                /** Format: date-time */
+                missedAt?: string;
+            };
+            rating?: components["schemas"]["Rating"];
+            /** Format: date-time */
+            sentAt: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        FeedListResponse: {
+            items: components["schemas"]["FeedMessageResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "score": 2
+         *     }
+         */
+        RateFeedMessageRequest: {
+            score: components["schemas"]["Rating"];
+        };
+        /**
+         * @example {
+         *       "role": "father",
+         *       "defeat": 42.5,
+         *       "defeatAt": "2026-10-23T12:00:00Z",
+         *       "mode": "defense",
+         *       "turnInProgress": false
+         *     }
+         */
+        BattleDialogResponse: {
+            role: components["schemas"]["Role"];
+            /** @description Режим персонажа по `defeat` (границы 40/70/90), для аватара при открытии экрана */
+            mode: components["schemas"]["BattleMode"];
+            /** @description Ход этого диалога идёт сейчас; кнопка отправки неактивна */
+            turnInProgress: boolean;
+            /** @description Побеждённость на момент запроса, с учётом отката */
+            defeat: number;
+            /** Format: date-time */
+            defeatAt: string;
+        };
+        /** @enum {string} */
+        BattleAuthor: "player" | "character";
+        /** @enum {string} */
+        BattleOrigin: "turn" | "reply_to_feed" | "battle_start" | "break";
+        /**
+         * @example {
+         *       "seq": 3,
+         *       "author": "character",
+         *       "text": "Я тебе не верю.",
+         *       "origin": "turn"
+         *     }
+         */
+        BattleMessageResponse: {
+            /** @description Порядковый номер реплики в диалоге */
+            seq: number;
+            author: components["schemas"]["BattleAuthor"];
+            text: string;
+            origin: components["schemas"]["BattleOrigin"];
+            /** @description Название задачи для реплики из «Истории» */
+            taskTitle?: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        BattleMessageListResponse: {
+            items: components["schemas"]["BattleMessageResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "text": "Ты сам три года ничего не доделал."
+         *     }
+         */
+        CreateBattleMessageRequest: {
+            /** @description Не меньше 2 непробельных символов */
+            text: string;
+        };
+        /**
+         * @example {
+         *       "feedMessageId": "f_01"
+         *     }
+         */
+        CreateBattleQuoteRequest: {
+            feedMessageId: string;
+        };
+        /** @enum {string} */
+        BattleMode: "aggression" | "defense" | "confusion" | "softening";
+        /**
+         * @description Итог засчитанного хода. Слом — когда `defeatAfter` равно 100 и в `messages` есть реплика с `origin = break`.
+         * @example {
+         *       "damage": 21,
+         *       "defeatBefore": 0,
+         *       "defeatAfter": 21,
+         *       "mode": "aggression",
+         *       "respectDelta": 1,
+         *       "respect": 13,
+         *       "messages": [
+         *         {
+         *           "seq": 2,
+         *           "author": "player",
+         *           "text": "Ты сам три года ничего не доделал.",
+         *           "origin": "turn"
+         *         },
+         *         {
+         *           "seq": 3,
+         *           "author": "character",
+         *           "text": "Не тебе меня учить.",
+         *           "origin": "turn"
+         *         }
+         *       ],
+         *       "strikesBalance": 2
+         *     }
+         */
+        TurnResponse: {
+            damage: number;
+            defeatBefore: number;
+            defeatAfter: number;
+            mode: components["schemas"]["BattleMode"];
+            /** @description Изменение уважения за ход, включая +12 за слом */
+            respectDelta: number;
+            /** @description Уважение после хода */
+            respect: number;
+            /** @description Реплика игрока, ответ персонажа и (при сломе) финальная реплика, по порядку */
+            messages: components["schemas"]["BattleMessageResponse"][];
+            /** @description Баланс ударов после хода */
+            strikesBalance: number;
+        };
+        /** @enum {string} */
+        StrikeLotSource: "purchase" | "manual";
+        /**
+         * @example {
+         *       "source": "purchase",
+         *       "total": 3,
+         *       "remaining": 1,
+         *       "createdAt": "2026-10-23T10:00:00Z"
+         *     }
+         */
+        StrikeLotResponse: {
+            source: components["schemas"]["StrikeLotSource"];
+            total: number;
+            remaining: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /**
+         * @example {
+         *       "balance": 1,
+         *       "lots": [
+         *         {
+         *           "source": "purchase",
+         *           "total": 3,
+         *           "remaining": 1,
+         *           "createdAt": "2026-10-23T10:00:00Z"
+         *         }
+         *       ]
+         *     }
+         */
+        StrikeBalanceResponse: {
+            /** @description Сумма остатков партий */
+            balance: number;
+            /** @description Партии от старых к новым, расход идёт из самой ранней с остатком */
+            lots: components["schemas"]["StrikeLotResponse"][];
+        };
+        /**
+         * @example {
+         *       "source": "purchase",
+         *       "total": 3,
+         *       "remaining": 3,
+         *       "createdAt": "2026-10-23T10:00:00Z",
+         *       "refundedAt": "2026-10-23T11:00:00Z"
+         *     }
+         */
+        OwnerStrikeLotResponse: components["schemas"]["StrikeLotResponse"] & {
+            /**
+             * Format: date-time
+             * @description Момент возврата Stars
+             */
+            refundedAt?: string;
+        };
+        /**
+         * @example {
+         *       "balance": 0,
+         *       "lots": []
+         *     }
+         */
+        OwnerStrikeBalanceResponse: {
+            balance: number;
+            lots: components["schemas"]["OwnerStrikeLotResponse"][];
+        };
+        /** @enum {string} */
+        StrikeOperationType: "purchase" | "spend" | "turn_refund" | "manual_grant" | "manual_revoke" | "stars_refund";
+        /**
+         * @example {
+         *       "type": "turn_refund",
+         *       "amount": 1,
+         *       "reason": "Возврат: ошибка хода",
+         *       "at": "2026-10-23T12:00:00Z"
+         *     }
+         */
+        StrikeOperationResponse: {
+            type: components["schemas"]["StrikeOperationType"];
+            amount: number;
+            /** @description Для ручных операций и возвратов; русский текст, который формирует сервер («Возврат: ошибка хода») */
+            reason?: string;
+            /** Format: date-time */
+            at: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        StrikeOperationListResponse: {
+            items: components["schemas"]["StrikeOperationResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "type": "manual_grant",
+         *       "amount": 2,
+         *       "reason": "Возврат по жалобе"
+         *     }
+         */
+        CreateStrikeOperationRequest: {
+            /** @enum {string} */
+            type: "manual_grant" | "manual_revoke";
+            amount: number;
+            reason: string;
+        };
+        /**
+         * @example {
+         *       "id": "pk_3",
+         *       "strikes": 3,
+         *       "priceStars": 39
+         *     }
+         */
+        PackageResponse: {
+            id: string;
+            strikes: number;
+            /** @description Цена в Telegram Stars (XTR) */
+            priceStars: number;
+        };
+        /**
+         * @example {
+         *       "items": [
+         *         {
+         *           "id": "pk_1",
+         *           "strikes": 1,
+         *           "priceStars": 15
+         *         }
+         *       ]
+         *     }
+         */
+        PackageListResponse: {
+            items: components["schemas"]["PackageResponse"][];
+        };
+        /**
+         * @example {
+         *       "id": "pk_3",
+         *       "strikes": 3,
+         *       "priceStars": 39,
+         *       "active": true,
+         *       "order": 2
+         *     }
+         */
+        OwnerPackageResponse: components["schemas"]["PackageResponse"] & {
+            active: boolean;
+            order: number;
+        };
+        /**
+         * @example {
+         *       "items": []
+         *     }
+         */
+        OwnerPackageListResponse: {
+            items: components["schemas"]["OwnerPackageResponse"][];
+        };
+        /**
+         * @example {
+         *       "strikes": 3,
+         *       "priceStars": 42,
+         *       "active": true,
+         *       "order": 2
+         *     }
+         */
+        OwnerPackageRequest: {
+            strikes: number;
+            priceStars: number;
+            active: boolean;
+            order: number;
+        };
+        /**
+         * @description Состав и цена на момент создания счёта
+         * @example {
+         *       "strikes": 3,
+         *       "priceStars": 39
+         *     }
+         */
+        PackageSnapshot: {
+            strikes: number;
+            priceStars: number;
+        };
+        /**
+         * @example {
+         *       "invoiceUrl": "https://t.me/$abc123",
+         *       "packageSnapshot": {
+         *         "strikes": 3,
+         *         "priceStars": 39
+         *       }
+         *     }
+         */
+        InvoiceResponse: {
+            /**
+             * Format: uri
+             * @description Ссылка на счёт для окна оплаты Telegram
+             */
+            invoiceUrl: string;
+            packageSnapshot: components["schemas"]["PackageSnapshot"];
+        };
+        /** @enum {string} */
+        PaymentStatus: "invoiced" | "paid" | "credited" | "refunded";
+        /**
+         * @example {
+         *       "id": "pay_01",
+         *       "telegramId": 123456789,
+         *       "packageSnapshot": {
+         *         "strikes": 3,
+         *         "priceStars": 39
+         *       },
+         *       "status": "credited",
+         *       "refundable": true,
+         *       "telegramChargeId": "ch_abc",
+         *       "paidAt": "2026-10-23T10:00:05Z",
+         *       "creditedAt": "2026-10-23T10:00:08Z"
+         *     }
+         */
+        PaymentResponse: {
+            id: string;
+            /** @description Возврат Stars возможен сейчас (статус `credited`, из партии не израсходовано ни одного удара, пользователь не удалён) */
+            refundable: boolean;
+            /** Format: int64 */
+            telegramId: number;
+            packageSnapshot: components["schemas"]["PackageSnapshot"];
+            status: components["schemas"]["PaymentStatus"];
+            telegramChargeId?: string;
+            /** Format: date-time */
+            paidAt?: string;
+            /** Format: date-time */
+            creditedAt?: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        PaymentListResponse: {
+            items: components["schemas"]["PaymentResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "reason": "Возврат по /paysupport"
+         *     }
+         */
+        RefundRequest: {
+            reason: string;
+        };
+        /** @enum {string} */
+        SupportTicketStatus: "open" | "resolved";
+        /**
+         * @example {
+         *       "id": "st_01",
+         *       "telegramId": 123456789,
+         *       "text": "Оплатил, ударов нет",
+         *       "status": "open",
+         *       "at": "2026-10-23T10:05:00Z"
+         *     }
+         */
+        SupportTicketResponse: {
+            id: string;
+            /** Format: int64 */
+            telegramId: number;
+            text: string;
+            status: components["schemas"]["SupportTicketStatus"];
+            /** Format: date-time */
+            at: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        SupportTicketListResponse: {
+            items: components["schemas"]["SupportTicketResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "status": "resolved"
+         *     }
+         */
+        UpdateSupportTicketRequest: {
+            status: components["schemas"]["SupportTicketStatus"];
+        };
+        /** @enum {string} */
+        PhraseCombo: "father_son" | "father_daughter" | "mother_son" | "mother_daughter" | "any";
+        /**
+         * @description Уровень побеждённости 1–4 или `any`
+         * @enum {string}
+         */
+        PhraseDefeatLevel: "1" | "2" | "3" | "4" | "any";
+        /** @enum {string} */
+        PhraseSource: "owner" | "subscriber" | "paraphrase";
+        /**
+         * @example {
+         *       "id": "ph_01",
+         *       "role": "father",
+         *       "category": "on_check_in",
+         *       "level": 1,
+         *       "defeatLevel": "any",
+         *       "combo": "any",
+         *       "template": "Покажи, что сделано. Две минуты.",
+         *       "source": "owner",
+         *       "status": "enabled",
+         *       "shows": 120,
+         *       "votes": 40,
+         *       "scoreSum": 52,
+         *       "belowThreshold": false
+         *     }
+         */
+        PhraseResponse: {
+            id: string;
+            role: components["schemas"]["PhraseRole"];
+            category: components["schemas"]["PhraseCategory"];
+            /** @description Только у категорий с уровнями */
+            level?: number;
+            defeatLevel: components["schemas"]["PhraseDefeatLevel"];
+            combo: components["schemas"]["PhraseCombo"];
+            /** @description Шаблон с вариантами рода и переменными */
+            template: string;
+            source: components["schemas"]["PhraseSource"];
+            author?: string;
+            status: components["schemas"]["PhraseStatus"];
+            shows: number;
+            votes: number;
+            scoreSum: number;
+            belowThreshold: boolean;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        PhraseListResponse: {
+            items: components["schemas"]["PhraseResponse"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @example {
+         *       "items": []
+         *     }
+         */
+        PhraseItemsResponse: {
+            items: components["schemas"]["PhraseResponse"][];
+        };
+        /**
+         * @example {
+         *       "role": "mother",
+         *       "category": "on_fail",
+         *       "defeatLevel": "any",
+         *       "combo": "any",
+         *       "template": "Опять не сделал(а). Я не удивлена.",
+         *       "source": "owner"
+         *     }
+         */
+        CreatePhraseRequest: {
+            role: components["schemas"]["PhraseRole"];
+            category: components["schemas"]["PhraseCategory"];
+            level?: number;
+            defeatLevel: components["schemas"]["PhraseDefeatLevel"];
+            combo: components["schemas"]["PhraseCombo"];
+            template: string;
+            /** @enum {string} */
+            source: "owner" | "subscriber";
+            author?: string;
+        };
+        /**
+         * @example {
+         *       "status": "enabled"
+         *     }
+         */
+        UpdatePhraseRequest: {
+            /** @enum {string} */
+            status: "enabled" | "disabled";
+        };
+        /**
+         * @example {
+         *       "count": 3
+         *     }
+         */
+        CreateParaphrasesRequest: {
+            /** @default 3 */
+            count: number;
+        };
+        /**
+         * @example {
+         *       "role": "father",
+         *       "category": "on_fail",
+         *       "defeatLevel": "any",
+         *       "combo": "any",
+         *       "enabledCount": 14,
+         *       "required": 12
+         *     }
+         */
+        PhraseCoverageItem: {
+            role: components["schemas"]["PhraseRole"];
+            category: components["schemas"]["PhraseCategory"];
+            level?: number;
+            defeatLevel: components["schemas"]["PhraseDefeatLevel"];
+            combo: components["schemas"]["PhraseCombo"];
+            enabledCount: number;
+            /** @description Минимум из таблицы категорий ТЗ */
+            required: number;
+        };
+        /**
+         * @example {
+         *       "items": []
+         *     }
+         */
+        PhraseCoverageResponse: {
+            items: components["schemas"]["PhraseCoverageItem"][];
+        };
+        /**
+         * @example {
+         *       "key": "unfinished_things",
+         *       "description": "Ненавидит, когда не доводят до конца"
+         *     }
+         */
+        WeakSpot: {
+            key: string;
+            description: string;
+        };
+        /**
+         * @example {
+         *       "role": "father",
+         *       "character": "Строгий, ворчливый, всё знает лучше",
+         *       "weakSpots": [
+         *         {
+         *           "key": "unfinished_things",
+         *           "description": "Ненавидит, когда не доводят до конца"
+         *         }
+         *       ]
+         *     }
+         */
+        RoleCardResponse: {
+            role: components["schemas"]["Role"];
+            character: string;
+            weakSpots: components["schemas"]["WeakSpot"][];
+        };
+        /**
+         * @example {
+         *       "character": "Строгий, ворчливый",
+         *       "weakSpots": [
+         *         {
+         *           "key": "a",
+         *           "description": "a"
+         *         },
+         *         {
+         *           "key": "b",
+         *           "description": "b"
+         *         },
+         *         {
+         *           "key": "c",
+         *           "description": "c"
+         *         },
+         *         {
+         *           "key": "d",
+         *           "description": "d"
+         *         },
+         *         {
+         *           "key": "e",
+         *           "description": "e"
+         *         }
+         *       ]
+         *     }
+         */
+        ReplaceRoleCardRequest: {
+            character: string;
+            weakSpots: components["schemas"]["WeakSpot"][];
+        };
+        /** @enum {string} */
+        ShareKind: "done" | "fail" | "battle";
+        /**
+         * @example {
+         *       "kind": "done",
+         *       "periodId": "p_01"
+         *     }
+         */
+        CreateShareRequest: {
+            kind: components["schemas"]["ShareKind"];
+            /** @description Для `done` и `fail` */
+            periodId?: string;
+            /** @description Для `battle` */
+            role?: components["schemas"]["Role"];
+        };
+        /**
+         * @example {
+         *       "preparedMessageId": "pm_abc"
+         *     }
+         */
+        ShareResponse: {
+            /** @description Идентификатор подготовленного сообщения для `shareMessage` Mini App */
+            preparedMessageId: string;
+        };
+        /**
+         * @description Карточка участника — username (или имя) и число закрытых задач
+         * @example {
+         *       "rank": 1,
+         *       "username": "ivan",
+         *       "closedCount": 42
+         *     }
+         */
+        LeaderboardEntry: {
+            rank: number;
+            username?: string;
+            firstName?: string;
+            closedCount: number;
+        };
+        /**
+         * @example {
+         *       "rank": 340,
+         *       "closedCount": 12,
+         *       "inLeaderboard": true
+         *     }
+         */
+        LeaderboardMe: {
+            /** @description Место; `null`, если пользователь вышел из рейтинга */
+            rank?: number | null;
+            closedCount: number;
+            inLeaderboard: boolean;
+        };
+        /**
+         * @example {
+         *       "items": [
+         *         {
+         *           "rank": 1,
+         *           "username": "ivan",
+         *           "closedCount": 42
+         *         }
+         *       ],
+         *       "me": {
+         *         "rank": 340,
+         *         "closedCount": 12,
+         *         "inLeaderboard": true
+         *       }
+         *     }
+         */
+        LeaderboardResponse: {
+            items: components["schemas"]["LeaderboardEntry"][];
+            me: components["schemas"]["LeaderboardMe"];
+        };
+        /**
+         * @example {
+         *       "inLeaderboard": false
+         *     }
+         */
+        LeaderboardParticipationRequest: {
+            inLeaderboard: boolean;
+        };
+        /**
+         * @example {
+         *       "inLeaderboard": false
+         *     }
+         */
+        LeaderboardParticipationResponse: {
+            inLeaderboard: boolean;
+        };
+        /**
+         * @description Значения метрик за период; `null` — данных нет
+         * @example {
+         *       "from": "2026-10-16T00:00:00Z",
+         *       "to": "2026-10-23T00:00:00Z",
+         *       "day7Retention": 0.31,
+         *       "closedShare": 0.58,
+         *       "checkInAnswerRate": 0.64,
+         *       "firstPurchaseConversion": 0.07,
+         *       "turnCostToStrikeRevenue": 0.22,
+         *       "botBlockedShare": 0.04,
+         *       "avgPhraseScore": 1.1,
+         *       "sharesPer100Active": 3.5,
+         *       "medianStartToFirstTaskSeconds": 95
+         *     }
+         */
+        MetricsResponse: {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            /** @description Возврат на 7-й день */
+            day7Retention?: number | null;
+            /** @description Доля закрытых задач и периодов */
+            closedShare?: number | null;
+            /** @description Доля отвеченных проверок */
+            checkInAnswerRate?: number | null;
+            /** @description Конверсия в первую покупку */
+            firstPurchaseConversion?: number | null;
+            /** @description Стоимость токенов хода к выручке с удара после комиссии */
+            turnCostToStrikeRevenue?: number | null;
+            /** @description Доля заблокировавших бота */
+            botBlockedShare?: number | null;
+            /** @description Средний балл фраз */
+            avgPhraseScore?: number | null;
+            /** @description Пересылок карточки на 100 активных пользователей */
+            sharesPer100Active?: number | null;
+            /** @description Медиана времени от /start до первой сохранённой задачи */
+            medianStartToFirstTaskSeconds?: number | null;
+        };
+        /** @enum {string} */
+        OwnerActionType: "phrase_add" | "phrase_toggle" | "paraphrase_review" | "role_card_edit" | "package_edit" | "strikes_grant" | "strikes_revoke" | "stars_refund" | "settings_edit";
+        /**
+         * @example {
+         *       "action": "strikes_grant",
+         *       "targetTelegramId": 123456789,
+         *       "details": {
+         *         "amount": 2,
+         *         "reason": "Возврат по жалобе"
+         *       },
+         *       "at": "2026-10-23T12:00:00Z"
+         *     }
+         */
+        OwnerJournalEntry: {
+            action: components["schemas"]["OwnerActionType"];
+            /**
+             * Format: int64
+             * @description Пользователь, над которым совершено действие
+             */
+            targetTelegramId?: number;
+            /** @description Идентификатор объекта действия: фраза, пакет, платёж, роль */
+            targetId?: string;
+            /** @description Числа и причина */
+            details?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            at: string;
+        };
+        /**
+         * @example {
+         *       "items": [],
+         *       "nextCursor": null
+         *     }
+         */
+        OwnerJournalListResponse: {
+            items: components["schemas"]["OwnerJournalEntry"][];
+            nextCursor: string | null;
+        };
+        /**
+         * @description Имя для переменной `{other}` в фразах
+         * @example {
+         *       "name": "Вася",
+         *       "gender": "male",
+         *       "cases": [
+         *         "Вася",
+         *         "Васи",
+         *         "Васе",
+         *         "Васю",
+         *         "Васей",
+         *         "Васе"
+         *       ]
+         *     }
+         */
+        OtherName: {
+            name: string;
+            gender: components["schemas"]["Gender"];
+            /** @description Формы имени по падежам */
+            cases: string[];
+        };
+        /**
+         * @example {
+         *       "battleCoefficients": {
+         *         "base": 1,
+         *         "damage": 1,
+         *         "weakSpot": 1.5,
+         *         "crit": 1.2
+         *       },
+         *       "aiDailyLimit": 50,
+         *       "otherNames": [
+         *         {
+         *           "name": "Вася",
+         *           "gender": "male",
+         *           "cases": [
+         *             "Вася",
+         *             "Васи",
+         *             "Васе",
+         *             "Васю",
+         *             "Васей",
+         *             "Васе"
+         *           ]
+         *         }
+         *       ],
+         *       "banditParams": {
+         *         "trialShows": 50,
+         *         "disableAvg": 0.4,
+         *         "disableVotes": 100
+         *       }
+         *     }
+         */
+        GameSettingsRequest: {
+            battleCoefficients: {
+                base: number;
+                damage: number;
+                weakSpot: number;
+                crit: number;
+            };
+            /** @description Проверок конкретности на пользователя в сутки */
+            aiDailyLimit: number;
+            otherNames: components["schemas"]["OtherName"][];
+            banditParams: {
+                trialShows: number;
+                disableAvg: number;
+                disableVotes: number;
+            };
+        };
+        /**
+         * @example {
+         *       "battleCoefficients": {
+         *         "base": 1,
+         *         "damage": 1,
+         *         "weakSpot": 1.5,
+         *         "crit": 1.2
+         *       },
+         *       "aiDailyLimit": 50,
+         *       "otherNames": [],
+         *       "banditParams": {
+         *         "trialShows": 50,
+         *         "disableAvg": 0.4,
+         *         "disableVotes": 100
+         *       }
+         *     }
+         */
+        GameSettingsResponse: components["schemas"]["GameSettingsRequest"];
+        /**
+         * @description Обновление Bot API; разбирает grammY, контракт требует только `update_id`.
+         * @example {
+         *       "update_id": 1001,
+         *       "message": {
+         *         "text": "/start"
+         *       }
+         *     }
+         */
+        TelegramUpdate: {
+            update_id: number;
+        } & {
+            [key: string]: unknown;
+        };
+        /**
+         * @example {
+         *       "ok": true
+         *     }
+         */
+        WebhookAck: {
+            ok: boolean;
+        };
+    };
+    responses: {
+        /** @description Неверный запрос или не прошла валидация (`validation_failed`, `task_vague`, `deadline_out_of_range` и др.) */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Нет или не годятся данные запуска Telegram */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Нет прав (`onboarding_required` для гостя, `owner_only` для не-владельца) */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Не найдено (в том числе чужой ресурс) */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Конфликт состояния (`period_not_active`, `extension_denied`, `already_rated`, `insufficient_strikes` и др.) */
+        Conflict: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Превышен суточный лимит (`daily_limit_reached`) */
+        TooManyRequests: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Внешний сервис не дал результата (`turn_failed`) */
+        BadGateway: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Внешний сервис недоступен (`ai_unavailable`, `share_failed`, `payment_gateway_unavailable`) */
+        ServiceUnavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+    };
+    parameters: {
+        /** @description Размер страницы. По умолчанию 50, максимум 100. */
+        Limit: number;
+        /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+        Cursor: string;
+        /**
+         * @description Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний
+         *     результат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.
+         */
+        OptionalIdempotencyKey: string;
+        /** @description Клиентский идентификатор хода (UUID). Повтор с тем же ключом возвращает прежний результат. */
+        IdempotencyKey: string;
+        TaskId: string;
+        PeriodId: string;
+        FeedMessageId: string;
+        BattleRole: components["schemas"]["Role"];
+        PackageId: string;
+        PhraseId: string;
+        PaymentId: string;
+        TicketId: string;
+        TelegramId: number;
+    };
     requestBodies: never;
     headers: never;
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Профиль */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    deleteMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Аккаунт удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMeRequest"];
+            };
+        };
+        responses: {
+            /** @description Обновлённый профиль */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    completeOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingRequest"];
+            };
+        };
+        responses: {
+            /** @description Старт пройден */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    setLeaderboardParticipation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeaderboardParticipationRequest"];
+            };
+        };
+        responses: {
+            /** @description Новое состояние */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaderboardParticipationResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listTasks: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Фильтр по статусу задачи */
+                status?: components["schemas"]["TaskStatus"];
+                /** @description Фильтр по виду задачи */
+                kind?: components["schemas"]["TaskKind"];
+                /** @description Порядок. `deadline` — по сроку текущего периода, ближайшие первыми (для главной); по умолчанию `-createdAt`. */
+                sort?: "deadline" | "-createdAt";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница задач */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createTask: {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний
+                 *     результат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.
+                 */
+                "Idempotency-Key"?: components["parameters"]["OptionalIdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Задача создана */
+            201: {
+                headers: {
+                    /** @description Адрес созданной задачи */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskActionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Задача */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Задача удалена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReplyResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Обновлённая задача */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskActionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listTaskPeriods: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                taskId: components["parameters"]["TaskId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница периодов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    completePeriod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Период закрыт */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodActionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    extendPeriod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Срок продлён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodActionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    surrenderPeriod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Период провален */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodActionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    retryPeriod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                periodId: components["parameters"]["PeriodId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Период снова активен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodActionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listFeed: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Только сообщения этого периода */
+                periodId?: string;
+                /** @description Только сообщения этой категории */
+                category?: components["schemas"]["PhraseCategory"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница ленты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    rateFeedMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedMessageId: components["parameters"]["FeedMessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateFeedMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Оценка записана */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedMessageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    answerCheckIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedMessageId: components["parameters"]["FeedMessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckInAnswerRequest"];
+            };
+        };
+        responses: {
+            /** @description Ответ принят */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PeriodActionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getBattleDialog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Диалог */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BattleDialogResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listBattleMessages: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница реплик */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BattleMessageListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createBattleMessage: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Клиентский идентификатор хода (UUID). Повтор с тем же ключом возвращает прежний результат. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBattleMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Повтор того же ключа, прежний результат */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResponse"];
+                };
+            };
+            /** @description Ход засчитан */
+            201: {
+                headers: {
+                    /** @description Список реплик диалога */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            502: components["responses"]["BadGateway"];
+        };
+    };
+    createBattleQuote: {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний
+                 *     результат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.
+                 */
+                "Idempotency-Key"?: components["parameters"]["OptionalIdempotencyKey"];
+            };
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBattleQuoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Реплика добавлена */
+            201: {
+                headers: {
+                    /** @description Список реплик диалога */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BattleMessageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getMyStrikes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Баланс */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StrikeBalanceResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listMyStrikeOperations: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница операций */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StrikeOperationListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listPackages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Пакеты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackageListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createInvoice: {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний
+                 *     результат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.
+                 */
+                "Idempotency-Key"?: components["parameters"]["OptionalIdempotencyKey"];
+            };
+            path: {
+                packageId: components["parameters"]["PackageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Счёт создан */
+            201: {
+                headers: {
+                    /** @description Адрес пакета */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShareRequest"];
+            };
+        };
+        responses: {
+            /** @description Карточка готова */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getLeaderboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Рейтинг */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaderboardResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    receiveTelegramUpdate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramUpdate"];
+            };
+        };
+        responses: {
+            /** @description Обновление обработано или проигнорировано */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookAck"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getOwnerUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Пользователь */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerUserResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getOwnerUserStrikes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Баланс и партии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerStrikeBalanceResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listOwnerUserStrikeOperations: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница операций */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StrikeOperationListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createOwnerStrikeOperation: {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description Клиентский идентификатор попытки (UUID). Повтор с тем же ключом возвращает прежний
+                 *     результат (200 с тем же телом) и ничего не создаёт и не списывает второй раз. Ключ живёт 24 часа.
+                 */
+                "Idempotency-Key"?: components["parameters"]["OptionalIdempotencyKey"];
+            };
+            path: {
+                telegramId: components["parameters"]["TelegramId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStrikeOperationRequest"];
+            };
+        };
+        responses: {
+            /** @description Операция записана */
+            201: {
+                headers: {
+                    /** @description Список операций пользователя */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StrikeOperationResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listOwnerPhrases: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                role?: components["schemas"]["PhraseRole"];
+                category?: components["schemas"]["PhraseCategory"];
+                status?: components["schemas"]["PhraseStatus"];
+                belowThreshold?: boolean;
+                /** @description Порядок. `avg` — по среднему баллу, худшие первыми; `-shows` — по показам; по умолчанию `-shows`. */
+                sort?: "avg" | "-shows";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница фраз */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhraseListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createOwnerPhrase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePhraseRequest"];
+            };
+        };
+        responses: {
+            /** @description Фраза добавлена */
+            201: {
+                headers: {
+                    /** @description Адрес фразы */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhraseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updateOwnerPhrase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phraseId: components["parameters"]["PhraseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePhraseRequest"];
+            };
+        };
+        responses: {
+            /** @description Фраза обновлена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhraseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    createOwnerParaphrases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phraseId: components["parameters"]["PhraseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateParaphrasesRequest"];
+            };
+        };
+        responses: {
+            /** @description Перефразы созданы */
+            201: {
+                headers: {
+                    /** @description Список фраз на одобрении */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhraseItemsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getOwnerPhraseCoverage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отчёт */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhraseCoverageResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getOwnerRoleCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Карточка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleCardResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    replaceOwnerRoleCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["parameters"]["BattleRole"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRoleCardRequest"];
+            };
+        };
+        responses: {
+            /** @description Карточка сохранена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleCardResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listOwnerPackages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Пакеты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerPackageListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    createOwnerPackage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OwnerPackageRequest"];
+            };
+        };
+        responses: {
+            /** @description Пакет добавлен */
+            201: {
+                headers: {
+                    /** @description Адрес пакета */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerPackageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    replaceOwnerPackage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packageId: components["parameters"]["PackageId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OwnerPackageRequest"];
+            };
+        };
+        responses: {
+            /** @description Пакет сохранён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerPackageResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listOwnerPayments: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                telegramId?: number;
+                status?: components["schemas"]["PaymentStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница платежей */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    refundOwnerPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                paymentId: components["parameters"]["PaymentId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundRequest"];
+            };
+        };
+        responses: {
+            /** @description Платёж возвращён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listOwnerSupportTickets: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                status?: components["schemas"]["SupportTicketStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница обращений */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updateOwnerSupportTicket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticketId: components["parameters"]["TicketId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSupportTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description Обращение обновлено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportTicketResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getOwnerMetrics: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Метрики */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    listOwnerJournal: {
+        parameters: {
+            query?: {
+                /** @description Размер страницы. По умолчанию 50, максимум 100. */
+                limit?: components["parameters"]["Limit"];
+                /** @description Непрозрачный курсор из `nextCursor` предыдущей страницы. */
+                cursor?: components["parameters"]["Cursor"];
+                action?: components["schemas"]["OwnerActionType"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница журнала */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerJournalListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getOwnerGameSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Настройки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameSettingsResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    replaceOwnerGameSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GameSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Настройки сохранены */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameSettingsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+}
