@@ -27,6 +27,8 @@ export default defineConfig([
     '**/build/**',
     '**/test-results/**',
     '**/playwright-report/**',
+    // Worktrees of parallel conveyor steps live inside the repository and are linted by their own branch.
+    '.claude/**',
     // Generated OpenAPI declarations retain the generator's formatting; tsc checks their use.
     'apps/web/src/api/generated/openapi.ts',
   ]),
@@ -61,7 +63,7 @@ export default defineConfig([
     rules: styleRules,
   },
   {
-    files: ['apps/web/test/helpers/*.mjs', 'scripts/testing/*.mjs'],
+    files: ['apps/web/test/helpers/*.mjs', 'scripts/testing/*.mjs', 'scripts/docs/*.mjs'],
     extends: [js.configs.recommended],
     plugins: { '@stylistic': stylistic },
     languageOptions: { globals: globals.node },
