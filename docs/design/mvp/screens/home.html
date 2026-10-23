@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Главная</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .respect { display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); align-items: center; }
+    .respect .scale { align-self: center; }
+    .respect p { margin: var(--space-1) 0 0; }
+    .list-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+    .task { display: grid; gap: var(--space-2); padding: var(--space-4); min-height: var(--target); background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--ink); border-radius: var(--radius); color: var(--fg); text-decoration: none; }
+    .task.hot { border-left-color: var(--red); }
+    .task.idle { border-left-style: dashed; border-left-color: var(--line); }
+    .task.ask { border-color: var(--red); border-left-color: var(--red); }
+    .t-title { font-weight: 700; overflow-wrap: anywhere; }
+    .t-line { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: baseline; }
+    .t-timer b { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); }
+    .hot .t-timer b { color: var(--red); }
+    .t-timer { font-size: var(--text-s); color: var(--muted); }
+    .t-state { font: 700 var(--hand-m)/1.1 var(--font-hand); color: var(--ink); }
+    .mood { display: flex; align-items: center; gap: var(--space-1); }
+    .mood i { width: var(--mood-width); height: var(--mood-height); border: 1.5px solid var(--ink); background: var(--ink); border-radius: 2px; }
+    .mood i.off { background: transparent; border-color: var(--line); }
+    .hot .mood i:not(.off) { background: var(--red); border-color: var(--red); }
+    .mood-t { margin-left: var(--space-2); font-size: var(--text-s); color: var(--muted); }
+    .ask-banner { display: grid; gap: var(--space-3); }
+    .ask-banner p { margin: 0; }
+    .empty { display: grid; gap: var(--space-4); }
+    .empty p { margin: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Главная»: F-4 (R-29, UC-19, UC-25), F-8 (R-69), F-5. Сейчас в макете пятница, 23 октября, 16:00. -->
+
+  <!-- Обычное: 5 активных задач разных видов -->
+  <section class="page" data-view="normal" data-label="Обычное">
+    <h1 class="sr-only">Главная · normal</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <div class="card respect">
+      <div class="grade ok" aria-hidden="true">14</div>
+      <div>
+        <div class="scale" role="meter" aria-label="Уважение" aria-valuemin="0" aria-valuemax="100" aria-valuenow="14">
+          <div class="head"><span>Уважение</span><b>14 из 100</b></div>
+          <div class="track"><div class="fill w14"></div></div>
+        </div>
+        <p class="small muted">Выше 94 — только если сломать Батю в бою.</p>
+      </div>
+    </div>
+    <a class="btn" href="task-new.html#empty">Новая задача</a>
+    <div class="list-head"><h2>Активные задачи · 5</h2><span class="small muted">Сверху те, у кого срок ближе</span></div>
+    <ul class="list">
+      <li><a class="task hot" href="task.html">
+        <span class="t-title">написать отчёт по продажам</span>
+        <span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b><time datetime="PT1H">1 ч 00 мин</time></b> до срока · сегодня, 17:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: зол, 4 из 5"><i></i><i></i><i></i><i></i><i class="off"></i><span class="mood-t">Зол</span></span>
+      </a></li>
+      <li><a class="task" href="task.html">
+        <span class="t-title">позвонить маме вечером</span>
+        <span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b><time datetime="PT6H">6 ч 00 мин</time></b> до срока · сегодня, 22:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span>
+      </a></li>
+      <li><a class="task" href="task.html#recurring">
+        <span class="t-title">повторять английский каждый день</span>
+        <span class="t-line"><span class="tag">Повторяется · каждый день</span><span class="t-timer"><b><time datetime="PT6H">6 ч 00 мин</time></b> до срока периода · 22:00, ориентир 20:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span>
+      </a></li>
+      <li><a class="task idle" href="task.html#recurring-idle">
+        <span class="t-title">проплыть километр в бассейне</span>
+        <span class="t-line"><span class="tag">Повторяется · вт, чт</span></span>
+        <span class="t-state">Сегодня не твой день. Следующий период — во вторник, 27 октября.</span>
+      </a></li>
+      <li><a class="task idle" href="task.html">
+        <span class="t-title">сделать зарядку каждый день</span>
+        <span class="t-line"><span class="tag ok">Сегодня закрыто</span><span class="tag">Повторяется · каждый день</span></span>
+        <span class="t-state">Следующий период начнётся в 00:00.</span>
+      </a></li>
+    </ul>
+    <p class="small muted m0">Нажми на задачу, чтобы открыть её.</p>
+  </section>
+
+  <!-- Есть неотвеченная проверка (R-54): ответить можно на странице задачи -->
+  <section class="page" data-view="check" data-label="Есть проверка" hidden>
+    <h1 class="sr-only">Главная · check</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <div class="card respect">
+      <div class="grade ok" aria-hidden="true">14</div>
+      <div>
+        <div class="scale" role="meter" aria-label="Уважение" aria-valuemin="0" aria-valuemax="100" aria-valuenow="14">
+          <div class="head"><span>Уважение</span><b>14 из 100</b></div>
+          <div class="track"><div class="fill w14"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card red ask-banner" role="alert">
+      <blockquote class="quote m0">Покажи, что сделано. Две минуты.<span class="who">Батя</span></blockquote>
+      <p class="small muted">Спросил в 15:47 про «написать отчёт по продажам». Без ответа 15 минут — минус 1 к уважению.</p>
+      <a class="btn red" href="task.html#check">Ответить на проверку</a>
+    </div>
+    <a class="btn ghost" href="task-new.html#empty">Новая задача</a>
+    <div class="list-head"><h2>Активные задачи · 3</h2></div>
+    <ul class="list">
+      <li><a class="task hot ask" href="task.html#check">
+        <span class="t-title">написать отчёт по продажам</span>
+        <span class="t-line"><span class="tag red">Ждёт ответа на проверку</span><span class="tag">Разовая</span></span>
+        <span class="t-line"><span class="t-timer"><b><time datetime="PT1H">1 ч 00 мин</time></b> до срока · сегодня, 17:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: зол, 4 из 5"><i></i><i></i><i></i><i></i><i class="off"></i><span class="mood-t">Зол</span></span>
+      </a></li>
+      <li><a class="task" href="task.html">
+        <span class="t-title">позвонить маме вечером</span>
+        <span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b><time datetime="PT6H">6 ч 00 мин</time></b> до срока · сегодня, 22:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span>
+      </a></li>
+      <li><a class="task" href="task.html">
+        <span class="t-title">повторять английский каждый день</span>
+        <span class="t-line"><span class="tag">Повторяется · каждый день</span><span class="t-timer"><b><time datetime="PT6H">6 ч 00 мин</time></b> до срока периода · 22:00, ориентир 20:00</span></span>
+        <span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span>
+      </a></li>
+    </ul>
+  </section>
+
+  <!-- Пусто: нет активных задач (UC-25, R-60) -->
+  <section class="page" data-view="empty" data-label="Пусто" hidden>
+    <h1 class="sr-only">Главная · empty</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <div class="card respect">
+      <div class="grade ok" aria-hidden="true">12</div>
+      <div>
+        <div class="scale" role="meter" aria-label="Уважение" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12">
+          <div class="head"><span>Уважение</span><b>12 из 100</b></div>
+          <div class="track"><div class="fill w12"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="empty">
+      <blockquote class="quote">Задач нет. Подозрительно. Ставь, пока я не придумал тебе сам.<span class="who">Батя</span></blockquote>
+      <p class="muted">Напиши, что нужно сделать, и к какому сроку или как часто. Расплывчатое («стать лучше») не примут. Проверки, напоминания и упрёки начнутся, как только задача появится.</p>
+      <a class="btn" href="task-new.html#empty">Поставить задачу</a>
+    </div>
+  </section>
+
+  <!-- Много задач: 25 активных, видны все (R-29) -->
+  <section class="page" data-view="many" data-label="25 задач" hidden>
+    <h1 class="sr-only">Главная · many</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <div class="card respect">
+      <div class="grade ok" aria-hidden="true">14</div>
+      <div>
+        <div class="scale" role="meter" aria-label="Уважение" aria-valuemin="0" aria-valuemax="100" aria-valuenow="14">
+          <div class="head"><span>Уважение</span><b>14 из 100</b></div>
+          <div class="track"><div class="fill w14"></div></div>
+        </div>
+      </div>
+    </div>
+    <a class="btn" href="task-new.html#empty">Новая задача</a>
+    <div class="list-head"><h2>Активные задачи · 25</h2><span class="small muted">Сверху те, у кого срок ближе</span></div>
+    <ul class="list">
+      <li><a class="task hot" href="task.html"><span class="t-title">написать отчёт по продажам</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>1 ч 00 мин</b> · сегодня, 17:00</span></span><span class="mood" role="img" aria-label="Настроение: зол, 4 из 5"><i></i><i></i><i></i><i></i><i class="off"></i><span class="mood-t">Зол</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">позвонить в сервис по гарантии</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>2 ч 30 мин</b> · сегодня, 18:30</span></span><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">купить подарок на день рождения Лёхи</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>3 ч 45 мин</b> · сегодня, 19:45</span></span><span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span></a></li>
+      <li><a class="task" href="task.html#recurring"><span class="t-title">повторять английский каждый день</span><span class="t-line"><span class="tag">Каждый день</span><span class="t-timer"><b>6 ч 00 мин</b> · 22:00</span></span><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">сделать зарядку по будням</span><span class="t-line"><span class="tag">По будням</span><span class="t-timer"><b>6 ч 00 мин</b> · 22:00</span></span><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">вынести мусор и сдать бутылки</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>6 ч 00 мин</b> · сегодня, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">оплатить интернет и коммуналку</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>6 ч 00 мин</b> · сегодня, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">прочитать 20 страниц «Сапиенса»</span><span class="t-line"><span class="tag">Каждый день</span><span class="t-timer"><b>6 ч 00 мин</b> · 22:00</span></span><span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">записаться к стоматологу</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>1 д 6 ч</b> · завтра, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">собрать документы для визы</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>1 д 6 ч</b> · завтра, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: присматривается, 2 из 5"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Присматривается</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">разобрать почту по папкам</span><span class="t-line"><span class="tag">Каждые 3 дня</span><span class="t-timer"><b>1 д 6 ч</b> · завтра, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">перевести деньги за аренду гаража</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>1 д 6 ч</b> · завтра, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">помыть машину</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>2 д 6 ч</b> · воскресенье, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">позвонить маме вечером</span><span class="t-line"><span class="tag">Раз в неделю · вс</span><span class="t-timer"><b>2 д 6 ч</b> · воскресенье, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">убраться на балконе</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>2 д 6 ч</b> · воскресенье, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">подготовить презентацию к защите диплома</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>3 д 6 ч</b> · понедельник, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">заменить лампочку в коридоре</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>3 д 6 ч</b> · понедельник, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">отправить акт сверки бухгалтеру</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>4 д 6 ч</b> · вторник, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">сдать анализы</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>5 д 6 ч</b> · среда, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">перебрать шкаф с зимними вещами</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>6 д 6 ч</b> · четверг, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">продлить страховку на машину</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>7 д 6 ч</b> · 30 октября, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">написать отзыв о курсе</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>9 д 6 ч</b> · 1 ноября, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">записать кота к ветеринару</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>12 д 6 ч</b> · 4 ноября, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">съездить на дачу и закрыть воду</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>14 д 6 ч</b> · 6 ноября, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+      <li><a class="task" href="task.html"><span class="t-title">выбрать подарки на Новый год</span><span class="t-line"><span class="tag">Разовая</span><span class="t-timer"><b>69 д 6 ч</b> · 31 декабря, 22:00</span></span><span class="mood" role="img" aria-label="Настроение: спокоен, 1 из 5"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="mood-t">Спокоен</span></span></a></li>
+    </ul>
+  </section>
+
+  <!-- Загрузка -->
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Главная · loading</h1>
+    <div class="skel"></div>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <!-- Ошибка загрузки -->
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">Главная · error</h1>
+    <div class="banner"><b>Не загрузилось.</b> Задачи на месте, а вот связь с Батей нет. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#normal">Повторить</button>
+  </section>
+
+  <section class="page" data-view="deleted" data-label="Задача удалена: onDelete" hidden>
+    <h1>Главная</h1><div class="toast" role="status">Задача удалена. Уважение не изменилось.</div>
+    <blockquote class="quote">Вычеркнули. Бумага стерпит.<span class="who">Батя</span></blockquote>
+    <a class="btn" href="#normal">К задачам</a><a class="btn ghost" href="task-new.html#empty">Новая задача</a>
+  </section>
+  <section class="page" data-view="stopped" data-label="Задача остановлена: onDelete" hidden>
+    <h1>Главная</h1><div class="toast" role="status">Задача остановлена. Уважение не изменилось, прошлые периоды сохранены.</div>
+    <blockquote class="quote">Больше не спрашиваю. Сами договорились.<span class="who">Батя</span></blockquote>
+    <a class="btn" href="task.html#stopped">Посмотреть прошлые периоды</a><a class="btn ghost" href="#normal">К задачам</a>
+  </section>
+  <section class="page" data-view="check-penalty" data-label="Проверка: штраф уже снят" hidden>
+    <h1>Главная</h1><div class="card red"><h2>Проверка ждёт ответа</h2><p>За 15 минут ответа не было: −1 к уважению, 14 → 13. Ответить ещё можно, снятое уважение не вернётся.</p><a class="btn" href="task.html#check-penalty">Ответить на проверку</a></div><a class="btn ghost" href="#normal">Все задачи</a>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html" aria-current="page"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

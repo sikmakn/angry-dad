@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Новая задача</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .form { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); margin: 0; }
+    .form .push { margin-top: auto; }
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: var(--space-2); }
+    legend { padding: 0; margin-bottom: var(--space-2); font-weight: 700; font-size: var(--text-s); }
+    .seg label { position: relative; }
+    .seg span { display: block; }
+    .meta { display: flex; justify-content: space-between; gap: var(--space-3); align-items: baseline; }
+    .count { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); white-space: nowrap; }
+    .count.full { color: var(--red); }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .opt { display: flex; align-items: center; gap: var(--space-3); min-height: var(--target); padding: var(--space-2) var(--space-4); background: var(--surface); border: 1.5px solid var(--edge); border-radius: var(--radius); cursor: pointer; font-weight: 700; }
+    .opt input { width: var(--check-size); height: var(--check-size); flex: none; margin: 0; accent-color: var(--accent); }
+    .opt:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+    .opt:has(input:focus-visible), .chips label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .chips { display: grid; grid-template-columns: repeat(4, minmax(var(--target-small), 1fr)); gap: var(--space-1); }
+    .chips label { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-1); min-height: var(--target); border: 1.5px solid var(--edge); border-radius: var(--radius); background: var(--surface); font-weight: 700; cursor: pointer; }
+    .chips input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .chips label:has(input:checked) { background: var(--accent); color: var(--accent-fg); border-color: var(--ink); }
+    .chips label:has(input:checked)::before { content: "✓"; }
+    .sub { display: grid; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-left: 4px solid var(--ink); background: var(--surface); border-radius: var(--radius); }
+    .note { display: flex; gap: var(--space-3); align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1.5px dashed var(--ink); border-radius: var(--radius); }
+    .note p { margin: 0; }
+    .summary { margin: 0; padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .summary b { font: 700 var(--hand-m)/1.1 var(--font-hand); color: var(--ink); }
+    .why { margin: 0; text-align: center; }
+    .size { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .done-title { font: 500 var(--hand-l)/1.1 var(--font-hand); margin: 0; overflow-wrap: anywhere; }
+    .field.bad textarea, .field.bad input, .field.bad select { border-color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Новая задача»: F-3, UC-13…UC-18, R-18…R-28, R-134. Одно главное действие: «Поставить». -->
+
+  <!-- Первый вход после старта: меню нет, форма пуста, «Поставить» неактивна (UC-18, R-19) -->
+  <section class="page" data-view="first" data-label="Первый вход" data-no-tabbar hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote">Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?<span class="who">Батя</span></blockquote>
+      <div class="field">
+        <label for="a-title">Что нужно сделать</label>
+        <textarea id="a-title" name="title" rows="2" maxlength="120" aria-describedby="a-title-h" placeholder="Например: написать отчёт по продажам"></textarea>
+        <div class="meta"><span class="hint" id="a-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">0/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="a-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="a-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <div class="push btns">
+        <button class="btn" type="submit" disabled aria-describedby="a-why">Поставить</button>
+        <p id="a-why" class="small muted why">Нужны название и срок или периодичность.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Пусто, но пользователь пришёл из приложения: меню есть, фразы Бати нет -->
+  <section class="page" data-view="empty" data-label="Пустая форма" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="b-title">Что нужно сделать</label>
+        <textarea id="b-title" name="title" rows="2" maxlength="120" aria-describedby="b-title-h" placeholder="Например: написать отчёт по продажам"></textarea>
+        <div class="meta"><span class="hint" id="b-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">0/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="b-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="b-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <div class="push btns">
+        <button class="btn" type="submit" disabled aria-describedby="b-why">Поставить</button>
+        <p id="b-why" class="small muted why">Нужны название и срок или периодичность.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Разовая, всё заполнено (UC-13, R-20) -->
+  <section class="page" data-view="once" data-label="Разовая: готово" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="c-title">Что нужно сделать</label>
+        <textarea id="c-title" name="title" rows="2" maxlength="120" aria-describedby="c-title-h">написать отчёт по продажам</textarea>
+        <div class="meta"><span class="hint" id="c-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">26/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="c-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="c-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="c-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="c-when" value="tomorrow" checked><span>Завтра</span></label>
+          <label><input type="radio" name="c-when" value="date"><span>Дата и время</span></label>
+        </div>
+        <p class="small muted m0">«Сегодня» и «Завтра» — до 22:00. Срок от 15 минут до 365 дней.</p>
+      </fieldset>
+      <p class="summary">Срок: <b>завтра, суббота 24 октября, 22:00</b></p>
+      <div class="push btns"><button class="btn" type="button" data-go="#success">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Граница названия: вставили 150 символов, осталось 120 (R-18, UC-16) -->
+  <section class="page" data-view="long" data-label="120 символов" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="d-title">Что нужно сделать</label>
+        <textarea id="d-title" name="title" rows="4" maxlength="120" aria-describedby="d-title-h">Подготовить месячный отчёт по продажам, свести таблицы по регионам, проверить цифры, согласовать с бухгалтерией и сдать.</textarea>
+        <div class="meta"><span class="hint" id="d-title-h">Больше не влезет. Лишнее отрезано.</span><span class="count full" aria-live="polite">120/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="d-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="d-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="d-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="d-when" value="tomorrow" checked><span>Завтра</span></label>
+          <label><input type="radio" name="d-when" value="date"><span>Дата и время</span></label>
+        </div>
+      </fieldset>
+      <p class="summary">Срок: <b>завтра, суббота 24 октября, 22:00</b></p>
+      <div class="push btns"><button class="btn" type="button" data-go="#success">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- «Сегодня» в 21:50: до конца дня меньше 15 минут (R-21, UC-16) -->
+  <section class="page" data-view="today-late" data-label="Сегодня в 21:50" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote" role="alert">Без десяти десять и «сегодня»? Ставь на завтра, там хоть шанс есть.<span class="who">Батя</span></blockquote>
+      <div class="field">
+        <label for="e-title">Что нужно сделать</label>
+        <textarea id="e-title" name="title" rows="2" maxlength="120" aria-describedby="e-title-h">вынести мусор и сдать бутылки</textarea>
+        <div class="meta"><span class="hint" id="e-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">29/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="e-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="e-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset aria-describedby="e-err">
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="e-when" value="today" checked><span>Сегодня</span></label>
+          <label><input type="radio" name="e-when" value="tomorrow"><span>Завтра</span></label>
+          <label><input type="radio" name="e-when" value="date"><span>Дата и время</span></label>
+        </div>
+        <p id="e-err" class="small m0 red-text">До конца дня меньше 15 минут.</p>
+      </fieldset>
+      <div class="push btns">
+        <button class="btn" type="submit" disabled aria-describedby="e-err">Поставить</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Дата и время ближе 15 минут (R-21, UC-16) -->
+  <section class="page" data-view="soon" data-label="Срок ближе 15 мин" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote" role="alert">Через десять минут? Это не срок, это отмазка. Дай хотя бы четверть часа.<span class="who">Батя</span></blockquote>
+      <div class="field">
+        <label for="f-title">Что нужно сделать</label>
+        <textarea id="f-title" name="title" rows="2" maxlength="120" aria-describedby="f-title-h">отправить договор клиенту</textarea>
+        <div class="meta"><span class="hint" id="f-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">25/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="f-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="f-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="f-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="f-when" value="tomorrow"><span>Завтра</span></label>
+          <label><input type="radio" name="f-when" value="date" checked><span>Дата и время</span></label>
+        </div>
+        <div class="pair">
+          <div class="field bad"><label for="f-date">Дата</label><input id="f-date" type="date" value="2026-10-23" aria-invalid="true" aria-describedby="f-err"></div>
+          <div class="field bad"><label for="f-time">Время</label><input id="f-time" type="time" value="14:10" aria-invalid="true" aria-describedby="f-err"></div>
+        </div>
+        <p id="f-err" class="small m0 red-text">Срок — не раньше чем через 15 минут. Сейчас 14:00.</p>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="submit" disabled aria-describedby="f-err">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Дата дальше 365 дней (R-21, UC-16) -->
+  <section class="page" data-view="far" data-label="Срок дальше года" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote" role="alert">Через год? До пятницы сначала доживи.<span class="who">Батя</span></blockquote>
+      <div class="field">
+        <label for="g-title">Что нужно сделать</label>
+        <textarea id="g-title" name="title" rows="2" maxlength="120" aria-describedby="g-title-h">оформить загранпаспорт в МФЦ</textarea>
+        <div class="meta"><span class="hint" id="g-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">28/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="g-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="g-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="g-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="g-when" value="tomorrow"><span>Завтра</span></label>
+          <label><input type="radio" name="g-when" value="date" checked><span>Дата и время</span></label>
+        </div>
+        <div class="pair">
+          <div class="field bad"><label for="g-date">Дата</label><input id="g-date" type="date" value="2027-10-24" aria-invalid="true" aria-describedby="g-err"></div>
+          <div class="field bad"><label for="g-time">Время</label><input id="g-time" type="time" value="12:00" aria-invalid="true" aria-describedby="g-err"></div>
+        </div>
+        <p id="g-err" class="small m0 red-text">Срок — не позже чем через 365 дней.</p>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="submit" disabled aria-describedby="g-err">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Повторяющаяся: слова периодичности найдены в названии, поле предзаполнено (R-23, UC-14) -->
+  <section class="page" data-view="rec-day" data-label="Каждый день" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="h-title">Что нужно сделать</label>
+        <textarea id="h-title" name="title" rows="2" maxlength="120" aria-describedby="h-title-h">повторять английский каждый день</textarea>
+        <div class="meta"><span class="hint" id="h-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">32/120</span></div>
+      </div>
+      <div class="note" role="status">
+        <p>В названии есть «каждый день». Подставили периодичность. Сохранится после «Поставить».</p>
+        <button class="btn ghost small" type="button">Убрать</button>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="h-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="h-kind" value="rec" checked><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Как часто</legend>
+        <label class="opt"><input type="radio" name="h-rec" value="daily" checked>Каждый день</label>
+        <label class="opt"><input type="radio" name="h-rec" value="weekdays">По будням</label>
+        <label class="opt"><input type="radio" name="h-rec" value="weekly">Раз в неделю</label>
+        <label class="opt"><input type="radio" name="h-rec" value="days">По выбранным дням</label>
+        <label class="opt"><input type="radio" name="h-rec" value="n">Каждые N дней</label>
+      </fieldset>
+      <div class="field">
+        <label for="h-anchor">Примерно во сколько (необязательно)</label>
+        <input id="h-anchor" type="time" value="20:00" aria-describedby="h-anchor-h">
+        <span class="hint" id="h-anchor-h">Ориентир: напоминания пойдут от него. Провал в 22:00, а если ориентир позже, то в ориентир.</span>
+      </div>
+      <p class="summary"><b>Каждый день.</b> Ориентир 20:00, срок периода 22:00. Первый период — сегодня.</p>
+      <div class="push btns"><button class="btn" type="button" data-go="#success-rec">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Раз в неделю с днём недели (R-22) -->
+  <section class="page" data-view="rec-weekly" data-label="Раз в неделю" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="i-title">Что нужно сделать</label>
+        <textarea id="i-title" name="title" rows="2" maxlength="120" aria-describedby="i-title-h">позвонить маме вечером</textarea>
+        <div class="meta"><span class="hint" id="i-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">22/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="i-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="i-kind" value="rec" checked><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Как часто</legend>
+        <label class="opt"><input type="radio" name="i-rec" value="daily">Каждый день</label>
+        <label class="opt"><input type="radio" name="i-rec" value="weekdays">По будням</label>
+        <label class="opt"><input type="radio" name="i-rec" value="weekly" checked>Раз в неделю</label>
+        <div class="sub">
+          <div class="field">
+            <label for="i-day">День недели</label>
+            <select id="i-day" aria-describedby="i-day-h">
+              <option>Любой, закрыть можно всю неделю</option>
+              <option>Понедельник</option><option>Вторник</option><option>Среда</option><option>Четверг</option><option>Пятница</option><option>Суббота</option>
+              <option selected>Воскресенье</option>
+            </select>
+            <span class="hint" id="i-day-h">Без дня неделя идёт с понедельника по воскресенье, срок — воскресенье 22:00.</span>
+          </div>
+        </div>
+        <label class="opt"><input type="radio" name="i-rec" value="days">По выбранным дням</label>
+        <label class="opt"><input type="radio" name="i-rec" value="n">Каждые N дней</label>
+      </fieldset>
+      <div class="field">
+        <label for="i-anchor">Примерно во сколько (необязательно)</label>
+        <input id="i-anchor" type="time" aria-describedby="i-anchor-h">
+        <span class="hint" id="i-anchor-h">Без ориентира срок периода — 22:00.</span>
+      </div>
+      <p class="summary"><b>Раз в неделю, по воскресеньям.</b> Первый период — до воскресенья, 25 октября, 22:00.</p>
+      <div class="push btns"><button class="btn" type="button" data-go="#success-rec">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- По выбранным дням недели: от 1 до 6 (R-22) -->
+  <section class="page" data-view="rec-days" data-label="Выбранные дни" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="j-title">Что нужно сделать</label>
+        <textarea id="j-title" name="title" rows="2" maxlength="120" aria-describedby="j-title-h">проплыть километр в бассейне</textarea>
+        <div class="meta"><span class="hint" id="j-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">28/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="j-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="j-kind" value="rec" checked><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Как часто</legend>
+        <label class="opt"><input type="radio" name="j-rec" value="daily">Каждый день</label>
+        <label class="opt"><input type="radio" name="j-rec" value="weekdays">По будням</label>
+        <label class="opt"><input type="radio" name="j-rec" value="weekly">Раз в неделю</label>
+        <label class="opt"><input type="radio" name="j-rec" value="days" checked>По выбранным дням</label>
+        <div class="sub">
+          <fieldset>
+            <legend>Дни недели: от 1 до 6</legend>
+            <div class="chips">
+              <label><input type="checkbox" name="j-d" value="1"><span>Пн</span></label>
+              <label><input type="checkbox" name="j-d" value="2" checked><span>Вт</span></label>
+              <label><input type="checkbox" name="j-d" value="3"><span>Ср</span></label>
+              <label><input type="checkbox" name="j-d" value="4" checked><span>Чт</span></label>
+              <label><input type="checkbox" name="j-d" value="5"><span>Пт</span></label>
+              <label><input type="checkbox" name="j-d" value="6"><span>Сб</span></label>
+              <label><input type="checkbox" name="j-d" value="7"><span>Вс</span></label>
+            </div>
+            <p class="small muted m0">Все семь дней — это «Каждый день», такой вариант выбирать не нужно.</p>
+          </fieldset>
+        </div>
+        <label class="opt"><input type="radio" name="j-rec" value="n">Каждые N дней</label>
+      </fieldset>
+      <div class="field">
+        <label for="j-anchor">Примерно во сколько (необязательно)</label>
+        <input id="j-anchor" type="time" value="19:00" aria-describedby="j-anchor-h">
+        <span class="hint" id="j-anchor-h">Ориентир: напоминания пойдут от него. Провал в 22:00.</span>
+      </div>
+      <p class="summary"><b>По вторникам и четвергам.</b> Ориентир 19:00, срок каждого периода 22:00. Первый период — во вторник, 27 октября.</p>
+      <div class="push btns"><button class="btn" type="button" data-go="#success-rec">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Каждые N дней: N вне 2…30 (R-22, UC-29 п.8) -->
+  <section class="page" data-view="rec-n" data-label="N дней: ошибка" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="k-title">Что нужно сделать</label>
+        <textarea id="k-title" name="title" rows="2" maxlength="120" aria-describedby="k-title-h">разобрать почту по папкам</textarea>
+        <div class="meta"><span class="hint" id="k-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">25/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="k-kind" value="once"><span>До срока</span></label>
+          <label><input type="radio" name="k-kind" value="rec" checked><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Как часто</legend>
+        <label class="opt"><input type="radio" name="k-rec" value="daily">Каждый день</label>
+        <label class="opt"><input type="radio" name="k-rec" value="weekdays">По будням</label>
+        <label class="opt"><input type="radio" name="k-rec" value="weekly">Раз в неделю</label>
+        <label class="opt"><input type="radio" name="k-rec" value="days">По выбранным дням</label>
+        <label class="opt"><input type="radio" name="k-rec" value="n" checked>Каждые N дней</label>
+        <div class="sub">
+          <div class="field bad">
+            <label for="k-n">Сколько дней в периоде</label>
+            <input id="k-n" type="number" inputmode="numeric" value="31" min="2" max="30" aria-invalid="true" aria-describedby="k-n-e">
+            <span class="err" id="k-n-e">От 2 до 30 дней.</span>
+            <span class="hint">Задачу можно закрыть в любой день периода. «Через день» — это 2.</span>
+          </div>
+        </div>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="submit" disabled aria-describedby="k-n-e">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- Отказ проверки конкретности: onVague (R-25, UC-15). Текст остаётся в поле -->
+  <section class="page" data-view="vague" data-label="Расплывчато" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote" role="alert">Это что за задача? Конкретно.<span class="who">Батя</span></blockquote>
+      <div class="field bad">
+        <label for="l-title">Что нужно сделать</label>
+        <textarea id="l-title" name="title" rows="2" maxlength="120" aria-invalid="true" aria-describedby="l-title-h">стать лучше</textarea>
+        <div class="meta"><span class="hint" id="l-title-h">Не цель, а действие: что именно сделаешь, сколько, где.</span><span class="count" aria-live="polite">11/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="l-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="l-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="l-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="l-when" value="tomorrow" checked><span>Завтра</span></label>
+          <label><input type="radio" name="l-when" value="date"><span>Дата и время</span></label>
+        </div>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="button" data-go="#success">Поставить</button></div>
+    </form>
+  </section>
+
+  <!-- 51-я проверка за сутки (R-28, UC-16). Форма сохранена -->
+  <section class="page" data-view="limit" data-label="Лимит за сутки" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <blockquote class="quote" role="alert">Хватит на сегодня. Приходи завтра.<span class="who">Батя</span></blockquote>
+      <div class="field">
+        <label for="m-title">Что нужно сделать</label>
+        <textarea id="m-title" name="title" rows="2" maxlength="120" aria-describedby="m-title-h">написать отчёт по продажам</textarea>
+        <div class="meta"><span class="hint" id="m-title-h">Название и срок сохранены в форме.</span><span class="count" aria-live="polite">26/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="m-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="m-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="m-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="m-when" value="tomorrow" checked><span>Завтра</span></label>
+          <label><input type="radio" name="m-when" value="date"><span>Дата и время</span></label>
+        </div>
+      </fieldset>
+      <div class="push btns">
+        <button class="btn" type="submit" disabled aria-describedby="m-why">Поставить</button>
+        <p id="m-why" class="small muted why">Ставить и переименовывать задачи снова можно после 00:00. Проверки прогресса продолжаются.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Идёт проверка конкретности и размера: до 3 секунд (R-25, R-26, R-134) -->
+  <section class="page" data-view="checking" data-label="Проверка идёт" hidden aria-busy="true">
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="field">
+        <label for="n-title">Что нужно сделать</label>
+        <textarea id="n-title" name="title" rows="2" maxlength="120" readonly>написать отчёт по продажам</textarea>
+        <div class="meta"><span class="hint">Форма на время проверки заморожена.</span><span class="count">26/120</span></div>
+      </div>
+      <p class="summary">Срок: <b>завтра, суббота 24 октября, 22:00</b></p>
+      <div class="push btns">
+        <button class="btn" type="submit" disabled aria-busy="true">Батя читает…</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Проверка не ответила за 3 с или упала: «Попробуй позже», введённое остаётся (R-26, UC-15) -->
+  <section class="page" data-view="later" data-label="Попробуй позже" hidden>
+    <form onsubmit="return false" class="form" novalidate>
+      <h1>Новая задача</h1>
+      <div class="banner" role="alert"><b>Попробуй позже.</b> Не удалось прочитать название. Задача не поставлена, всё введённое на месте.</div>
+      <div class="field">
+        <label for="o-title">Что нужно сделать</label>
+        <textarea id="o-title" name="title" rows="2" maxlength="120" aria-describedby="o-title-h">написать отчёт по продажам</textarea>
+        <div class="meta"><span class="hint" id="o-title-h">Конкретно: что, сколько, где.</span><span class="count" aria-live="polite">26/120</span></div>
+      </div>
+      <fieldset>
+        <legend>Как ставим</legend>
+        <div class="seg">
+          <label><input type="radio" name="o-kind" value="once" checked><span>До срока</span></label>
+          <label><input type="radio" name="o-kind" value="rec"><span>Повторять</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Срок</legend>
+        <div class="seg">
+          <label><input type="radio" name="o-when" value="today"><span>Сегодня</span></label>
+          <label><input type="radio" name="o-when" value="tomorrow" checked><span>Завтра</span></label>
+          <label><input type="radio" name="o-when" value="date"><span>Дата и время</span></label>
+        </div>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="button" data-go="#success">Поставить ещё раз</button></div>
+    </form>
+  </section>
+
+  <!-- Успех, разовая: onTaskSet, размер задачи (R-27, R-134, UC-13) -->
+  <section class="page" data-view="success" data-label="Поставлена (разовая)" hidden>
+    <h1 class="sr-only">Новая задача · success</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <blockquote class="quote" role="status">Записал. Не подведи.<span class="who">Батя</span></blockquote>
+    <div class="card stack">
+      <p class="done-title">написать отчёт по продажам</p>
+      <div class="size">
+        <span class="tag">Разовая</span>
+        <span class="tag">Средняя задача</span>
+      </div>
+      <p class="m0">Срок: <b>завтра, суббота 24 октября, 22:00</b></p>
+      <p class="small muted m0">Размер определён при постановке, поменять его нельзя. За закрытие: +3 к уважению.</p>
+    </div>
+    <p class="small muted m0">Проверки начнутся не раньше чем через 3 минуты. Когда — Батя не скажет.</p>
+    <div class="push btns">
+      <a class="btn" href="home.html">К задачам</a>
+      <button class="btn link" type="button">Поставить ещё одну</button>
+    </div>
+  </section>
+
+  <!-- Успех, повторяющаяся (UC-14): открыт текущий период -->
+  <section class="page" data-view="success-rec" data-label="Поставлена (повтор)" hidden>
+    <h1 class="sr-only">Новая задача · success-rec</h1>
+    <div class="eyebrow">Дневник · пятница, 23 октября</div>
+    <blockquote class="quote" role="status">Записал. Каждый день, без выходных на лень.<span class="who">Батя</span></blockquote>
+    <div class="card stack">
+      <p class="done-title">повторять английский каждый день</p>
+      <div class="size">
+        <span class="tag">Повторяется: каждый день</span>
+        <span class="tag">Средняя задача</span>
+      </div>
+      <p class="m0">Ориентир: <b>20:00</b>. Срок сегодняшнего периода: <b>22:00</b>.</p>
+      <p class="small muted m0">Размер один на все периоды. За каждый закрытый период: +3 к уважению.</p>
+    </div>
+    <div class="push btns">
+      <a class="btn" href="home.html">К задачам</a>
+      <button class="btn link" type="button">Поставить ещё одну</button>
+    </div>
+  </section>
+
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html" aria-current="page"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+<script>
+  /* Меню прячется на секциях с data-no-tabbar (первый вход) */
+  var nav = document.querySelector('.tabbar');
+  function sync() { var v = document.querySelector('[data-view]:not([hidden])'); nav.hidden = !!(v && v.hasAttribute('data-no-tabbar')); }
+  document.addEventListener('click', function () { setTimeout(sync, 0); });
+  sync();
+</script>
+</body>
+</html>

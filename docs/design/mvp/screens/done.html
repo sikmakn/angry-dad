@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Готово</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .done-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+    .done-top .meta { display: grid; gap: var(--space-2); justify-items: start; }
+    .task-name { font: 500 var(--hand-l)/1.1 var(--font-hand); margin: 0; }
+    .delta { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+    .delta b { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); }
+    .delta .from { color: var(--muted); white-space: nowrap; }
+    .next { border-left: 5px solid var(--ink); display: grid; gap: var(--space-1); }
+    .next .when { font: 700 var(--hand-m)/1.1 var(--font-hand); color: var(--ink); }
+    .note { margin: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Готово»: UC-19, UC-44, UC-47 (потолок), UC-22 и UC-23 (опоздал), UC-26 и UC-31 (период). Скупая похвала, изменение уважения, два действия. -->
+
+  <section class="page" data-view="micro" data-label="Микро +1">
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · сегодня, 09:12</div>
+    <p class="task-name">Ответить на письмо от бухгалтерии</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">Размер: микро</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Сделал. Невелик подвиг, но с чего-то же надо начинать. Засчитано.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+1</b> &nbsp;<span class="from">12 → 13</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+    </div>
+    <p class="small muted note">Награда зависит от размера задачи: микро +1, средняя +3, большая +5.</p>
+  </section>
+
+  <section class="page" data-view="medium" data-label="Средняя +3" hidden>
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · сегодня, 17:02</div>
+    <p class="task-name">Написать отчёт по продажам за октябрь</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">Размер: средняя</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Вовремя. Надо же. Не привык я такое говорить, поэтому скажу один раз: нормально.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+3</b> &nbsp;<span class="from">12 → 15</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+    </div>
+    <p class="small muted note">Награда зависит от размера задачи: микро +1, средняя +3, большая +5.</p>
+  </section>
+
+  <section class="page" data-view="large" data-label="Большая +5" hidden>
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · сегодня, 20:48</div>
+    <p class="task-name">Перевезти вещи из гаража на дачу</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">Размер: большая</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Большое дело, и ничего не развалил. Ну, молодец. Только не зазнавайся, до Сергея из пятого подъезда тебе ещё далеко.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+5</b> &nbsp;<span class="from">15 → 20</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+    </div>
+    <p class="small muted note">Награда зависит от размера задачи: микро +1, средняя +3, большая +5.</p>
+  </section>
+
+  <section class="page" data-view="cap" data-label="Потолок 94" hidden>
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · сегодня, 19:30</div>
+    <p class="task-name">Подготовить презентацию для инвестора</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">Размер: большая</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Сдал. Что ж, и такое бывает. Дальше сам.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+1</b> &nbsp;<span class="from">93 → 94</span></span></div>
+    <p class="small muted note">За большую задачу положено +5, засчитан +1: выше 94 уважение растёт только если сломать Батю в бою.</p>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+      <a class="btn link" href="battle.html">Сломать Батю</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="recurring" data-label="Повторяющаяся (день)" hidden>
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · понедельник, 12:00</div>
+    <p class="task-name">Повторять английский · понедельник</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">Каждый день</span>
+        <span class="tag">Размер: средняя</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Сегодня сделал. Посмотрим, надолго ли тебя хватит. Меня на «завтра» не обманешь.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+3</b> &nbsp;<span class="from">12 → 15</span></span></div>
+    <div class="card next">
+      <span class="small muted">Следующий период</span>
+      <span class="when">вторник, срок до 22:00</span>
+      <span class="small muted">До вторника Батя по этой задаче молчит: ни проверок, ни напоминаний.</span>
+    </div>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="weekdays" data-label="Повторяющаяся (пт → пн)" hidden>
+    <h1 class="sr-only">Готово</h1>
+    <div class="eyebrow">Дневник · пятница, 18:20</div>
+    <p class="task-name">Разобрать почту · пятница</p>
+    <div class="done-top">
+      <div class="meta">
+        <span class="tag ok">✓ Выполнено</span>
+        <span class="tag">По будням</span>
+        <span class="tag">Размер: микро</span>
+      </div>
+      <span class="tag">Отметка в дневнике: выполнено</span>
+    </div>
+    <blockquote class="quote">Почта разобрана. Только не говори, что это был труд. Это была почта.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>+1</b> &nbsp;<span class="from">19 → 20</span></span></div>
+    <div class="card next">
+      <span class="small muted">Следующий период</span>
+      <span class="when">понедельник, срок до 22:00</span>
+      <span class="small muted">В выходные по этой задаче сообщений нет.</span>
+    </div>
+    <div class="btns">
+      <a class="btn" href="task-new.html#empty">Новая задача</a>
+      <a class="btn ghost" href="share-card.html#done">Поделиться</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="late" data-label="Опоздал: уже провалена" hidden role="alert">
+    <h1 class="sr-only">Готово не принято</h1>
+    <div class="eyebrow">Дневник · сегодня, 18:00</div>
+    <p class="task-name">Отправить отчёт по продажам за квартал</p>
+    <div class="banner"><b>Задача уже провалена.</b> «Готово» в 18:00:30 при сроке 18:00 не принимается. Уважение не меняется, снятое за провал не возвращается.</div>
+    <div class="btns">
+      <a class="btn" href="task.html#retry">Сделаю за час</a>
+      <a class="btn ghost" href="fail.html">Смотреть провал</a>
+    </div>
+    <p class="small muted note">«Сделаю за час» работает один раз на задачу. Если час уже брал, остаётся только новая задача.</p>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Готово</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">Готово не загрузилось</h1>
+    <div class="banner"><b>Не загрузилось.</b> Не вышло узнать, чем закончилась задача: сеть отвалилась. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#micro">Повторить</button>
+  </section>
+  <section class="page" data-view="cap-zero" data-label="Уже 94: прибавка 0" hidden>
+    <h1>Готово</h1><p class="task-name">Написать отчёт по продажам</p><span class="tag ok">✓ Выполнено · средняя задача</span>
+    <blockquote class="quote">Вовремя. Что ж, нормально.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><b>+0 · 94 → 94</b></div><p>Выше 94 уважение растёт только через бой. Закрытая задача засчитана в рейтинг.</p>
+    <a class="btn" href="battle.html">Сломать Батю</a><a class="btn ghost" href="task-new.html#empty">Новая задача</a><a class="btn ghost" href="share-card.html#done">Поделиться</a>
+  </section>
+  <section class="page" data-view="above-cap" data-label="После слома: 98 остаётся 98" hidden>
+    <h1>Готово</h1><p class="task-name">Перевезти вещи из гаража на дачу</p><span class="tag ok">✓ Выполнено · большая задача</span>
+    <blockquote class="quote">Вовремя. Что ж, нормально.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><b>+0 · 98 → 98</b></div><p>Выше 94 уважение растёт только через бой. Полученное за слом сохраняется, задача засчитана в рейтинг.</p>
+    <a class="btn" href="task-new.html#empty">Новая задача</a><a class="btn ghost" href="share-card.html#done">Поделиться</a>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

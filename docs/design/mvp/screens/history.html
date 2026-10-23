@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>История</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .lead { margin: 0; }
+    .feed { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+    .msg { display: grid; gap: var(--space-3); border-left: 5px solid var(--red); }
+    .msg-head { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; justify-content: space-between; }
+    .msg-head .left { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+    .msg-head time { font-size: var(--text-s); color: var(--muted); }
+    .who-h { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--red); }
+    .msg-task { margin: 0; font-size: var(--text-s); color: var(--muted); }
+    .msg-task b { color: var(--fg); }
+    .msg-text { margin: 0; }
+    .msg-ans { margin: 0; font-size: var(--text-s); color: var(--muted); }
+
+    /* оценка фразы: один голос, изменить нельзя */
+    .rate { display: grid; gap: var(--space-2); }
+    .rate-q { font-size: var(--text-s); font-weight: 700; }
+    .rate-btns { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: var(--space-2); }
+    .rate-btns button { min-height: var(--target); padding: var(--space-2); border: 1.5px solid var(--edge); border-radius: var(--radius); background: var(--surface); color: var(--fg); font: 700 var(--text-s)/1.2 var(--font-body); cursor: pointer; }
+    .rate-btns button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+    .rate-btns button:disabled:not([aria-pressed="true"]) { color: var(--muted); border-style: dashed; cursor: not-allowed; }
+    .rate-note { font-size: var(--text-s); font-weight: 700; color: var(--muted); }
+    .msg-foot { display: flex; justify-content: flex-end; }
+    .more { display: grid; gap: var(--space-2); justify-items: stretch; }
+    .more p { margin: 0; text-align: center; }
+    .hello { display: grid; gap: var(--space-3); }
+    .hello p { margin: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «История»: F-10, UC-54…UC-59. Лента сообщений Бати от новых к старым. Данные карточки: category, text, taskTitle, checkIn, rating, sentAt. -->
+
+  <!-- Лента: оценённые и неоценённые, оцениваемые и нет -->
+  <section class="page" data-view="list" data-label="Лента">
+    <div><div class="eyebrow">Дневник</div><h1>История</h1></div>
+    <p class="lead small muted">Всё, что Батя тебе сказал, от новых к старым. Оценить фразу можно один раз, изменить оценку нельзя.</p>
+    <ul class="feed">
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Напоминание</span></div><time datetime="2026-10-23T16:30">Сегодня, 16:30</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Я тебе говорил, а ты так и не сделал «Написать отчёт по продажам за октябрь». Осталось 1 ч 30 мин.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=reminder#history-reply" aria-label="Ответить на напоминание от 16:30">Ответить</a></div>
+      </article></li>
+
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Проверка</span></div><time datetime="2026-10-23T12:14">Сегодня, 12:14</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Ну что, показывай, что сделано. Или опять «потом»?</p>
+        <p class="msg-ans">Ты ответил: частично</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled aria-pressed="true">✓ в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=check#history-reply" aria-label="Ответить на проверку от 12:14">Ответить</a></div>
+      </article></li>
+
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag red">Провал</span></div><time datetime="2026-10-22T22:05">Вчера, 22:05</time></div>
+        <p class="msg-task">Задача: <b>Убраться в гараже</b></p>
+        <p class="msg-text">Гараж не убран. Сергей из пятого подъезда свой уже перебрал и перекрасил.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled aria-pressed="true">✓ неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=garage#history-reply" aria-label="Ответить на упрёк о провале от 22:05">Ответить</a></div>
+      </article></li>
+
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Молчание на проверку</span></div><time datetime="2026-10-22T14:12">Вчера, 14:12</time></div>
+        <p class="msg-task">Задача: <b>Повторять английский</b></p>
+        <p class="msg-text">Молчишь. Это ты так английский повторяешь? Тихо и без прогресса.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=english#history-reply" aria-label="Ответить на упрёк за молчание от 14:12">Ответить</a></div>
+      </article></li>
+
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Давно не заходил</span></div><time datetime="2026-10-22T09:40">Вчера, 09:40</time></div>
+        <p class="msg-text">Шесть часов тебя нет. Я не волнуюсь. Я просто отмечаю.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled aria-pressed="true">✓ слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=absence#history-reply" aria-label="Ответить на сообщение от 09:40">Ответить</a></div>
+      </article></li>
+
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Похвала</span></div><time datetime="2026-10-21T17:45">21 октября, 17:45</time></div>
+        <p class="msg-task">Задача: <b>Ответить на письмо от бухгалтерии</b></p>
+        <p class="msg-text">Сделал. Невелик подвиг, но с чего-то же надо начинать. Засчитано.</p>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=praise#history-reply" aria-label="Ответить на похвалу от 21 октября">Ответить</a></div>
+      </article></li>
+    </ul>
+  </section>
+
+  <!-- Длинная лента: подгрузка по кнопке -->
+  <section class="page" data-view="long" data-label="Длинная лента" hidden>
+    <div><div class="eyebrow">Дневник</div><h1>История</h1></div>
+    <p class="lead small muted">Всё, что Батя тебе сказал, от новых к старым. Оценить фразу можно один раз, изменить оценку нельзя.</p>
+    <ul class="feed">
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Напоминание</span></div><time datetime="2026-10-23T16:30">Сегодня, 16:30</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Я тебе говорил, а ты так и не сделал «Написать отчёт по продажам за октябрь». Осталось 1 ч 30 мин.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=reminder#history-reply" aria-label="Ответить на напоминание от 16:30">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Проверка</span></div><time datetime="2026-10-23T12:14">Сегодня, 12:14</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Ну что, показывай, что сделано. Или опять «потом»?</p>
+        <p class="msg-ans">Ты ответил: частично</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled aria-pressed="true">✓ в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=check#history-reply" aria-label="Ответить на проверку от 12:14">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag red">Провал</span></div><time datetime="2026-10-22T22:05">Вчера, 22:05</time></div>
+        <p class="msg-task">Задача: <b>Убраться в гараже</b></p>
+        <p class="msg-text">Гараж не убран. Сергей из пятого подъезда свой уже перебрал и перекрасил.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled aria-pressed="true">✓ неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=garage#history-reply" aria-label="Ответить на упрёк о провале от 22:05">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Молчание на проверку</span></div><time datetime="2026-10-22T14:12">Вчера, 14:12</time></div>
+        <p class="msg-task">Задача: <b>Повторять английский</b></p>
+        <p class="msg-text">Молчишь. Это ты так английский повторяешь? Тихо и без прогресса.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=english#history-reply" aria-label="Ответить на упрёк за молчание от 14:12">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Давно не заходил</span></div><time datetime="2026-10-22T09:40">Вчера, 09:40</time></div>
+        <p class="msg-text">Шесть часов тебя нет. Я не волнуюсь. Я просто отмечаю.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled aria-pressed="true">✓ слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=absence#history-reply" aria-label="Ответить на сообщение от 09:40">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Похвала</span></div><time datetime="2026-10-21T17:45">21 октября, 17:45</time></div>
+        <p class="msg-task">Задача: <b>Ответить на письмо от бухгалтерии</b></p>
+        <p class="msg-text">Сделал. Невелик подвиг, но с чего-то же надо начинать. Засчитано.</p>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=praise#history-reply" aria-label="Ответить на похвалу от 21 октября">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag red">Провал</span></div><time datetime="2026-10-20T22:05">20 октября, 22:05</time></div>
+        <p class="msg-task">Задача: <b>Сделать зарядку · вторник</b></p>
+        <p class="msg-text">Вторник сам себя не сделает. Завтра новый день, и я опять спрошу.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled aria-pressed="true">✓ слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=exercise-fail#history-reply" aria-label="Ответить на упрёк о провале от 20 октября">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Напоминание</span></div><time datetime="2026-10-20T20:00">20 октября, 20:00</time></div>
+        <p class="msg-task">Задача: <b>Сделать зарядку · вторник</b></p>
+        <p class="msg-text">Осталось 2 часа. Зарядка не для Бати, она для твоей спины. Хотя что я говорю.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=exercise#history-reply" aria-label="Ответить на напоминание от 20 октября, 20:00">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Проверка</span></div><time datetime="2026-10-20T11:20">20 октября, 11:20</time></div>
+        <p class="msg-task">Задача: <b>Перевезти вещи из гаража на дачу</b></p>
+        <p class="msg-text">Что сделано? Вещи сами в машину не сядут.</p>
+        <p class="msg-ans">Ты ответил: не начинал</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled aria-pressed="true">✓ неприятно</button><button type="button" disabled>в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=moving-check#history-reply" aria-label="Ответить на проверку от 20 октября, 11:20">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Задача принята</span></div><time datetime="2026-10-20T08:05">20 октября, 08:05</time></div>
+        <p class="msg-task">Задача: <b>Перевезти вещи из гаража на дачу</b></p>
+        <p class="msg-text">Записал. Срок до субботы. Хотя что я говорю, ты и до понедельника не соберёшься.</p>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=moving#history-reply" aria-label="Ответить на сообщение от 20 октября, 08:05">Ответить</a></div>
+      </article></li>
+    </ul>
+    <div class="more">
+      <button class="btn ghost" type="button">Показать ещё</button>
+    </div>
+  </section>
+
+  <!-- Пусто: только фразы старта, кнопок оценки нет (UC-59) -->
+  <section class="page" data-view="empty" data-label="Пусто (только старт)" hidden>
+    <div><div class="eyebrow">Дневник</div><h1>История</h1></div>
+    <p class="lead small muted">Всё, что Батя тебе сказал, от новых к старым.</p>
+    <ul class="feed">
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Старт</span></div><time datetime="2026-10-23T09:03">Сегодня, 09:03</time></div>
+        <p class="msg-text">Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?</p>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=start#history-reply" aria-label="Ответить на стартовую фразу, 09:03">Ответить</a></div>
+      </article></li>
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Старт</span></div><time datetime="2026-10-23T09:03">Сегодня, 09:03</time></div>
+        <p class="msg-text">Опять ничего сам не можешь? Ну, что тебе надо сделать?</p>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=start-help#history-reply" aria-label="Ответить на стартовую фразу, 09:03">Ответить</a></div>
+      </article></li>
+    </ul>
+    <div class="card hello">
+      <h3>Дальше будет больше</h3>
+      <p class="small">Напоминания, проверки и упрёки появятся здесь, когда будет что проверять. Поставь первую задачу, и Батя найдёт, что сказать.</p>
+      <a class="btn" href="task-new.html#empty">Поставить задачу</a>
+    </div>
+  </section>
+
+  <!-- Оценка той же фразы повторно: «Уже оценено», статистика не меняется (UC-56, R-79) -->
+  <section class="page" data-view="again" data-label="Уже оценено" hidden>
+    <div><div class="eyebrow">Дневник</div><h1>История</h1></div>
+    <p class="lead small muted">Всё, что Батя тебе сказал, от новых к старым. Оценить фразу можно один раз, изменить оценку нельзя.</p>
+    <ul class="feed">
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Проверка</span></div><time datetime="2026-10-23T12:14">Сегодня, 12:14</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Ну что, показывай, что сделано. Или опять «потом»?</p>
+        <div class="rate" role="group" aria-label="Оценка фразы: уже оценено">
+          <div class="rate-btns"><button type="button" disabled>слабо</button><button type="button" disabled>неприятно</button><button type="button" disabled aria-pressed="true">✓ в самое больное</button></div>
+          <span class="rate-note">Уже оценено</span>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=check#history-reply" aria-label="Ответить на проверку от 12:14">Ответить</a></div>
+      </article></li>
+    </ul>
+    <div class="toast" role="status">Уже оценено: твоя оценка — <b data-rating-choice>в самое больное</b>. Изменить её нельзя.</div>
+  </section>
+
+  <!-- Сбой сохранения оценки -->
+  <section class="page" data-view="rateerr" data-label="Сбой оценки" hidden>
+    <div><div class="eyebrow">Дневник</div><h1>История</h1></div>
+    <ul class="feed">
+      <li><article class="card msg">
+        <div class="msg-head"><div class="left"><span class="who-h">Батя</span><span class="tag">Напоминание</span></div><time datetime="2026-10-23T16:30">Сегодня, 16:30</time></div>
+        <p class="msg-task">Задача: <b>Написать отчёт по продажам за октябрь</b></p>
+        <p class="msg-text">Я тебе говорил, а ты так и не сделал «Написать отчёт по продажам за октябрь». Осталось 1 ч 30 мин.</p>
+        <div class="rate" role="group" aria-label="Оценка фразы">
+          <span class="rate-q">Насколько задело?</span>
+          <div class="rate-btns"><button type="button">слабо</button><button type="button">неприятно</button><button type="button">в самое больное</button></div>
+        </div>
+        <div class="msg-foot"><a class="btn small ghost" href="battle.html?message=reminder#history-reply" aria-label="Ответить на напоминание от 16:30">Ответить</a></div>
+      </article></li>
+    </ul>
+    <div class="banner" role="alert"><b>Оценка не сохранилась.</b> Сеть отвалилась, голос не засчитан. Нажми оценку ещё раз.</div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">История</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">История</h1>
+    <div class="banner"><b>Не загрузилось.</b> Батя всё помнит, а вот история не открылась: сеть отвалилась. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#list">Повторить</button>
+  </section>
+
+  <section class="page" data-view="confirm-rating" data-label="Подтвердить оценку" hidden>
+    <h1>История</h1><div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="rating-h" aria-describedby="rating-d"><h2 id="rating-h">Записать оценку?</h2><p id="rating-d">Твой выбор: <b data-rating-choice>в самое больное</b>. Оценить эту фразу можно один раз, изменить голос нельзя.</p><a class="btn" href="#again">Записать оценку</a><a class="btn ghost" href="#list">Вернуться к выбору</a></div>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html" aria-current="page"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

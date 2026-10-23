@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Магазин ударов</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .back { display: inline-flex; align-items: center; align-self: flex-start; min-height: var(--target-small); color: var(--ink); }
+    .balance { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .balance .num { font: 700 var(--hand-xl)/1 var(--font-hand); color: var(--ink); }
+    .balance .num.zero { color: var(--red); }
+    .balance .unit { font: 500 var(--hand-l)/1 var(--font-hand); color: var(--muted); }
+    .balance .side { text-align: right; }
+    .lead { margin: 0; }
+    .note { margin: 0; }
+
+    /* роль и пол: по умолчанию отец и мужской, переключатель в панели просмотра */
+    .for-mother, .for-female { display: none; }
+    html[data-role="mother"] .for-father { display: none; }
+    html[data-role="mother"] .for-mother { display: inline; }
+    html[data-gender="female"] .for-male { display: none; }
+    html[data-gender="female"] .for-female { display: inline; }
+
+    /* пакеты: выбор радиокнопками, одна кнопка оплаты */
+    .packs { display: grid; gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+    .packs legend { padding: 0; margin-bottom: var(--space-2); font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+    .pack { position: relative; display: grid; grid-template-columns: 1fr auto 6.5em; align-items: center; gap: var(--space-3); min-height: var(--target); padding: var(--space-3) var(--space-4); background: var(--surface); border: 1.5px solid var(--edge); border-radius: var(--radius); cursor: pointer; }
+    .pack input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .pack .cnt { font-size: var(--text-m); }
+    .pack .cnt b { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); margin-right: var(--space-1); }
+    .pack .price { display: grid; text-align: right; font-weight: 700; }
+    .pack .price small { font-weight: 400; font-size: var(--text-s); color: var(--muted); }
+    .pack .sel { visibility: hidden; text-align: center; font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); }
+    .pack:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+    .pack:has(input:checked) .sel { visibility: visible; }
+    .pack:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .pack:has(input:disabled) { border-style: dashed; cursor: not-allowed; }
+
+    /* история операций */
+    .hist { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+    .op { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--line); }
+    .op:last-child { border-bottom: 0; }
+    .op .what { display: grid; gap: var(--space-1); min-width: 0; }
+    .op .amt { display: grid; text-align: right; flex: none; }
+    .op .amt b { font: 700 var(--hand-l)/1 var(--font-hand); }
+    .op .amt .minus { color: var(--red); }
+    .op .amt .plus { color: var(--ink); }
+    .op.fresh { border-left: 5px solid var(--ink); }
+    .done { display: flex; align-items: center; gap: var(--space-4); }
+    .done .grade { flex: none; width: var(--grade-small); height: var(--grade-small); }
+    .ctx { border-left: 5px solid var(--ink); }
+    .ctx q { display: block; margin-top: var(--space-1); font-family: var(--font-hand); font-size: var(--hand-m); line-height: 1.2; }
+    h2.sec { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Магазин ударов»: F-13. UC-72 (покупка), UC-73 (из боя), UC-74 (отмена, дубль, задержка), UC-75 (возвраты в истории), UC-77 (пустая история), R-110 (других товаров нет).
+       Подписи персонажа зависят от роли (for-father / for-mother), окончания глаголов от пола (for-male / for-female). Переключатели в панели просмотра. -->
+
+  <section class="page" data-view="normal" data-label="Обычное">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num">4</div></div>
+      <div class="unit">удара</div>
+    </div>
+    <p class="lead muted">Один удар — одна твоя реплика <span class="for-father">Бате</span><span class="for-mother">Маме</span> в бою. Молчать пока бесплатно.</p>
+
+    <fieldset class="packs">
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk1" value="1" data-price="15"><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk1" value="3" data-price="39" checked><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk1" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <div class="btns">
+      <button class="btn pay-btn" type="button">Оплатить 39 Stars</button>
+      <p class="small muted note">Оплата Stars откроется прямо здесь, из приложения выходить не нужно. Удары придут в течение минуты.</p>
+    </div>
+
+    <h2 class="sec">История операций</h2>
+    <ul class="hist">
+      <li class="op"><div class="what"><b>Возврат Stars</b><span class="small muted">22 окт, 10:30</span><span class="small muted">Причина: возврат за пакет «Пять» по обращению</span></div><div class="amt"><b class="minus">−5</b><span class="small muted">ударов</span></div></li>
+      <li class="op"><div class="what"><b>Покупка: пакет «Пять»</b><span class="small muted">22 окт, 10:00</span><span class="small muted">Оплачено 60 Stars</span></div><div class="amt"><b class="plus">+5</b><span class="small muted">ударов</span></div></li>
+      <li class="op"><div class="what"><b>Начисление от владельца</b><span class="small muted">21 окт, 22:15</span><span class="small muted">Причина: возврат по жалобе</span></div><div class="amt"><b class="plus">+2</b><span class="small muted">удара</span></div></li>
+      <li class="op"><div class="what"><b>Возврат: ошибка хода</b><span class="small muted">19 окт, 08:18</span><span class="small muted">Причина: судья не ответил, удар вернулся</span></div><div class="amt"><b class="plus">+1</b><span class="small muted">удар</span></div></li>
+      <li class="op"><div class="what"><b>Списание: реплика в бою</b><span class="small muted">19 окт, 08:18</span><span class="small muted"><span class="for-father">Бой с отцом</span><span class="for-mother">Бой с матерью</span></span></div><div class="amt"><b class="minus">−1</b><span class="small muted">удар</span></div></li>
+      <li class="op"><div class="what"><b>Списание: реплика в бою</b><span class="small muted">19 окт, 08:15</span><span class="small muted"><span class="for-father">Бой с отцом</span><span class="for-mother">Бой с матерью</span></span></div><div class="amt"><b class="minus">−1</b><span class="small muted">удар</span></div></li>
+    </ul>
+    <button class="btn ghost" type="button">Показать ещё</button>
+    <p class="small muted note">Что-то не так с платежом? Напиши /paysupport в чате с ботом. Условия продажи: /terms.</p>
+  </section>
+
+  <section class="page" data-view="empty" data-label="Пустая история" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num zero">0</div></div>
+      <div class="unit">ударов</div>
+    </div>
+    <p class="lead muted">
+      <span class="for-father">Один удар — одна твоя реплика Бате в бою. Пока молчишь, он считает, что прав.</span>
+      <span class="for-mother">Один удар — одна твоя реплика Маме в бою. Пока молчишь, она считает, что права.</span>
+    </p>
+
+    <fieldset class="packs">
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk2" value="1" data-price="15"><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk2" value="3" data-price="39" checked><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk2" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <div class="btns">
+      <button class="btn pay-btn" type="button">Оплатить 39 Stars</button>
+      <p class="small muted note">Оплата Stars откроется прямо здесь, из приложения выходить не нужно.</p>
+    </div>
+
+    <h2 class="sec">История операций</h2>
+    <div class="card">
+      <h3>Пока ни одного удара</h3>
+      <p class="muted mt2">Купи пакет, и здесь появятся покупки и списания. Других товаров в магазине нет: только удары.</p>
+    </div>
+  </section>
+
+  <section class="page" data-view="pending" data-label="Оплата в процессе" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num">4</div></div>
+      <div class="unit">удара</div>
+    </div>
+    <div class="banner" role="status"><b>Оплата в процессе.</b> Окно оплаты Telegram открыто. Закончи платёж там, удары начислятся сами.</div>
+
+    <fieldset class="packs" disabled>
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk3" value="1" disabled><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk3" value="3" checked disabled><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk3" value="5" disabled><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <div class="btns">
+      <button class="btn" type="button" disabled aria-busy="true">Ждём оплату…</button>
+      <button class="btn link" type="button"><span class="for-male">Закрыл окно оплаты? Вернуться к выбору</span><span class="for-female">Закрыла окно оплаты? Вернуться к выбору</span></button>
+    </div>
+  </section>
+
+  <section class="page" data-view="success" data-label="Успех" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="done card" role="status">
+      <div class="grade ok" aria-hidden="true">+3</div>
+      <div><b>Удары начислены.</b><br>Было 4, стало 7. <span class="for-father">Батя уже готовится.</span><span class="for-mother">Мама уже готовится.</span></div>
+    </div>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num">7</div></div>
+      <div class="unit">ударов</div>
+    </div>
+    <div class="btns">
+      <a class="btn" href="battle.html"><span class="for-father">Ответить Бате</span><span class="for-mother">Ответить Маме</span></a>
+      <button class="btn ghost" type="button">Купить ещё</button>
+    </div>
+
+    <h2 class="sec">История операций</h2>
+    <ul class="hist">
+      <li class="op fresh"><div class="what"><b>Покупка: пакет «Три»</b><span class="small muted">23 окт, 12:41 · только что</span><span class="small muted">Оплачено 39 Stars</span></div><div class="amt"><b class="plus">+3</b><span class="small muted">удара</span></div></li>
+      <li class="op"><div class="what"><b>Возврат Stars</b><span class="small muted">22 окт, 10:30</span><span class="small muted">Причина: возврат за пакет «Пять» по обращению</span></div><div class="amt"><b class="minus">−5</b><span class="small muted">ударов</span></div></li>
+      <li class="op"><div class="what"><b>Покупка: пакет «Пять»</b><span class="small muted">22 окт, 10:00</span><span class="small muted">Оплачено 60 Stars</span></div><div class="amt"><b class="plus">+5</b><span class="small muted">ударов</span></div></li>
+      <li class="op"><div class="what"><b>Начисление от владельца</b><span class="small muted">21 окт, 22:15</span><span class="small muted">Причина: возврат по жалобе</span></div><div class="amt"><b class="plus">+2</b><span class="small muted">удара</span></div></li>
+    </ul>
+    <button class="btn ghost" type="button">Показать ещё</button>
+  </section>
+
+  <section class="page" data-view="failed" data-label="Оплата не прошла" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="banner" role="alert"><b>Оплата не прошла.</b> Удары не начислены, баланс прежний. Можно попробовать ещё раз.</div>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num">4</div></div>
+      <div class="unit">удара</div>
+    </div>
+
+    <fieldset class="packs">
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk4" value="1" data-price="15"><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk4" value="3" data-price="39" checked><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk4" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <button class="btn pay-btn" type="button">Попробовать снова: 39 Stars</button>
+    <p class="small muted note">Если Telegram всё же списал Stars, а удары не пришли в течение минуты, напиши /paysupport в чате с ботом.</p>
+  </section>
+
+  <section class="page" data-view="delay" data-label="Задержка начисления" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="banner" role="status"><b>Платёж принят, удары в пути.</b> Начислим в течение минуты. Второй раз платить не нужно: мы не потеряем ни одного удара и не начислим лишнего.</div>
+    <div class="card balance" aria-busy="true">
+      <div><div class="small muted">Баланс пока</div><div class="num">4</div></div>
+      <div class="unit">удара</div>
+    </div>
+    <div class="btns">
+      <button class="btn" type="button">Обновить баланс</button>
+      <p class="small muted note">Пакеты временно скрыты, чтобы не заплатить дважды. Через минуту баланс обновится сам.</p>
+    </div>
+    <p class="small muted note">Не пришло и через 5 минут? Напиши /paysupport в чате с ботом, мы разберёмся.</p>
+  </section>
+
+  <!-- Из боя при нулевом балансе: реплика ждёт в поле, удары кончились (ссылки «Купить» из боя при балансе 0) -->
+  <section class="page" data-view="battle-positive" data-label="Из боя: докупить заранее" hidden>
+    <a class="back" href="battle.html#dialog" data-battle-back>← В бой</a><div class="eyebrow">Магазин · из боя</div><h1>Удары</h1>
+    <div class="card balance"><div><div class="small muted">Баланс</div><div class="num" data-battle-balance>2</div></div><div class="unit" data-battle-unit>удара</div></div><p>Вернёшься в бой. Диалог и введённый текст сохранятся.</p>
+    <fieldset class="packs"><legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk-positive" value="1" data-price="15"><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk-positive" value="3" data-price="39" checked><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk-positive" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset><button class="btn pay-btn" type="button" data-go="#battle-positive-ok">Оплатить 39 Stars</button><a class="btn ghost" href="battle.html#dialog" data-battle-back>Вернуться в бой</a>
+  </section>
+  <section class="page" data-view="battle-positive-ok" data-label="Из боя: докуплено заранее" hidden>
+    <h1>Удары начислены</h1><p role="status" data-purchase-result>Оплачено 39 Stars. К балансу добавлено 3 удара. Теперь: 5 ударов.</p><a class="btn" href="battle.html#dialog" data-battle-back>Вернуться в бой</a>
+  </section>
+  <section class="page" data-view="battle" data-label="Из боя: баланс 0" hidden>
+    <a class="back" href="battle.html#zero" data-battle-back>← В бой</a>
+    <div class="eyebrow">Магазин · из боя</div>
+    <h1>Удары кончились</h1>
+    <div class="card ctx">
+      <span class="small muted">Твоя реплика ждёт в поле боя</span>
+      <q>«А сам-то в моём возрасте чем занимался?»</q>
+    </div>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num zero">0</div></div>
+      <div class="unit">ударов</div>
+    </div>
+
+    <fieldset class="packs">
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk5" value="1" data-price="15" checked><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk5" value="3" data-price="39"><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk5" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <div class="btns">
+      <button class="btn pay-btn" type="button">Оплатить 15 Stars</button>
+      <p class="small muted note">После оплаты вернёшься в бой: диалог и набранный текст никуда не денутся.</p>
+    </div>
+  </section>
+
+  <!-- Из боя при балансе 1–5 (D-4): без цитаты и без «кончились». Ссылки «Купить» из боя при ненулевом балансе ведут сюда. -->
+  <section class="page" data-view="battle-low" data-label="Из боя: баланс 1–5" hidden>
+    <a class="back" href="battle.html#zero" data-battle-back>← В бой</a>
+    <div class="eyebrow">Магазин · из боя</div>
+    <h1>Удары</h1>
+    <p class="lead muted">Вернёшься в бой сразу после оплаты. Докупить можно заранее, чтобы посреди спора не остаться с пустыми руками.</p>
+    <div class="card balance">
+      <div><div class="small muted">Баланс</div><div class="num">2</div></div>
+      <div class="unit">удара</div>
+    </div>
+
+    <fieldset class="packs">
+      <legend>Пакет ударов</legend>
+      <label class="pack"><input type="radio" name="pk6" value="1" data-price="15"><span class="cnt"><b>1</b>удар</span><span class="price">15 Stars<small>15 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk6" value="3" data-price="39" checked><span class="cnt"><b>3</b>удара</span><span class="price">39 Stars<small>13 за удар</small></span><span class="sel">Выбрано</span></label>
+      <label class="pack"><input type="radio" name="pk6" value="5" data-price="60"><span class="cnt"><b>5</b>ударов</span><span class="price">60 Stars<small>12 за удар</small></span><span class="sel">Выбрано</span></label>
+    </fieldset>
+    <div class="btns">
+      <button class="btn pay-btn" type="button">Оплатить 39 Stars</button>
+      <p class="small muted note">После оплаты вернёшься в бой: диалог и набранный текст никуда не денутся.</p>
+    </div>
+  </section>
+
+  <section class="page" data-view="battle-ok" data-label="Из боя: оплачено" hidden>
+    <a class="back" href="battle.html#zero" data-battle-back>← В бой</a>
+    <div class="eyebrow">Магазин · из боя</div>
+    <h1>Удары</h1>
+    <div class="done card" role="status">
+      <div class="grade ok" aria-hidden="true">+1</div>
+      <div><b>Оплачено.</b><br>На балансе 1 удар. Твоя реплика на месте, можно отправлять.</div>
+    </div>
+    <div class="card ctx">
+      <span class="small muted">Твоя реплика в поле боя</span>
+      <q>«А сам-то в моём возрасте чем занимался?»</q>
+    </div>
+    <div class="btns">
+      <a class="btn" href="battle.html">Вернуться в бой</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Магазин</div>
+    <h1>Удары</h1>
+    <div class="banner"><b>Магазин не открылся.</b> Ничего не списано. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#normal">Повторить</button>
+  </section>
+
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html" aria-current="page"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+<script>
+  /* подпись кнопки оплаты следует за выбранным пакетом */
+  document.addEventListener('change', function (e) {
+    var r = e.target;
+    if (!r.matches || !r.matches('.packs input')) return;
+    var btn = r.closest('section').querySelector('.pay-btn');
+    var failed = r.closest('section').getAttribute('data-view') === 'failed';
+    btn.textContent = (failed ? 'Попробовать снова: ' : 'Оплатить ') + r.dataset.price + ' Stars';
+  });
+
+</script>
+</body>
+</html>

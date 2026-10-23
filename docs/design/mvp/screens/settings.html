@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Настройки</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .back { display: inline-flex; align-items: center; align-self: flex-start; min-height: var(--target-small); color: var(--ink); }
+    form { display: grid; gap: var(--space-5); margin: 0; }
+    fieldset.field { margin: 0; padding: 0; border: 0; min-width: 0; }
+    .field legend { padding: 0; margin-bottom: var(--space-1); font-weight: 700; font-size: var(--text-s); }
+    .seg label { position: relative; }
+    .times { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .field label.check { display: flex; align-items: flex-start; gap: var(--space-3); min-height: var(--target); padding: var(--space-3); background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius); font-size: var(--text-m); cursor: pointer; }
+    .check input { flex: none; width: var(--check-size); height: var(--check-size); min-height: 0; margin: 0; padding: 0; accent-color: var(--accent); }
+    .check .hint { display: block; font-weight: 400; }
+    .check span { display: grid; gap: var(--space-1); }
+    .danger-zone { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 2px solid var(--red); }
+    .danger-zone h2 { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--red); }
+    .danger-zone p { margin: 0; }
+    .step { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--red); }
+    .burn { margin: 0; font: 700 var(--hand-l)/1.1 var(--font-hand); color: var(--red); }
+    .ghost-card { opacity: 1; border-style: dashed; }
+    /* на подтверждении и после удаления нижнее меню прячется, как и под шторкой */
+    .app:has(section:not([hidden]) .sheet) .tabbar,
+    .app:has(section[data-view="deleted"]:not([hidden])) .tabbar { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Настройки»: F-2. UC-7, UC-8 (родитель, пол, пояс), UC-9 (тихие часы, ошибка), UC-10 и UC-12 (удаление в два подтверждения), UC-84 (выход из рейтинга). Одно главное действие: «Сохранить». -->
+
+  <section class="page" data-view="normal" data-label="Обычное">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <form onsubmit="return false">
+      <fieldset class="field">
+        <legend>Родитель</legend>
+        <div class="seg">
+          <label><input type="radio" name="role-n" value="father" checked><span>Отец</span></label>
+          <label><input type="radio" name="role-n" value="mother"><span>Мать</span></label>
+        </div>
+        <span class="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</span>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Твой пол</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender-n" value="male" checked><span>Мужской</span></label>
+          <label><input type="radio" name="gender-n" value="female"><span>Женский</span></label>
+        </div>
+        <span class="hint">Новые фразы будут с другими окончаниями. Старые в «Истории» не меняются.</span>
+      </fieldset>
+
+      <div class="field">
+        <label for="tz-n">Часовой пояс</label>
+        <select id="tz-n">
+          <option>Калининград, UTC+2</option>
+          <option>Минск, UTC+3</option>
+          <option selected>Москва, UTC+3</option>
+          <option>Самара, UTC+4</option>
+          <option>Екатеринбург, UTC+5</option>
+          <option>Омск, UTC+6</option>
+          <option>Новосибирск, UTC+7</option>
+          <option>Иркутск, UTC+8</option>
+          <option>Якутск, UTC+9</option>
+          <option>Владивосток, UTC+10</option>
+        </select>
+        <span class="hint">Сроки задач покажутся в новом поясе, но сам момент срока не сдвинется.</span>
+      </div>
+
+      <fieldset class="field">
+        <legend>Тихие часы</legend>
+        <div class="times">
+          <div class="field"><label for="qs-n">С</label><input id="qs-n" type="time" step="1800" value="23:00" aria-describedby="qh-n"></div>
+          <div class="field"><label for="qe-n">До</label><input id="qe-n" type="time" step="1800" value="08:00" aria-describedby="qh-n"></div>
+        </div>
+        <span class="hint" id="qh-n">Бот молчит 9 ч: с 23:00 до 08:00. Шаг 30 минут, не длиннее 12 часов. Если «с» и «до» совпадают, тихих часов нет.</span>
+        <button class="btn link small" type="button" data-go="#quiet-off">Без тихих часов</button>
+      </fieldset>
+
+      <div class="field">
+        <label class="check" for="lb-n"><input id="lb-n" type="checkbox" checked><span><b>Участвую в общем рейтинге</b><span class="hint">Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге.</span></span></label>
+      </div>
+
+      <button class="btn" type="button" data-go="#saved">Сохранить</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>Опасная зона</h2>
+      <p class="small muted">Удаление стирает профиль, задачи, ленту, бои и место в рейтинге. Вернуть это нельзя.</p>
+      <button class="btn danger" type="button" data-go="#del1">Удалить аккаунт</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="saved" data-label="Сохранено" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="toast" role="status">Сохранено. <span class="for-father">Батя принял</span><span class="for-mother">Мама приняла</span> к сведению.</div>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <form onsubmit="return false">
+      <fieldset class="field">
+        <legend>Родитель</legend>
+        <div class="seg">
+          <label><input type="radio" name="role-s" value="father" checked><span>Отец</span></label>
+          <label><input type="radio" name="role-s" value="mother"><span>Мать</span></label>
+        </div>
+        <span class="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</span>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Твой пол</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender-s" value="male" checked><span>Мужской</span></label>
+          <label><input type="radio" name="gender-s" value="female"><span>Женский</span></label>
+        </div>
+        <span class="hint">Новые фразы будут с другими окончаниями. Старые в «Истории» не меняются.</span>
+      </fieldset>
+
+      <div class="field">
+        <label for="tz-s">Часовой пояс</label>
+        <select id="tz-s">
+          <option>Калининград, UTC+2</option>
+          <option>Минск, UTC+3</option>
+          <option selected>Москва, UTC+3</option>
+          <option>Самара, UTC+4</option>
+          <option>Екатеринбург, UTC+5</option>
+          <option>Омск, UTC+6</option>
+          <option>Новосибирск, UTC+7</option>
+          <option>Иркутск, UTC+8</option>
+          <option>Якутск, UTC+9</option>
+          <option>Владивосток, UTC+10</option>
+        </select>
+        <span class="hint">Сроки задач покажутся в новом поясе, но сам момент срока не сдвинется.</span>
+      </div>
+
+      <fieldset class="field">
+        <legend>Тихие часы</legend>
+        <div class="times">
+          <div class="field"><label for="qs-s">С</label><input id="qs-s" type="time" step="1800" value="22:00" aria-describedby="qh-s"></div>
+          <div class="field"><label for="qe-s">До</label><input id="qe-s" type="time" step="1800" value="10:00" aria-describedby="qh-s"></div>
+        </div>
+        <span class="hint" id="qh-s">Бот молчит 12 ч: с 22:00 до 10:00. Шаг 30 минут, не длиннее 12 часов. Если «с» и «до» совпадают, тихих часов нет.</span>
+        <button class="btn link small" type="button" data-go="#quiet-off">Без тихих часов</button>
+      </fieldset>
+
+      <div class="field">
+        <label class="check" for="lb-s"><input id="lb-s" type="checkbox" checked><span><b>Участвую в общем рейтинге</b><span class="hint">Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге.</span></span></label>
+      </div>
+
+      <button class="btn" type="button" data-go="#saved">Сохранить</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>Опасная зона</h2>
+      <p class="small muted">Удаление стирает профиль, задачи, ленту, бои и место в рейтинге. Вернуть это нельзя.</p>
+      <button class="btn danger" type="button" data-go="#del1">Удалить аккаунт</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="bad-quiet" data-label="Ошибка: тихие часы" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <form onsubmit="return false">
+      <fieldset class="field">
+        <legend>Родитель</legend>
+        <div class="seg">
+          <label><input type="radio" name="role-q" value="father" checked><span>Отец</span></label>
+          <label><input type="radio" name="role-q" value="mother"><span>Мать</span></label>
+        </div>
+        <span class="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</span>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Твой пол</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender-q" value="male" checked><span>Мужской</span></label>
+          <label><input type="radio" name="gender-q" value="female"><span>Женский</span></label>
+        </div>
+        <span class="hint">Новые фразы будут с другими окончаниями. Старые в «Истории» не меняются.</span>
+      </fieldset>
+
+      <div class="field">
+        <label for="tz-q">Часовой пояс</label>
+        <select id="tz-q">
+          <option>Калининград, UTC+2</option>
+          <option>Минск, UTC+3</option>
+          <option selected>Москва, UTC+3</option>
+          <option>Самара, UTC+4</option>
+          <option>Екатеринбург, UTC+5</option>
+          <option>Омск, UTC+6</option>
+          <option>Новосибирск, UTC+7</option>
+          <option>Иркутск, UTC+8</option>
+          <option>Якутск, UTC+9</option>
+          <option>Владивосток, UTC+10</option>
+        </select>
+        <span class="hint">Сроки задач покажутся в новом поясе, но сам момент срока не сдвинется.</span>
+      </div>
+
+      <fieldset class="field bad">
+        <legend>Тихие часы</legend>
+        <div class="times">
+          <div class="field bad"><label for="qs-q">С</label><input id="qs-q" type="time" step="1800" value="20:00" aria-invalid="true" aria-describedby="qe-err"></div>
+          <div class="field bad"><label for="qe-q">До</label><input id="qe-q" type="time" step="1800" value="10:00" aria-invalid="true" aria-describedby="qe-err"></div>
+        </div>
+        <span class="err" id="qe-err" role="alert"><b>Тихие часы не длиннее 12 часов.</b> Сейчас 14 ч. Сдвинь начало позже или конец раньше. Сохранены прежние 23:00–08:00.</span>
+      </fieldset>
+
+      <div class="field">
+        <label class="check" for="lb-q"><input id="lb-q" type="checkbox" checked><span><b>Участвую в общем рейтинге</b><span class="hint">Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге.</span></span></label>
+      </div>
+
+      <button class="btn" type="submit" disabled aria-describedby="qe-err">Сохранить</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>Опасная зона</h2>
+      <p class="small muted">Удаление стирает профиль, задачи, ленту, бои и место в рейтинге. Вернуть это нельзя.</p>
+      <button class="btn danger" type="button" data-go="#del1">Удалить аккаунт</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="save-error" data-label="Ошибка сохранения" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="banner" role="alert"><b>Не сохранилось.</b> Сеть подвела, прежние настройки остались. Проверь интернет и нажми «Сохранить» ещё раз.</div>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <form onsubmit="return false">
+      <fieldset class="field">
+        <legend>Родитель</legend>
+        <div class="seg">
+          <label><input type="radio" name="role-e" value="father"><span>Отец</span></label>
+          <label><input type="radio" name="role-e" value="mother" checked><span>Мать</span></label>
+        </div>
+        <span class="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</span>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Твой пол</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender-e" value="male" checked><span>Мужской</span></label>
+          <label><input type="radio" name="gender-e" value="female"><span>Женский</span></label>
+        </div>
+        <span class="hint">Новые фразы будут с другими окончаниями. Старые в «Истории» не меняются.</span>
+      </fieldset>
+
+      <div class="field">
+        <label for="tz-e">Часовой пояс</label>
+        <select id="tz-e">
+          <option>Калининград, UTC+2</option>
+          <option>Минск, UTC+3</option>
+          <option selected>Москва, UTC+3</option>
+          <option>Самара, UTC+4</option>
+          <option>Екатеринбург, UTC+5</option>
+          <option>Омск, UTC+6</option>
+          <option>Новосибирск, UTC+7</option>
+          <option>Иркутск, UTC+8</option>
+          <option>Якутск, UTC+9</option>
+          <option>Владивосток, UTC+10</option>
+        </select>
+        <span class="hint">Сроки задач покажутся в новом поясе, но сам момент срока не сдвинется.</span>
+      </div>
+
+      <fieldset class="field">
+        <legend>Тихие часы</legend>
+        <div class="times">
+          <div class="field"><label for="qs-e">С</label><input id="qs-e" type="time" step="1800" value="23:00" aria-describedby="qh-e"></div>
+          <div class="field"><label for="qe-e">До</label><input id="qe-e" type="time" step="1800" value="08:00" aria-describedby="qh-e"></div>
+        </div>
+        <span class="hint" id="qh-e">Бот молчит 9 ч: с 23:00 до 08:00. Шаг 30 минут, не длиннее 12 часов. Если «с» и «до» совпадают, тихих часов нет.</span>
+        <button class="btn link small" type="button" data-go="#quiet-off">Без тихих часов</button>
+      </fieldset>
+
+      <div class="field">
+        <label class="check" for="lb-e"><input id="lb-e" type="checkbox" checked><span><b>Участвую в общем рейтинге</b><span class="hint">Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге.</span></span></label>
+      </div>
+
+      <button class="btn" type="button" data-go="#saved">Сохранить</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>Опасная зона</h2>
+      <p class="small muted">Удаление стирает профиль, задачи, ленту, бои и место в рейтинге. Вернуть это нельзя.</p>
+      <button class="btn danger" type="button" data-go="#del1">Удалить аккаунт</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="quiet-off" data-label="Без тихих часов" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <form onsubmit="return false">
+      <fieldset class="field">
+        <legend>Родитель</legend>
+        <div class="seg">
+          <label><input type="radio" name="role-z" value="father" checked><span>Отец</span></label>
+          <label><input type="radio" name="role-z" value="mother"><span>Мать</span></label>
+        </div>
+        <span class="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</span>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Твой пол</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender-z" value="male" checked><span>Мужской</span></label>
+          <label><input type="radio" name="gender-z" value="female"><span>Женский</span></label>
+        </div>
+        <span class="hint">Новые фразы будут с другими окончаниями. Старые в «Истории» не меняются.</span>
+      </fieldset>
+
+      <div class="field">
+        <label for="tz-z">Часовой пояс</label>
+        <select id="tz-z">
+          <option>Калининград, UTC+2</option>
+          <option>Минск, UTC+3</option>
+          <option selected>Москва, UTC+3</option>
+          <option>Самара, UTC+4</option>
+          <option>Екатеринбург, UTC+5</option>
+          <option>Омск, UTC+6</option>
+          <option>Новосибирск, UTC+7</option>
+          <option>Иркутск, UTC+8</option>
+          <option>Якутск, UTC+9</option>
+          <option>Владивосток, UTC+10</option>
+        </select>
+        <span class="hint">Сроки задач покажутся в новом поясе, но сам момент срока не сдвинется.</span>
+      </div>
+
+      <fieldset class="field">
+        <legend>Тихие часы</legend>
+        <div class="times">
+          <div class="field"><label for="qs-z">С</label><input id="qs-z" type="time" step="1800" value="23:00" aria-describedby="qh-z"></div>
+          <div class="field"><label for="qe-z">До</label><input id="qe-z" type="time" step="1800" value="23:00" aria-describedby="qh-z"></div>
+        </div>
+        <span class="hint" id="qh-z"><b>Тихих часов нет (0 ч).</b> Бот может написать в любое время, даже ночью. Утром после провала считаем 08:00.</span>
+        <button class="btn link small" type="button" data-go="#normal">Вернуть 23:00–08:00</button>
+      </fieldset>
+
+      <div class="field">
+        <label class="check" for="lb-z"><input id="lb-z" type="checkbox" checked><span><b>Участвую в общем рейтинге</b><span class="hint">Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге.</span></span></label>
+      </div>
+
+      <button class="btn" type="button" data-go="#saved">Сохранить</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>Опасная зона</h2>
+      <p class="small muted">Удаление стирает профиль, задачи, ленту, бои и место в рейтинге. Вернуть это нельзя.</p>
+      <button class="btn danger" type="button" data-go="#del1">Удалить аккаунт</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="del1" data-label="Удаление: шаг 1" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <div class="card ghost-card muted">Родитель, пол, пояс, тихие часы, рейтинг: всё останется как было, пока ты не подтвердишь.</div>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="dt1" aria-describedby="dd1">
+      <div class="step">Шаг 1 из 2</div>
+      <h2 id="dt1">Удалить аккаунт?</h2>
+      <p id="dd1" class="m0">Пропадут задачи, лента сообщений, бои, уважение и место в рейтинге. Батя даже не попрощается.</p>
+      <div class="btns">
+        <button class="btn ghost" type="button" data-go="#normal">Оставить аккаунт</button>
+        <button class="btn danger" type="button" data-go="#del2">Продолжить удаление</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-view="del2" data-label="Удаление: шаг 2" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <div class="card ghost-card muted">Родитель, пол, пояс, тихие часы, рейтинг: всё останется как было, пока ты не подтвердишь.</div>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="dt2" aria-describedby="dd2">
+      <div class="step">Шаг 2 из 2</div>
+      <h2 id="dt2">Это насовсем</h2>
+      <p class="burn" id="dd2">4 удара сгорят</p>
+      <p class="m0">Неизрасходованные удары пропадут, Stars за них не вернутся. Задачи, бои и место в рейтинге исчезнут. Записи о платежах останутся.</p>
+      <div class="btns">
+        <button class="btn ghost" type="button" data-go="#normal">Не удалять</button>
+        <button class="btn red" type="button" data-go="#deleted">Удалить окончательно</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-view="del2-zero" data-label="Удаление: шаг 2, без ударов" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <div class="card ghost-card muted">Родитель, пол, пояс, тихие часы, рейтинг: всё останется как было, пока ты не подтвердишь.</div>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="dt3" aria-describedby="dd3">
+      <div class="step">Шаг 2 из 2</div>
+      <h2 id="dt3">Это насовсем</h2>
+      <p id="dd3" class="m0">Профиль, задачи, бои и место в рейтинге исчезнут. Вернуть их нельзя.</p>
+      <div class="btns">
+        <button class="btn ghost" type="button" data-go="#normal">Не удалять</button>
+        <button class="btn red" type="button" data-go="#deleted">Удалить окончательно</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-view="deleted" data-label="Аккаунт удалён" hidden role="status">
+    <h1 class="sr-only">Настройки · deleted</h1>
+    <div class="eyebrow">Дневник закрыт</div>
+    <div class="stamp">Аккаунт удалён</div>
+    <p class="quote m0">Задачи стёрты, лента пуста, бот больше не напишет. Хотя Батя, конечно, не такой, чтобы навязываться.<span class="who">Батя</span></p>
+    <p class="muted m0">Если захочешь вернуться, отправь боту /start. Начнёшь с нуля.</p>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="eyebrow">Дневник · ты</div>
+    <h1>Настройки</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка загрузки" hidden>
+    <h1>Настройки</h1><div class="banner" role="alert">Настройки не загрузились. Проверь интернет и повтори.</div><a class="btn" href="#normal">Повторить</a><a class="btn ghost" href="more.html">К разделу «Ещё»</a>
+  </section>
+  <section class="page" data-view="delete-error" data-label="Удаление: результат неизвестен" hidden>
+    <h1>Удаление аккаунта</h1><div class="banner" role="alert">Не удалось узнать результат удаления. Проверь интернет и обнови статус. До ответа сервера нельзя утверждать, что аккаунт сохранился.</div>
+    <a class="btn" href="#delete-not-done">Обновить статус: аккаунт на месте</a><a class="btn ghost" href="#deleted">Обновить статус: аккаунт удалён</a>
+  </section>
+  <section class="page" data-view="delete-not-done" data-label="Удаление не прошло" hidden>
+    <h1>Аккаунт не удалён</h1><p>Аккаунт не удалён, всё на месте. Повтори или оставь как есть.</p><a class="btn danger" href="#del1">Повторить удаление</a><a class="btn ghost" href="#normal">Оставить как есть</a>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html" aria-current="page"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

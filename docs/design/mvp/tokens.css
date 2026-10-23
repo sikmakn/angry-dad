@@ -1,0 +1,76 @@
+/* Токены дизайна «Батя»: школьный дневник, клетка, красная ручка. Макеты берут значения отсюда, литеральных цветов в экранах нет. */
+/* Local Cyrillic fonts, bundled under OFL; see fonts/*-OFL.txt. */
+@font-face { font-family: 'PT Sans'; src: url('./fonts/pt-sans-400.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: 'PT Sans'; src: url('./fonts/pt-sans-700.ttf') format('truetype'); font-style: normal; font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Caveat'; src: url('./fonts/caveat-500.ttf') format('truetype'); font-style: normal; font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Caveat'; src: url('./fonts/caveat-700.ttf') format('truetype'); font-style: normal; font-weight: 700; font-display: swap; }
+
+:root {
+  /* бумага и чернила (светлая тема) */
+  --bg: #f6f7fc;            /* лист */
+  --grid: #d5dcf0;          /* клетка */
+  --surface: #ffffff;       /* карточка, вклеенный листок */
+  --fg: #1c2455;            /* синие чернила, основной текст, контраст 13:1 */
+  --ink: #26398f;           /* синяя ручка, акцент интерфейса */
+  --muted: #4f5b8c;         /* подписи, контраст 6:1 */
+  --line: #b9c3e6;          /* декоративные границы карточек */
+  --edge: #7480b0;          /* границы полей и переключателей, контраст не ниже 3:1 */
+  --red: #c4202c;           /* красная ручка: двойки, штампы, опасное */
+  --red-fg: #ffffff;
+  --accent: #26398f;
+  --accent-fg: #ffffff;
+  --ok: #1d6b3a;            /* только скупая «галочка» */
+  --warn: #8a5a00;
+  --danger: #c4202c;
+  --focus: #26398f;
+
+  --font-body: 'PT Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-hand: 'Caveat', 'PT Sans', system-ui, sans-serif;
+  --font-display: var(--font-hand);
+  --text-s: 0.875rem;
+  --text-m: 1rem;
+  --text-l: 1.25rem;
+  --text-xl: 1.75rem;
+  --hand-m: 1.5rem;
+  --hand-l: 2rem;
+  --hand-xl: 4.5rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 40px;
+
+  --radius: 6px;
+  --cell: 22px;             /* шаг клетки */
+  --target: 48px;           /* минимальная цель нажатия, не меньше 44 */
+  --app-width: 440px;
+  --nav-height: 56px;
+  --grade-size: 112px;
+  --grade-small: 96px;
+  --avatar-size: 64px;
+  --icon-size: 24px;
+  --sheet-width: 520px;
+  --target-small: 44px;
+  --check-size: 24px;
+  --mood-width: 18px;
+  --mood-height: 10px;
+  --grade-card: 88px;
+  --preview-width: 760px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151f; --grid: #232a40; --surface: #1a1f30; --fg: #dbe2ff; --ink: #b7c3ff;
+    --muted: #9aa6d9; --line: #323b5c; --edge: #6c78b0; --red: #ff8089; --red-fg: #12151f;
+    --accent: #b7c3ff; --accent-fg: #12151f; --ok: #7ed39a; --warn: #f0c36d; --danger: #ff8089; --focus: #b7c3ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151f; --grid: #232a40; --surface: #1a1f30; --fg: #dbe2ff; --ink: #b7c3ff;
+  --muted: #9aa6d9; --line: #323b5c; --edge: #6c78b0; --red: #ff8089; --red-fg: #12151f;
+  --accent: #b7c3ff; --accent-fg: #12151f; --ok: #7ed39a; --warn: #f0c36d; --danger: #ff8089; --focus: #b7c3ff;
+  color-scheme: dark;
+}
