@@ -1,0 +1,26 @@
+{
+  "name": "angry-dad",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
+    "check": "npm run check:api && npm run check:database-safety && npm run lint && npm run typecheck",
+    "generate:api": "openapi-typescript docs/openapi.yaml -o apps/web/src/api/generated/openapi.ts",
+    "check:api": "npm run generate:api -- --check",
+    "build": "npm run build --workspaces --if-present",
+    "check:database-safety": "node scripts/testing/check-database-safety.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "openapi-typescript": "7.13.0",
+    "typescript-eslint": "^8.71.2"
+  }
+}
