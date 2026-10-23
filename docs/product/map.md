@@ -2,31 +2,31 @@
 
 Статусы функций: `идея` → `в ТЗ` → `в архитектуре` → `в контракте` → `реализовано` → `проверено`. Каждый шаг конвейера двигает статус своих функций.
 
-ТЗ: [specs/mvp/spec.md](../specs/mvp/spec.md) (версия 4).
+ТЗ: [specs/mvp/spec.md](../specs/mvp/spec.md) (версия 4). Архитектура: [architecture/mvp](../architecture/mvp/00-overview.md).
 
 ## Ядро: задачи и давление (этап 1)
 | id | функция | кто | статус | описание |
 |---|---|---|---|---|
-| F-1 | Старт и вход через бота | гость, пользователь | в ТЗ | [F-1](../specs/mvp/functions/F-1-start.md) |
-| F-2 | Профиль, настройки и удаление аккаунта | пользователь | в ТЗ | [F-2](../specs/mvp/functions/F-2-settings.md) |
-| F-3 | Постановка задачи | пользователь | в ТЗ | [F-3](../specs/mvp/functions/F-3-task-create.md) |
-| F-4 | Разовая задача: жизненный цикл | пользователь | в ТЗ | [F-4](../specs/mvp/functions/F-4-one-time-task.md) |
-| F-5 | Повторяющаяся задача: периоды | пользователь | в ТЗ | [F-5](../specs/mvp/functions/F-5-recurring-task.md) |
-| F-6 | Проверки «покажи, что сделано» | пользователь | в ТЗ | [F-6](../specs/mvp/functions/F-6-check-ins.md) |
-| F-7 | Напоминания, уведомления и тихие часы | пользователь | в ТЗ | [F-7](../specs/mvp/functions/F-7-notifications.md) |
-| F-8 | Шкала «Уважение» | пользователь | в ТЗ | [F-8](../specs/mvp/functions/F-8-respect.md) |
-| F-9 | Пул фраз и подстановка | пользователь, владелец | в ТЗ | [F-9](../specs/mvp/functions/F-9-phrase-pool.md) |
-| F-10 | Оценка фраз, выбор фраз и история | пользователь, владелец | в ТЗ | [F-10](../specs/mvp/functions/F-10-phrase-rating.md) |
-| F-14 | Шеринг | пользователь | в ТЗ | [F-14](../specs/mvp/functions/F-14-sharing.md) |
-| F-15 | Общий рейтинг | пользователь | в ТЗ | [F-15](../specs/mvp/functions/F-15-leaderboard.md) |
-| F-16 | Функции владельца | владелец | в ТЗ | [F-16](../specs/mvp/functions/F-16-owner.md) |
+| F-1 | Старт и вход через бота | гость, пользователь | в архитектуре | [F-1](../specs/mvp/functions/F-1-start.md) |
+| F-2 | Профиль, настройки и удаление аккаунта | пользователь | в архитектуре | [F-2](../specs/mvp/functions/F-2-settings.md) |
+| F-3 | Постановка задачи | пользователь | в архитектуре | [F-3](../specs/mvp/functions/F-3-task-create.md) |
+| F-4 | Разовая задача: жизненный цикл | пользователь | в архитектуре | [F-4](../specs/mvp/functions/F-4-one-time-task.md) |
+| F-5 | Повторяющаяся задача: периоды | пользователь | в архитектуре | [F-5](../specs/mvp/functions/F-5-recurring-task.md) |
+| F-6 | Проверки «покажи, что сделано» | пользователь | в архитектуре | [F-6](../specs/mvp/functions/F-6-check-ins.md) |
+| F-7 | Напоминания, уведомления и тихие часы | пользователь | в архитектуре | [F-7](../specs/mvp/functions/F-7-notifications.md) |
+| F-8 | Шкала «Уважение» | пользователь | в архитектуре | [F-8](../specs/mvp/functions/F-8-respect.md) |
+| F-9 | Пул фраз и подстановка | пользователь, владелец | в архитектуре | [F-9](../specs/mvp/functions/F-9-phrase-pool.md) |
+| F-10 | Оценка фраз, выбор фраз и история | пользователь, владелец | в архитектуре | [F-10](../specs/mvp/functions/F-10-phrase-rating.md) |
+| F-14 | Шеринг | пользователь | в архитектуре | [F-14](../specs/mvp/functions/F-14-sharing.md) |
+| F-15 | Общий рейтинг | пользователь | в архитектуре | [F-15](../specs/mvp/functions/F-15-leaderboard.md) |
+| F-16 | Функции владельца | владелец | в архитектуре | [F-16](../specs/mvp/functions/F-16-owner.md) |
 
 ## Бой и оплата (этап 2)
 | id | функция | кто | статус | описание |
 |---|---|---|---|---|
-| F-11 | Диалог боя | пользователь | в ТЗ | [F-11](../specs/mvp/functions/F-11-battle-dialog.md) |
-| F-12 | Ход боя, шкалы и слом | пользователь, владелец | в ТЗ | [F-12](../specs/mvp/functions/F-12-battle-turn.md) |
-| F-13 | Удары и оплата Telegram Stars | пользователь, владелец | в ТЗ | [F-13](../specs/mvp/functions/F-13-payments.md) |
+| F-11 | Диалог боя | пользователь | в архитектуре | [F-11](../specs/mvp/functions/F-11-battle-dialog.md) |
+| F-12 | Ход боя, шкалы и слом | пользователь, владелец | в архитектуре | [F-12](../specs/mvp/functions/F-12-battle-turn.md) |
+| F-13 | Удары и оплата Telegram Stars | пользователь, владелец | в архитектуре | [F-13](../specs/mvp/functions/F-13-payments.md) |
 
 ### F-1 Старт и вход через бота: сценарии
 | тип | сценарий | ссылка |
