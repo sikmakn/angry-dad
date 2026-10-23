@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ещё</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .who-line { margin: 0; }
+    .group { display: grid; gap: var(--space-2); }
+    .group > h2 { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+    .menu { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+    .item { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--target); padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); color: var(--fg); text-decoration: none; text-align: left; font: inherit; cursor: pointer; }
+    .item .t { flex: 1; display: grid; gap: var(--space-1); min-width: 0; }
+    .item .t b { font-weight: 700; }
+    .item .val { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); white-space: nowrap; }
+    .item .val.zero { color: var(--red); }
+    .item .go { color: var(--muted); font: 700 var(--hand-m)/1 var(--font-hand); }
+    .item.owner { border: 1.5px dashed var(--ink); }
+    .item.owner .tag { color: var(--ink); border-color: var(--ink); }
+    .note { margin: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Ещё»: раздел меню. Связи: Магазин (F-13, UC-72), Настройки (F-2, UC-7), Раздел владельца (F-16, UC-93), /terms и /paysupport (F-13, UC-75). -->
+
+  <section class="page" data-view="user" data-label="Пользователь">
+    <div class="eyebrow">Дневник · прочее</div>
+    <h1>Ещё</h1>
+    <p class="who-line muted small">@ivan_k · родитель: отец</p>
+
+    <div class="group">
+      <h2>Твоё</h2>
+      <ul class="menu">
+        <li><a class="item" href="shop.html">
+          <span class="t"><b>Магазин ударов</b><span class="small muted">Чтобы ответить Бате, нужны удары</span></span>
+          <span class="val">4 удара</span><span class="go" aria-hidden="true">›</span>
+        </a></li>
+        <li><a class="item" href="settings.html">
+          <span class="t"><b>Настройки</b><span class="small muted">Родитель, пол, пояс, тихие часы, рейтинг</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="group">
+      <h2>Условия и платежи</h2>
+      <ul class="menu">
+        <li><button class="item" type="button" data-cmd="/terms">
+          <span class="t"><b>Условия продажи</b><span class="small muted">Команда /terms, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+        <li><button class="item" type="button" data-cmd="/paysupport">
+          <span class="t"><b>Вопрос по платежу</b><span class="small muted">Команда /paysupport, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+      </ul>
+      <p class="note small muted">Команда уйдёт в чат с ботом. Для вопроса по платежу после команды опиши, что случилось, одним сообщением.</p>
+    </div>
+  </section>
+
+  <section class="page" data-view="zero" data-label="Баланс 0" hidden>
+    <div class="eyebrow">Дневник · прочее</div>
+    <h1>Ещё</h1>
+    <p class="who-line muted small">@ivan_k · родитель: отец</p>
+
+    <div class="group">
+      <h2>Твоё</h2>
+      <ul class="menu">
+        <li><a class="item" href="shop.html">
+          <span class="t"><b>Магазин ударов</b><span class="small muted">Ударов нет, отвечать Бате нечем</span></span>
+          <span class="val zero">0 ударов</span><span class="go" aria-hidden="true">›</span>
+        </a></li>
+        <li><a class="item" href="settings.html">
+          <span class="t"><b>Настройки</b><span class="small muted">Родитель, пол, пояс, тихие часы, рейтинг</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="group">
+      <h2>Условия и платежи</h2>
+      <ul class="menu">
+        <li><button class="item" type="button" data-cmd="/terms">
+          <span class="t"><b>Условия продажи</b><span class="small muted">Команда /terms, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+        <li><button class="item" type="button" data-cmd="/paysupport">
+          <span class="t"><b>Вопрос по платежу</b><span class="small muted">Команда /paysupport, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+      </ul>
+      <p class="note small muted">Команда уйдёт в чат с ботом. Для вопроса по платежу после команды опиши, что случилось, одним сообщением.</p>
+    </div>
+  </section>
+
+  <!-- Пункт «Раздел владельца» есть в разметке только для владельца (Telegram ID из настройки, R-126); обычному пользователю его нет вообще, даже недоступного. -->
+  <section class="page" data-view="owner" data-label="Для владельца" hidden>
+    <div class="eyebrow">Дневник · прочее</div>
+    <h1>Ещё</h1>
+    <p class="who-line muted small">@nikita_owner · родитель: мать</p>
+
+    <div class="group">
+      <h2>Твоё</h2>
+      <ul class="menu">
+        <li><a class="item" href="shop.html">
+          <span class="t"><b>Магазин ударов</b><span class="small muted">Чтобы ответить Бате, нужны удары</span></span>
+          <span class="val">12 ударов</span><span class="go" aria-hidden="true">›</span>
+        </a></li>
+        <li><a class="item" href="settings.html">
+          <span class="t"><b>Настройки</b><span class="small muted">Родитель, пол, пояс, тихие часы, рейтинг</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="group">
+      <h2>Для владельца</h2>
+      <ul class="menu">
+        <li><a class="item owner" href="owner.html">
+          <span class="t"><b>Раздел владельца</b><span class="small muted">Фразы, цены, удары пользователей, метрики, журнал</span><span><span class="tag">только владелец</span></span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="group">
+      <h2>Условия и платежи</h2>
+      <ul class="menu">
+        <li><button class="item" type="button" data-cmd="/terms">
+          <span class="t"><b>Условия продажи</b><span class="small muted">Команда /terms, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+        <li><button class="item" type="button" data-cmd="/paysupport">
+          <span class="t"><b>Вопрос по платежу</b><span class="small muted">Команда /paysupport, откроется чат с ботом</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </button></li>
+      </ul>
+      <p class="note small muted">Команда уйдёт в чат с ботом. Для вопроса по платежу после команды опиши, что случилось, одним сообщением.</p>
+    </div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <div class="eyebrow">Дневник · прочее</div>
+    <h1>Ещё</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <div class="eyebrow">Дневник · прочее</div>
+    <h1>Ещё</h1>
+    <div class="banner"><b>Не загрузилось.</b> Баланс ударов не показался: сеть отвалилась. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#user">Повторить</button>
+    <ul class="menu">
+      <li><a class="item" href="settings.html">
+        <span class="t"><b>Настройки</b><span class="small muted">Родитель, пол, пояс, тихие часы, рейтинг</span></span>
+        <span class="go" aria-hidden="true">›</span>
+      </a></li>
+    </ul>
+  </section>
+
+  <a class="btn ghost" href="start.html#terms">Условия и конфиденциальность</a>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html" aria-current="page"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

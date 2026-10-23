@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Задача</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .back { display: inline-flex; align-items: center; min-height: var(--target-small); align-self: flex-start; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .task-title { font: 700 var(--hand-l)/1.1 var(--font-hand); color: var(--fg); overflow-wrap: anywhere; }
+    .task-title.struck { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+    .head { display: grid; gap: var(--space-3); }
+    .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    dl { margin: 0; }
+    .card.facts { padding-block: var(--space-2); }
+    .facts div { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px dashed var(--line); }
+    .facts div:last-child { border-bottom: 0; }
+    .facts dt { color: var(--muted); }
+    .facts dd { margin: 0; text-align: right; font-weight: 700; }
+    .facts .time { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); }
+    .facts.hot .time { color: var(--red); }
+    .mood { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-1); }
+    .mood i { width: var(--mood-width); height: var(--mood-height); border: 1.5px solid var(--ink); background: var(--ink); border-radius: 2px; }
+    .mood i.off { background: transparent; border-color: var(--line); }
+    .hot .mood i:not(.off) { background: var(--red); border-color: var(--red); }
+    .mood-t { margin-left: var(--space-2); font-size: var(--text-s); font-weight: 700; }
+    .checks { display: grid; gap: var(--space-3); }
+    .checks p { margin: 0; }
+    .checks .btns.inline .btn { padding: 0 var(--space-2); }
+    .note { margin: 0; }
+    .periods li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); min-height: var(--target-small); padding: var(--space-2) var(--space-3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+    .periods li.now { border-color: var(--ink); box-shadow: inset 3px 0 0 var(--ink); }
+    .page > .sheet { margin-inline: calc(-1 * var(--space-4)); margin-bottom: calc(-1 * var(--space-5)); }
+    .sheet h2 { font-family: var(--font-hand); font-size: var(--hand-l); color: var(--red); }
+    .sheet p { margin: 0; }
+    .dim { opacity: 1; color: var(--muted); }
+    .stale { background: var(--bg); border-style: dashed; }
+    .form { display: grid; gap: var(--space-4); margin: 0; }
+    .meta { display: flex; justify-content: space-between; gap: var(--space-3); align-items: baseline; }
+    .count { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); white-space: nowrap; }
+    .field.bad textarea { border-color: var(--red); }
+    .empty-state { display: grid; gap: var(--space-3); justify-items: center; text-align: center; padding-block: var(--space-5); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Задача»: F-4 (R-33…R-37, UC-19…UC-24), F-5 (R-44, R-45, UC-26…UC-31), F-6 (R-53, R-54). Меню на месте, раздел «Главная». Макет: пятница, 23 октября, 16:00. -->
+
+  <!-- Разовая, активна, проверки нет -->
+  <section class="page" data-view="active" data-label="Разовая: активна">
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="head">
+      <h1 class="task-title">написать отчёт по продажам</h1>
+      <a class="btn ghost small" href="#edit">Изменить название</a>
+    </div>
+    <div class="tags"><span class="tag">Разовая</span><span class="tag">Средняя задача</span></div>
+    <dl class="card facts hot">
+      <div><dt>Срок</dt><dd>сегодня, 17:00</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT1H">1 ч 00 мин</time></dd></div>
+      <div><dt>Настроение</dt><dd><span class="mood" role="img" aria-label="Настроение: зол, 4 из 5"><i></i><i></i><i></i><i></i><i class="off"></i><span class="mood-t">Зол</span></span></dd></div>
+      <div><dt>Закроешь</dt><dd>+3 к уважению</dd></div>
+      <div><dt>Провалишь</dt><dd>−2 к уважению</dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="done.html#medium">Готово</a>
+      <a class="btn ghost" aria-describedby="a-more" href="#extended">Мне нужно больше времени…</a>
+      <p id="a-more" class="small muted note">Срок сдвигается на 1 час, один раз в сутки. Другого способа сдвинуть срок нет.</p>
+      <a class="btn danger" href="#confirm-giveup">Сдаюсь</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Разовая с неотвеченной проверкой: три кнопки (R-54, UC-33) -->
+  <section class="page" data-view="check" data-label="Проверка без ответа" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="head">
+      <h1 class="task-title">написать отчёт по продажам</h1>
+    </div>
+    <div class="tags"><span class="tag">Разовая</span><span class="tag">Средняя задача</span><span class="tag red">Ждёт ответа на проверку</span></div>
+    <div class="card red checks" role="group" aria-labelledby="c-h" id="check">
+      <h2 id="c-h">Проверка</h2>
+      <blockquote class="quote m0">Покажи, что сделано. Две минуты.<span class="who">Батя</span></blockquote>
+      <p class="small muted">Спросил в 15:47. Без ответа до 16:02 — минус 1 к уважению.</p>
+      <div class="btns inline">
+        <a class="btn" href="done.html#medium">Сделано</a>
+        <a class="btn ghost" href="#check-answered">Частично</a>
+        <a class="btn ghost" href="#check-answered"><span class="for-male">Не начинал</span><span class="for-female">Не начинала</span></a>
+      </div>
+      <p class="small muted">«Сделано» закрывает задачу: +3. «Частично» и «Не начинал» уважение не меняют, но Батя спросит ещё раз.</p>
+    </div>
+    <dl class="card facts hot">
+      <div><dt>Срок</dt><dd>сегодня, 17:00</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT1H">1 ч 00 мин</time></dd></div>
+      <div><dt>Настроение</dt><dd><span class="mood" role="img" aria-label="Настроение: зол, 4 из 5"><i></i><i></i><i></i><i></i><i class="off"></i><span class="mood-t">Зол</span></span></dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn ghost" href="done.html#medium">Готово</a>
+      <a class="btn ghost" href="#extended">Мне нужно больше времени…</a>
+      <a class="btn danger" href="#confirm-giveup">Сдаюсь</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Проверка устарела: задача уже закрыта, кнопки неактивны, штрафа нет (R-53, UC-35) -->
+  <section class="page" data-view="check-closed" data-label="Проверка устарела" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="toast" role="status">Задача уже закрыта. Штрафа за молчание нет.</div>
+    <h1 class="task-title">написать отчёт по продажам</h1>
+    <div class="tags"><span class="tag ok">Закрыта</span><span class="tag">Разовая</span><span class="tag">Средняя задача</span></div>
+    <div class="card checks stale" role="group" aria-labelledby="cc-h">
+      <h2 id="cc-h" class="dim">Проверка</h2>
+      <p class="dim">Покажи, что сделано. Две минуты.</p>
+      <div class="btns inline">
+        <button class="btn" type="button" disabled>Сделано</button>
+        <button class="btn" type="button" disabled>Частично</button>
+        <button class="btn" type="button" disabled>Не начинал</button>
+      </div>
+    </div>
+    <dl class="card facts">
+      <div><dt>Закрыта</dt><dd>сегодня, 16:03</dd></div>
+      <div><dt>Как</dt><dd>кнопкой «Готово»</dd></div>
+      <div><dt>Уважение</dt><dd>+3</dd></div>
+    </dl>
+    <div class="btns"><a class="btn link" href="#confirm-delete">Удалить задачу</a></div>
+  </section>
+
+  <!-- Продление принято: +1 час, onExcuse (R-33, UC-20) -->
+  <section class="page" data-view="extended" data-label="Продлено на час" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <blockquote class="quote" role="status">Час. Ровно час. Не два и не «до завтра».<span class="who">Батя</span></blockquote>
+    <div class="head">
+      <h1 class="task-title">написать отчёт по продажам</h1>
+      <a class="btn ghost small" href="#edit">Изменить название</a>
+    </div>
+    <div class="tags"><span class="tag">Разовая</span><span class="tag">Средняя задача</span></div>
+    <dl class="card facts">
+      <div><dt>Срок</dt><dd>сегодня, <b>18:00</b> (был 17:00)</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT2H">2 ч 00 мин</time></dd></div>
+      <div><dt>Настроение</dt><dd><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></dd></div>
+      <div><dt>Закроешь</dt><dd>+3 к уважению</dd></div>
+      <div><dt>Провалишь</dt><dd>−2 к уважению</dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="done.html#medium">Готово</a>
+      <a class="btn ghost" aria-describedby="x-more" href="#denied">Мне нужно больше времени…</a>
+      <p id="x-more" class="small muted note">Сегодня час уже взят. Следующий — после 00:00.</p>
+      <a class="btn danger" href="#confirm-giveup">Сдаюсь</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Повторное продление в те же сутки: onExcuseDenied, срок прежний (R-33, UC-23) -->
+  <section class="page" data-view="denied" data-label="Отказ в продлении" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <blockquote class="quote" role="alert">Один час в сутки. Свой ты уже взял. Дальше сам.<span class="who">Батя</span></blockquote>
+    <div class="head">
+      <h1 class="task-title">написать отчёт по продажам</h1>
+      <a class="btn ghost small" href="#edit">Изменить название</a>
+    </div>
+    <div class="tags"><span class="tag">Разовая</span><span class="tag">Средняя задача</span></div>
+    <dl class="card facts">
+      <div><dt>Срок</dt><dd>сегодня, 18:00</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT2H">2 ч 00 мин</time></dd></div>
+      <div><dt>Настроение</dt><dd><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="done.html#medium">Готово</a>
+      <a class="btn ghost" aria-describedby="d-more" href="#denied">Мне нужно больше времени…</a>
+      <p id="d-more" class="small muted note">Срок остался прежним. Продление снова будет доступно после 00:00.</p>
+      <a class="btn danger" href="#confirm-giveup">Сдаюсь</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Редактирование названия: только оно (R-36). Срок недоступен -->
+  <section class="page" data-view="edit" data-label="Название: правка" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1>Название задачи</h1>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="field">
+        <label for="ed-title">Что нужно сделать</label>
+        <textarea id="ed-title" rows="2" maxlength="120" aria-describedby="ed-h">написать отчёт по продажам за октябрь</textarea>
+        <div class="meta"><span class="hint" id="ed-h">Меняется только название. Срок сдвигается кнопкой «Мне нужно больше времени…».</span><span class="count" aria-live="polite">37/120</span></div>
+      </div>
+      <div class="field">
+        <label for="ed-dl">Срок</label>
+        <input id="ed-dl" type="text" value="сегодня, 17:00" disabled>
+      </div>
+      <div class="btns">
+        <button class="btn" type="button" data-go="#active">Сохранить</button>
+        <a class="btn ghost" href="#active">Отмена</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Новое название расплывчатое: onVague (R-25 через R-36) -->
+  <section class="page" data-view="edit-vague" data-label="Название: расплывчато" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1>Название задачи</h1>
+    <blockquote class="quote" role="alert">Это что за задача? Конкретно.<span class="who">Батя</span></blockquote>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="field bad">
+        <label for="ev-title">Что нужно сделать</label>
+        <textarea id="ev-title" rows="2" maxlength="120" aria-invalid="true" aria-describedby="ev-h">заняться отчётами</textarea>
+        <div class="meta"><span class="hint" id="ev-h">Прежнее название остаётся, пока не напишешь конкретно.</span><span class="count" aria-live="polite">18/120</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn" type="button" data-go="#active">Сохранить</button>
+        <a class="btn ghost" href="#active">Отмена</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Проверка не ответила: «Попробуй позже» (R-26 через R-36) -->
+  <section class="page" data-view="edit-later" data-label="Название: позже" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1>Название задачи</h1>
+    <div class="banner" role="alert"><b>Попробуй позже.</b> Не удалось прочитать название. Название не изменено, твой текст на месте.</div>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="field">
+        <label for="el-title">Что нужно сделать</label>
+        <textarea id="el-title" rows="2" maxlength="120" aria-describedby="el-h">написать отчёт по продажам за октябрь</textarea>
+        <div class="meta"><span class="hint" id="el-h">Меняется только название.</span><span class="count" aria-live="polite">37/120</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn" type="button" data-go="#active">Сохранить ещё раз</button>
+        <a class="btn ghost" href="#active">Отмена</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Лимит 50 проверок в сутки (R-28 через R-36) -->
+  <section class="page" data-view="edit-limit" data-label="Название: лимит" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1>Название задачи</h1>
+    <blockquote class="quote" role="alert">Хватит на сегодня. Приходи завтра.<span class="who">Батя</span></blockquote>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="field">
+        <label for="eq-title">Что нужно сделать</label>
+        <textarea id="eq-title" rows="2" maxlength="120" aria-describedby="eq-h">написать отчёт по продажам за октябрь</textarea>
+        <div class="meta"><span class="hint" id="eq-h">Ставить и переименовывать задачи снова можно после 00:00. Проверки прогресса продолжаются.</span><span class="count" aria-live="polite">37/120</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn" type="submit" disabled aria-describedby="eq-h">Сохранить</button>
+        <a class="btn ghost" href="#active">Отмена</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Подтверждение «Сдаюсь» (R-32, UC-22). Отмена оставляет задачу активной -->
+  <section class="page" data-view="confirm-giveup" data-label="Подтверждение: сдаюсь" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title">написать отчёт по продажам</h1>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="g-h" aria-describedby="g-d">
+      <h2 id="g-h">Сдаёшься?</h2>
+      <p id="g-d">Задача станет проваленной, уважение упадёт на 1: с 14 до 13. Вернуть снятое нельзя, Батя запишет в дневник.</p>
+      <div class="btns">
+        <a class="btn red" href="fail.html#surrender">Да, сдаюсь</a>
+        <a class="btn ghost" href="#active">Нет, продолжу</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Подтверждение удаления (R-35, UC-20) -->
+  <section class="page" data-view="confirm-delete" data-label="Подтверждение: удалить" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title">написать отчёт по продажам</h1>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="dl-h" aria-describedby="dl-d">
+      <h2 id="dl-h">Удалить задачу?</h2>
+      <p id="dl-d">Она исчезнет из списка и истории. Если задача закрыта, пропадёт и из рейтинга. Уважение останется как есть.</p>
+      <div class="btns">
+        <a class="btn red" href="home.html#deleted">Удалить</a>
+        <a class="btn ghost" href="#active">Не удалять</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Повторяющаяся, идёт период: список периодов со статусами (R-40, R-44, UC-26) -->
+  <section class="page" data-view="recurring" data-label="Повтор: идёт период" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="head">
+      <h1 class="task-title">повторять английский каждый день</h1>
+      <a class="btn ghost small" href="#edit-recurring">Изменить название</a>
+    </div>
+    <div class="tags"><span class="tag">Повторяется · каждый день</span><span class="tag">Средняя задача</span></div>
+    <dl class="card facts">
+      <div><dt>Период</dt><dd>сегодня, пт 23 октября</dd></div>
+      <div><dt>Ориентир</dt><dd>20:00</dd></div>
+      <div><dt>Срок периода</dt><dd>сегодня, 22:00</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT6H">6 ч 00 мин</time></dd></div>
+      <div><dt>Настроение</dt><dd><span class="mood" role="img" aria-label="Настроение: раздражён, 3 из 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i><span class="mood-t">Раздражён</span></span></dd></div>
+      <div><dt>Закроешь период</dt><dd>+3 к уважению</dd></div>
+      <div><dt>Провалишь период</dt><dd>−2 к уважению</dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="done.html#recurring">Готово</a>
+      <p class="small muted note">Закрывает только сегодняшний период. Завтра Батя спросит снова.</p>
+      <a class="btn ghost" href="#rec-extended">Мне нужно больше времени…</a>
+      <a class="btn danger" href="#confirm-period-giveup" aria-describedby="r-giveup">Сдаюсь</a>
+      <p id="r-giveup" class="small muted note pull1">Проваливает только сегодняшний период. Задача остаётся.</p>
+    </div>
+    <h2>Периоды</h2>
+    <ol class="list periods">
+      <li class="now"><span>Сегодня, пт 23 окт.</span><span class="tag">Идёт · до 22:00</span></li>
+      <li><span>Чт 22 окт.</span><span class="tag ok">Закрыт</span></li>
+      <li><span>Ср 21 окт.</span><span class="tag red">Провален</span></li>
+      <li><span>Вт 20 окт.</span><span class="tag ok">Закрыт</span></li>
+      <li><span>Пн 19 окт.</span><span class="tag ok">Закрыт</span></li>
+      <li><span>Вс 18 окт.</span><span class="tag ok">Закрыт</span></li>
+    </ol>
+    <a class="btn link" href="#recurring-earlier">Показать более ранние</a>
+    <div class="btns">
+      <a class="btn danger" href="#confirm-stop">Остановить задачу</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Повторяющаяся без активного периода: выходной или не «её» день (UC-31, A-67) -->
+  <section class="page" data-view="recurring-idle" data-label="Повтор: нет периода" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="head">
+      <h1 class="task-title">проплыть километр в бассейне</h1>
+      <a class="btn ghost small" href="#edit-pool">Изменить название</a>
+    </div>
+    <div class="tags"><span class="tag">Повторяется · вт, чт</span><span class="tag">Средняя задача</span></div>
+    <div class="card">
+      <p class="hand ink-hand">Сегодня не твой день. Проверок и напоминаний нет.</p>
+      <p class="muted mt2">Следующий период — вторник, 27 октября. Срок 22:00, ориентир 19:00.</p>
+    </div>
+    <h2>Периоды</h2>
+    <ol class="list periods">
+      <li><span>Чт 22 окт.</span><span class="tag ok">Закрыт</span></li>
+      <li><span>Вт 20 окт.</span><span class="tag red">Провален</span></li>
+      <li><span>Чт 15 окт.</span><span class="tag ok">Закрыт</span></li>
+    </ol>
+    <div class="btns">
+      <a class="btn danger" href="#confirm-stop">Остановить задачу</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="edit-recurring" data-label="Английский: изменить название" hidden>
+    <a class="back" href="#recurring">← К задаче</a><h1>Изменить название</h1>
+    <p>Повторяется · каждый день. Меняется только название, периоды и расписание сохраняются.</p>
+    <form onsubmit="return false" class="stack"><div class="field"><label for="edit-english">Название задачи</label><input id="edit-english" value="повторять английский каждый день" maxlength="120"></div><button class="btn" type="button" data-go="#recurring">Сохранить</button><a class="btn ghost" href="#recurring">Отмена</a></form>
+  </section>
+  <section class="page" data-view="edit-pool" data-label="Бассейн: изменить название" hidden>
+    <a class="back" href="#recurring-idle">← К задаче</a><h1>Изменить название</h1>
+    <p>Повторяется · вт, чт. Сегодня нет активного периода. Меняется только название.</p>
+    <form onsubmit="return false" class="stack"><div class="field"><label for="edit-swim">Название задачи</label><input id="edit-swim" value="проплыть километр в бассейне" maxlength="120"></div><button class="btn" type="button" data-go="#recurring-idle">Сохранить</button><a class="btn ghost" href="#recurring-idle">Отмена</a></form>
+  </section>
+  <section class="page" data-view="recurring-earlier" data-label="Английский: ранние периоды" hidden>
+    <a class="back" href="#recurring">← К текущему периоду</a><h1>повторять английский каждый день</h1><span class="tag">Повторяется · каждый день</span>
+    <h2>Ранние периоды</h2><ol class="list periods"><li><span>Сб 17 окт.</span><span class="tag ok">Закрыт</span></li><li><span>Пт 16 окт.</span><span class="tag red">Провален</span></li><li><span>Чт 15 окт.</span><span class="tag ok">Закрыт</span></li></ol><p class="small muted">Это все более ранние периоды этой задачи.</p>
+  </section>
+  <section class="page" data-view="rec-extended" data-label="Английский: период продлён" hidden>
+    <a class="back" href="home.html">← Задачи</a><h1>повторять английский каждый день</h1><span class="tag">Повторяется · каждый день</span>
+    <blockquote class="quote" role="status">Час добавлен. Успевай.<span class="who">Батя</span></blockquote>
+    <dl class="card facts"><div><dt>Период</dt><dd>пт 23 октября</dd></div><div><dt>Ориентир</dt><dd>20:00</dd></div><div><dt>Срок периода</dt><dd>22:00 → 23:00</dd></div><div><dt>Следующий период</dt><dd>сб 24 октября, 00:00</dd></div></dl>
+    <p>Продление на сегодня использовано. Уважение не изменилось.</p><a class="btn" href="done.html#recurring">Готово за сегодня</a><button class="btn ghost" disabled>Больше времени сегодня нет</button><a class="btn danger" href="#confirm-period-giveup">Сдаюсь на сегодня</a><a class="btn link" href="#recurring-earlier">Показать более ранние</a>
+  </section>
+
+  <!-- Продление повторяющейся не влезает до начала следующего периода: отказ (R-44, UC-29 п.6) -->
+  <section class="page" data-view="rec-denied" data-label="Повтор: отказ в продлении" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <blockquote class="quote" role="alert">Продлевать некуда: дальше уже завтра. Успевай сегодня.<span class="who">Батя</span></blockquote>
+    <h1 class="task-title">выпить таблетки после ужина</h1>
+    <div class="tags"><span class="tag">Повторяется · каждый день</span><span class="tag">Микро-задача</span></div>
+    <dl class="card facts hot">
+      <div><dt>Ориентир</dt><dd>23:30</dd></div>
+      <div><dt>Срок периода</dt><dd>сегодня, 23:30</dd></div>
+      <div><dt>Осталось</dt><dd class="time"><time datetime="PT7H30M">7 ч 30 мин</time></dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="done.html#micro">Готово</a>
+      <a class="btn ghost" href="#rec-denied" aria-describedby="rd-more">Мне нужно больше времени…</a>
+      <p id="rd-more" class="small muted note">Срок не изменился: с продлением он ушёл бы на следующие сутки.</p>
+      <a class="btn danger" href="#confirm-period-giveup">Сдаюсь</a>
+    </div>
+  </section>
+
+  <!-- Подтверждение «Остановить задачу» (R-45, UC-27) -->
+  <section class="page" data-view="confirm-stop" data-label="Подтверждение: остановить" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title">повторять английский каждый день</h1>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="s-h" aria-describedby="s-d">
+      <h2 id="s-h">Остановить задачу?</h2>
+      <p id="s-d">Новые периоды открываться не будут, проверки и напоминания прекратятся. Уважение не изменится. Прошлые периоды останутся в списке.</p>
+      <div class="btns">
+        <a class="btn red" href="home.html#stopped">Остановить</a>
+        <a class="btn ghost" href="#recurring">Пусть идёт</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Остановленная повторяющаяся: действий нет, кроме удаления -->
+  <section class="page" data-view="stopped" data-label="Остановлена" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title struck">повторять английский каждый день</h1>
+    <div class="tags"><span class="tag">Остановлена</span><span class="tag">Повторялась · каждый день</span><span class="tag">Средняя задача</span></div>
+    <div class="card"><p class="muted m0">Новых периодов не будет, сообщений по задаче нет.</p></div>
+    <h2>Периоды</h2>
+    <ol class="list periods">
+      <li><span>Чт 22 окт.</span><span class="tag ok">Закрыт</span></li>
+      <li><span>Ср 21 окт.</span><span class="tag red">Провален</span></li>
+      <li><span>Вт 20 окт.</span><span class="tag ok">Закрыт</span></li>
+    </ol>
+    <div class="btns"><a class="btn link" href="#confirm-delete">Удалить задачу</a></div>
+  </section>
+
+  <!-- Разовая закрыта: без действий (кроме удаления) -->
+  <section class="page" data-view="done" data-label="Закрыта (done)" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title">позвонить в сервис по гарантии</h1>
+    <div class="tags"><span class="tag ok">Закрыта</span><span class="tag">Разовая</span><span class="tag">Микро-задача</span></div>
+    <dl class="card facts">
+      <div><dt>Срок был</dt><dd>сегодня, 18:30</dd></div>
+      <div><dt>Закрыта</dt><dd>сегодня, 15:12</dd></div>
+      <div><dt>Как</dt><dd>кнопкой «Готово»</dd></div>
+      <div><dt>Уважение</dt><dd>+1</dd></div>
+    </dl>
+    <div class="btns"><a class="btn link" href="#confirm-delete">Удалить задачу</a></div>
+  </section>
+
+  <!-- Разовая провалена: штамп, без действий; «Сделаю за час» живёт на экране «Провал» -->
+  <section class="page" data-view="failed" data-label="Провалена (failed)" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <h1 class="task-title struck">вынести мусор и сдать бутылки</h1>
+    <div class="stamp">Задача провалена</div>
+    <div class="tags"><span class="tag red">Провалена</span><span class="tag">Разовая</span><span class="tag">Микро-задача</span></div>
+    <dl class="card facts">
+      <div><dt>Срок был</dt><dd>сегодня, 12:00</dd></div>
+      <div><dt>Как</dt><dd>срок вышел</dd></div>
+      <div><dt>Уважение</dt><dd>−2</dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn ghost" href="fail.html">К разбору провала</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- «Готово» нажато по проваленной задаче, например под старым напоминанием (R-37, UC-22, UC-23) -->
+  <section class="page" data-view="late" data-label="Готово после срока" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="toast" role="alert">Задача уже провалена.</div>
+    <h1 class="task-title struck">отправить отчёт по продажам</h1>
+    <div class="stamp">Задача провалена</div>
+    <dl class="card facts">
+      <div><dt>Срок был</dt><dd>сегодня, 18:00</dd></div>
+      <div><dt>Как</dt><dd>срок вышел</dd></div>
+      <div><dt>Уважение</dt><dd>−2</dd></div>
+    </dl>
+    <div class="btns">
+      <a class="btn" href="fail.html">К разбору: «Сделаю за час»</a>
+      <a class="btn link" href="#confirm-delete">Удалить задачу</a>
+    </div>
+  </section>
+
+  <!-- Чужая или удалённая задача (UC-24) -->
+  <section class="page" data-view="missing" data-label="Задачи нет" hidden>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="empty-state">
+      <div class="grade" aria-hidden="true">?</div>
+      <h1>Такой задачи нет</h1>
+      <p class="muted m0">Её удалили, или она не твоя. Чужие задачи здесь не открываются.</p>
+      <a class="btn" href="home.html">К моим задачам</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Задача · loading</h1>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">Задача · error</h1>
+    <a class="back" href="home.html">← Задачи</a>
+    <div class="banner"><b>Не загрузилось.</b> Задача никуда не делась, просто Батя не дозвонился. Проверь интернет и нажми «Повторить».</div>
+    <a class="btn" href="#active">Повторить</a>
+  </section>
+
+  <section class="page" data-view="retry" data-label="Сделаю за час: принято" hidden>
+    <a class="back" href="home.html">← Задачи</a><h1>Написать отчёт по продажам</h1>
+    <blockquote class="quote" role="status">Ещё час. Последний. Посмотрим, что у тебя получится.<span class="who">Батя</span></blockquote>
+    <div class="card"><p>Задача снова активна. Новый срок: сегодня, 19:10 (сейчас 18:10 + 1 час).</p><p class="small muted">Снятое за провал уважение не возвращается. Повторной попытки по этой задаче больше нет.</p></div>
+    <a class="btn" href="done.html#medium">Готово</a><a class="btn ghost" href="#active">К задаче</a>
+  </section>
+  <section class="page" data-view="retry-period" data-label="Период: Сделаю за час принято" hidden>
+    <h1>Повторять английский · пятница, 23 октября</h1><blockquote class="quote" role="status">Ещё час. Последний. Посмотрим, что у тебя получится.<span class="who">Батя</span></blockquote>
+    <p>Период снова активен. Сейчас 22:10, новый срок — 23:10. Следующий период начнётся в 00:00. Снятое уважение не возвращается.</p><a class="btn" href="done.html#recurring">Готово за сегодня</a><a class="btn ghost" href="#recurring">К периодам задачи</a>
+  </section>
+  <section class="page" data-view="check-penalty" data-label="Проверка: штраф уже снят" hidden>
+    <a class="back" href="home.html#check-penalty">← Задачи</a><h1>Написать отчёт по продажам</h1>
+    <blockquote class="quote">Покажи, что сделано. Две минуты.<span class="who">Батя</span></blockquote>
+    <div class="banner" role="status">За 15 минут ответа не было: −1 к уважению, 14 → 13. Ответить ещё можно, снятое уважение не вернётся.</div>
+    <div class="btns"><a class="btn" href="done.html#medium">Сделано</a><a class="btn ghost" href="#check-answered">Частично</a><a class="btn ghost" href="#check-answered"><span class="for-male">Не начинал</span><span class="for-female">Не начинала</span></a></div>
+  </section>
+  <section class="page" data-view="check-answered" data-label="Проверка: ответ принят" hidden>
+    <h1>Ответ принят</h1><blockquote class="quote">Ладно. Скоро спрошу ещё.<span class="who">Батя</span></blockquote>
+    <p>Ответ сохранён. Уважение не изменилось; снятый штраф не возвращается. Следующая проверка серии — через 3–10 минут.</p><a class="btn" href="#active">К задаче</a>
+  </section>
+  <section class="page" data-view="confirm-period-giveup" data-label="Подтверждение: сдаюсь на период" hidden>
+    <h1>Повторять английский каждый день</h1>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="pg-h" aria-describedby="pg-d">
+      <h2 id="pg-h">Сдаёшься на сегодня?</h2><p id="pg-d">Провалится только период за пятницу, 23 октября. Уважение упадёт на 1: с 14 до 13. Задача останется, завтра Батя спросит снова.</p>
+      <a class="btn red" href="fail.html#period-surrender">Да, сдаюсь на сегодня</a><a class="btn ghost" href="#recurring">Нет, продолжу</a>
+    </div>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html" aria-current="page"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

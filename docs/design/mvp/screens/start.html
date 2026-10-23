@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Старт</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .form { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); margin: 0; }
+    .form .push { margin-top: auto; }
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: var(--space-3); }
+    legend { padding: 0; margin-bottom: var(--space-3); font: 700 var(--hand-l)/1.1 var(--font-hand); color: var(--ink); }
+    .opt { display: flex; align-items: center; gap: var(--space-3); min-height: 72px; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1.5px solid var(--edge); border-radius: var(--radius); cursor: pointer; }
+    .opt input { width: var(--check-size); height: var(--check-size); flex: none; margin: 0; accent-color: var(--accent); }
+    .opt b { display: block; font: 700 var(--hand-l)/1 var(--font-hand); }
+    .opt span.sub { display: block; font-size: var(--text-s); color: var(--muted); }
+    .opt:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+    .opt:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .terms a { color: var(--ink); display: inline-flex; align-items: center; min-height: var(--target); padding-block: var(--space-2); }
+    .why { margin: 0; text-align: center; }
+    .center { display: grid; justify-items: center; gap: var(--space-4); text-align: center; }
+    .big { font: 700 var(--hand-xl)/1 var(--font-hand); margin: 0; }
+    .page > .sheet { margin-inline: calc(-1 * var(--space-4)); margin-bottom: calc(-1 * var(--space-5)); }
+    .sheet h2 { font-family: var(--font-hand); font-size: var(--hand-l); color: var(--ink); }
+    .sheet p { margin: 0; }
+    .step { display: flex; justify-content: space-between; align-items: baseline; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Старт»: F-1, UC-1…UC-6. Нижнего меню нет. Состояния идут по шагам: родитель, пол, «Соболезнуем», первые фразы. -->
+
+  <!-- Шаг 1, ничего не выбрано: «Дальше» неактивна (R-2, R-3, UC-3) -->
+  <section class="page" data-view="parent" data-label="1 · Родитель">
+    <h1 class="sr-only">Старт · parent</h1>
+    <form onsubmit="return false" class="form" data-need novalidate>
+      <div class="step"><span class="eyebrow">Шаг 1 из 4</span></div>
+      <fieldset>
+        <legend>Выберите Вашего вредного родителя</legend>
+        <label class="opt"><input type="radio" name="p-role" value="father"><span><b>Отец</b><span class="sub">Сравнивает, сроки, «в твои годы»</span></span></label>
+        <label class="opt"><input type="radio" name="p-role" value="mother"><span><b>Мать</b><span class="sub">Давит виной: «я для тебя всё…»</span></span></label>
+      </fieldset>
+      <p class="small muted terms m0">Продолжая, вы принимаете <a href="#terms" data-open="terms">условия и политику конфиденциальности</a>.</p>
+      <div class="push btns">
+        <button class="btn" type="button" data-next disabled aria-describedby="p-hint" data-go="#gender">Дальше</button>
+        <p id="p-hint" class="small muted why">Выберите родителя, чтобы идти дальше.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Шаг 1, выбран отец: «Дальше» активна -->
+  <section class="page" data-view="parent-chosen" data-label="1 · Выбран" hidden>
+    <h1 class="sr-only">Старт · parent-chosen</h1>
+    <p class="small muted">Ты в общем рейтинге. Выйти можно в настройках.</p>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="step"><span class="eyebrow">Шаг 1 из 4</span></div>
+      <fieldset>
+        <legend>Выберите Вашего вредного родителя</legend>
+        <label class="opt"><input type="radio" name="pc-role" value="father" checked><span><b>Отец</b><span class="sub">Сравнивает, сроки, «в твои годы»</span></span></label>
+        <label class="opt"><input type="radio" name="pc-role" value="mother"><span><b>Мать</b><span class="sub">Давит виной: «я для тебя всё…»</span></span></label>
+      </fieldset>
+      <p class="small muted terms m0">Продолжая, вы принимаете <a href="#terms" data-open="terms">условия и политику конфиденциальности</a>.</p>
+      <div class="push btns">
+        <button class="btn" type="button" data-go="#gender">Дальше</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Строка про условия: что передаётся внешнему ИИ (R-3) -->
+  <section class="page" data-view="terms" data-label="Условия" hidden>
+    <a class="btn link" href="more.html#user">К разделу «Ещё»</a>
+    <div class="eyebrow">Условия</div>
+    <h1>Условия и политика конфиденциальности</h1>
+    <div class="card stack">
+      <h3>Внешний ИИ</h3>
+      <p class="m0">Тексты ваших задач и реплики в бою передаются внешнему ИИ: он проверяет, что задача конкретная, и отвечает за персонажа.</p>
+    </div>
+    <div class="card stack">
+      <h3>Полный текст</h3>
+      <p class="muted m0">Полный текст условий и политики конфиденциальности размещает владелец продукта.</p>
+    </div>
+    <div class="btns push"><button class="btn ghost" type="button" data-go="#parent-chosen">Понятно, назад</button></div>
+  </section>
+
+  <!-- Устройство не отдало часовой пояс: UTC+3 (R-5, UC-3) -->
+  <section class="page" data-view="tz-unknown" data-label="Пояс не определён" hidden>
+    <h1 class="sr-only">Старт · tz-unknown</h1>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="step"><span class="eyebrow">Шаг 1 из 4</span></div>
+      <div class="banner" role="status"><b>Пояс не определился.</b> Поставили UTC+3 (Москва). Сменить можно в настройках.</div>
+      <fieldset>
+        <legend>Выберите Вашего вредного родителя</legend>
+        <label class="opt"><input type="radio" name="tu-role" value="father"><span><b>Отец</b><span class="sub">Сравнивает, сроки, «в твои годы»</span></span></label>
+        <label class="opt"><input type="radio" name="tu-role" value="mother"><span><b>Мать</b><span class="sub">Давит виной: «я для тебя всё…»</span></span></label>
+      </fieldset>
+      <p class="small muted terms m0">Продолжая, вы принимаете <a href="#terms" data-open="terms">условия и политику конфиденциальности</a>.</p>
+      <div class="push btns">
+        <button class="btn" type="button" disabled aria-describedby="tu-hint" data-go="#gender">Дальше</button>
+        <p id="tu-hint" class="small muted why">Выберите родителя, чтобы идти дальше.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Повторный старт после удаления аккаунта, отец (R-8, UC-2). Идёт сразу после выбора родителя -->
+  <section class="page" data-view="again" data-label="Снова (отец)" hidden>
+    <h1 class="sr-only">Старт · again</h1>
+    <div class="step"><span class="eyebrow">Шаг 1 из 4</span></div>
+    <blockquote class="quote">Снова начинаем. Я не удивлён.<span class="who">Батя</span></blockquote>
+    <p class="muted m0">Старых задач и боёв нет. Уважение начинается с 12.</p>
+    <div class="push btns"><button class="btn" type="button" data-go="#gender">Дальше</button></div>
+  </section>
+
+  <!-- То же для матери: «не удивлена» -->
+  <section class="page" data-view="again-mother" data-label="Снова (мать)" hidden>
+    <h1 class="sr-only">Старт · again-mother</h1>
+    <div class="step"><span class="eyebrow">Шаг 1 из 4</span></div>
+    <blockquote class="quote">Снова начинаем. Я не удивлена.<span class="who">Мама</span></blockquote>
+    <p class="muted m0">Старых задач и боёв нет. Уважение начинается с 12.</p>
+    <div class="push btns"><button class="btn" type="button" data-go="#gender">Дальше</button></div>
+  </section>
+
+  <!-- Шаг 2: пол, ничего не выбрано (R-2, UC-5: сюда возвращают незавершивших) -->
+  <section class="page" data-view="gender" data-label="2 · Пол" hidden>
+    <p class="small muted">Ты в общем рейтинге. Выйти можно в настройках.</p>
+    <h1 class="sr-only">Старт · gender</h1>
+    <form onsubmit="return false" class="form" data-need novalidate>
+      <div class="step"><span class="eyebrow">Шаг 2 из 4</span><a class="small back-link" href="#parent" data-open="parent">Назад</a></div>
+      <fieldset>
+        <legend>Выберите Ваш пол</legend>
+        <label class="opt"><input type="radio" name="g-gender" value="male"><span><b>Мужской</b></span></label>
+        <label class="opt"><input type="radio" name="g-gender" value="female"><span><b>Женский</b></span></label>
+      </fieldset>
+      <p class="small muted m0">От пола зависят окончания: «сам» или «сама». Больше ни от чего.</p>
+      <div class="push btns">
+        <button class="btn" type="button" data-next disabled aria-describedby="g-hint" data-go="#condolence">Дальше</button>
+        <p id="g-hint" class="small muted why">Выберите пол, чтобы идти дальше.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Гость пытался открыть другой раздел и возвращён на незавершённый шаг (UC-5, UC-17) -->
+  <section class="page" data-view="redirect" data-label="Вернули на шаг" hidden>
+    <h1 class="sr-only">Старт · redirect</h1>
+    <form onsubmit="return false" class="form" data-need novalidate>
+      <div class="step"><span class="eyebrow">Шаг 2 из 4</span></div>
+      <div class="banner" role="status"><b>Сначала закончи начатое.</b> Задачи, бой и остальное откроются после старта.</div>
+      <fieldset>
+        <legend>Выберите Ваш пол</legend>
+        <label class="opt"><input type="radio" name="r-gender" value="male"><span><b>Мужской</b></span></label>
+        <label class="opt"><input type="radio" name="r-gender" value="female"><span><b>Женский</b></span></label>
+      </fieldset>
+      <div class="push btns">
+        <button class="btn" type="button" data-next disabled aria-describedby="r-hint" data-go="#condolence">Дальше</button>
+        <p id="r-hint" class="small muted why">Выберите пол, чтобы идти дальше.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- Шаг 3: «Соболезнуем» (R-2). Тон персонажа начинается здесь (A-59) -->
+  <section class="page" data-view="condolence" data-label="3 · Соболезнуем" hidden>
+    <p class="small muted">Ты в общем рейтинге. Выйти можно в настройках.</p>
+    <div class="step"><span class="eyebrow">Шаг 3 из 4</span></div>
+    <div class="center center-block">
+      <div class="grade" aria-hidden="true">2</div>
+      <h1 class="hand-xl">Соболезнуем Вам. Крепитесь…</h1>
+      <p class="muted m0">Передумаете: родителя и пол можно сменить в настройках.</p>
+    </div>
+    <div class="btns"><button class="btn" type="button" data-go="#phrases">Дальше</button></div>
+  </section>
+
+  <!-- Шаг 4: первые фразы, отец и мужской пол (R-6, R-4) -->
+  <section class="page" data-view="phrases" data-label="4 · Фразы (отец, м)" hidden>
+    <p class="small muted">Ты в общем рейтинге. Выйти можно в настройках.</p>
+    <h1 class="sr-only">Старт · phrases</h1>
+    <div class="step"><span class="eyebrow">Шаг 4 из 4</span></div>
+    <blockquote class="quote">Опять ничего сам не можешь? Ну, что тебе надо сделать?<span class="who">Батя</span></blockquote>
+    <blockquote class="quote">Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?<span class="who">Батя</span></blockquote>
+    <div class="push btns"><a class="btn" href="task-new.html#first">Назвать задачу</a></div>
+  </section>
+
+  <!-- Шаг 4: мать и женский пол: «сама» -->
+  <section class="page" data-view="phrases-mother" data-label="4 · Фразы (мать, ж)" hidden>
+    <p class="small muted">Ты в общем рейтинге. Выйти можно в настройках.</p>
+    <h1 class="sr-only">Старт · phrases-mother</h1>
+    <div class="step"><span class="eyebrow">Шаг 4 из 4</span></div>
+    <blockquote class="quote">Опять ничего сама не можешь? Ну, что тебе надо сделать?<span class="who">Мама</span></blockquote>
+    <blockquote class="quote">Мечты сюда не пиши. Витать в облаках — не работа. Что нужно сделать, чётко?<span class="who">Мама</span></blockquote>
+    <div class="push btns"><a class="btn" href="task-new.html#first">Назвать задачу</a></div>
+  </section>
+
+  <!-- Пользователь прошёл старт, пояс устройства отличается от сохранённого (R-9, UC-4). Показывается поверх главной -->
+  <section class="page" data-view="tz" data-label="Обновить пояс" hidden>
+    <h1 class="sr-only">Старт · tz</h1>
+    <div class="eyebrow">Главная</div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="tz-h">
+      <h2 id="tz-h">Обновить часовой пояс?</h2>
+      <p>Сохранён UTC+3 (Москва), а устройство сейчас в UTC+4 (Самара). По поясу считаются сроки, проверки и тихие часы.</p>
+      <div class="btns">
+        <button class="btn" type="button" data-go="home.html">Обновить на UTC+4</button>
+        <button class="btn ghost" type="button" data-go="home.html">Оставить UTC+3</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Выбор не сохранился: выбранное остаётся на месте -->
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">Старт · error</h1>
+    <form onsubmit="return false" class="form" novalidate>
+      <div class="step"><span class="eyebrow">Шаг 2 из 4</span></div>
+      <div class="banner"><b>Не сохранилось.</b> Выбор на месте, сеть отвалилась. Проверь интернет и нажми «Повторить».</div>
+      <fieldset>
+        <legend>Выберите Ваш пол</legend>
+        <label class="opt"><input type="radio" name="e-gender" value="male"><span><b>Мужской</b></span></label>
+        <label class="opt"><input type="radio" name="e-gender" value="female" checked><span><b>Женский</b></span></label>
+      </fieldset>
+      <div class="push btns"><button class="btn" type="button" data-go="#gender">Повторить</button></div>
+    </form>
+  </section>
+
+  <!-- Открытие Mini App -->
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Старт · loading</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+</div>
+<script src="../viewer.js?v=4"></script>
+<script>document.querySelectorAll("form[data-need]").forEach(function(f){f.addEventListener("change",function(){f.querySelector("[data-next]").disabled=false;});});</script>
+</body>
+</html>

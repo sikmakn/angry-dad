@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поделиться</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .note { margin: 0; }
+
+    /* стол, на котором лежит вырванный лист */
+    .stage { margin: 0; display: grid; gap: var(--space-3); padding: var(--space-5) var(--space-4) var(--space-4); background: var(--bg); border: 1px dashed var(--line); border-radius: var(--radius); }
+    .stage figcaption { text-align: center; }
+    .leaf-wrap { filter: drop-shadow(3px 5px 0 var(--line)); transform: rotate(-1.5deg); }
+
+    /* карточка-изображение: лист из тетради в клетку, левый край вырван, поле красной ручкой */
+    .leaf { position: relative; aspect-ratio: 4 / 5; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-4) var(--space-5) 52px; color: var(--fg);
+      background-color: var(--surface);
+      background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: var(--cell) var(--cell);
+      clip-path: polygon(0 0, 100% 0, 100% 97%, 95% 100%, 90% 97%, 85% 100%, 80% 97%, 75% 100%, 70% 97%, 65% 100%, 60% 97%, 55% 100%, 50% 97%, 45% 100%, 40% 97%, 35% 100%, 30% 97%, 25% 100%, 20% 97%, 15% 100%, 10% 97%, 5% 100%, 0 97%); }
+    .leaf::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 16px; background: radial-gradient(circle at 0 50%, var(--bg) 0 7px, transparent 8px) left top / 16px 38px repeat-y; }
+    .leaf::after { content: ""; position: absolute; top: 0; bottom: 0; left: 38px; width: 2px; background: var(--red); }
+    .leaf-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+    .leaf-role { display: grid; gap: var(--space-1); }
+    .leaf-role .k { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+    .leaf-role .v { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); }
+    .leaf .grade { width: var(--grade-card); height: var(--grade-card); font-size: calc(var(--hand-xl) * 0.75); }
+    .leaf .grade.deg { font-size: calc(var(--hand-xl) * 0.6); }
+    .leaf .stamp { align-self: flex-start; margin: var(--space-2) 0 0; font-size: var(--hand-m); padding: var(--space-2) var(--space-4); }
+    .leaf-phrase { margin: auto 0; font: 700 calc(var(--hand-m) * 1.2)/1.2 var(--font-hand); color: var(--red); text-wrap: balance; }
+    .leaf-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px dashed var(--line); font-size: var(--text-s); color: var(--muted); }
+    .leaf-foot .sign { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--red); }
+    .deg-box { display: grid; justify-items: center; gap: var(--space-1); font-size: var(--text-s); color: var(--fg); text-align: center; }
+    .pips { display: flex; gap: var(--space-1); }
+    .pips i { width: var(--mood-width); height: var(--space-2); border: 1.5px solid var(--ink); }
+    .pips i.on { background: var(--ink); }
+
+    .leaf-skel { aspect-ratio: 4 / 5; height: auto; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Поделиться»: F-14, UC-78…UC-82. Карточка без имени, username и названия задачи: {task} → «задачу», {name} → «сынок»/«дочка».
+       На карточку идёт только фраза пула. В макете карточка следует теме страницы; на сервере её рисуют в светлой теме (допущение).
+       Уровни степени победы: 1 = 0–19, 2 = 20–49, 3 = 50–79, 4 = 80–100 (R-104). -->
+
+  <section class="page" data-view="done" data-label="Готово">
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, отметка «Выполнено». Фраза: Вовремя. Надо же. Не привык я такое говорить, поэтому скажу один раз: нормально. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <span class="tag">Выполнено</span>
+        </div>
+        <p class="leaf-phrase">Вовремя. Надо же. Не привык я такое говорить, поэтому скажу один раз: нормально.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">На карточке нет твоего имени, username и названия задачи. Только фраза Бати и ссылка на бота.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="done.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="fail" data-label="Провал" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, оценка 2, штамп «Задача провалена». Фраза: Сергей из пятого подъезда в твои годы задачу сдавал до обеда. Но ты у нас особенный. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="grade" aria-hidden="true">2</div>
+        </div>
+        <div class="stamp">Задача провалена</div>
+        <p class="leaf-phrase">Сергей из пятого подъезда в твои годы задачу сдавал до обеда. Но ты у нас особенный.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">Название задачи на карточку не попадает: вместо него слово «задачу».</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="fail.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="battle1" data-label="Бой · уровень 1 (0)" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, степень победы 0, уровень 1 из 4. Фраза: Ну что, пришёл разговаривать? Я слушаю. Недолго. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="deg-box" aria-hidden="true"><div class="grade ok deg">0</div><span>степень победы</span><span class="pips"><i class="on"></i><i></i><i></i><i></i></span><span>уровень 1 из 4</span></div>
+        </div>
+        <p class="leaf-phrase">Ну что, пришёл разговаривать? Я слушаю. Недолго.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">До слома на карточку идёт стартовая фраза родителя и текущая степень победы.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="battle.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="battle2" data-label="Бой · уровень 2 (21)" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, степень победы 21, уровень 2 из 4. Фраза: Ну что, пришёл разговаривать? Я слушаю. Недолго. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="deg-box" aria-hidden="true"><div class="grade ok deg">21</div><span>степень победы</span><span class="pips"><i class="on"></i><i class="on"></i><i></i><i></i></span><span>уровень 2 из 4</span></div>
+        </div>
+        <p class="leaf-phrase">Ну что, пришёл разговаривать? Я слушаю. Недолго.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">До слома на карточку идёт стартовая фраза родителя и текущая степень победы.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="battle.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="battle3" data-label="Бой · уровень 3 (78)" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, степень победы 78, уровень 3 из 4. Фраза: Ну что, пришёл разговаривать? Я слушаю. Недолго. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="deg-box" aria-hidden="true"><div class="grade ok deg">78</div><span>степень победы</span><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span>уровень 3 из 4</span></div>
+        </div>
+        <p class="leaf-phrase">Ну что, пришёл разговаривать? Я слушаю. Недолго.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">До слома на карточку идёт стартовая фраза родителя и текущая степень победы.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="battle.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="battle4" data-label="Бой · уровень 4 (94)" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, степень победы 94, уровень 4 из 4. Фраза: Ну что, пришёл разговаривать? Я слушаю. Недолго. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="deg-box" aria-hidden="true"><div class="grade ok deg">94</div><span>степень победы</span><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span>уровень 4 из 4</span></div>
+        </div>
+        <p class="leaf-phrase">Ну что, пришёл разговаривать? Я слушаю. Недолго.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">До слома на карточку идёт стартовая фраза родителя и текущая степень победы.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="battle.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="break" data-label="Бой · слом (100)" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: отец, степень победы 100, уровень 4 из 4, штамп «Сломлен». Фраза: Ну... Я просто хотел как лучше. Вот и всё, что я хотел сказать. Подпись: Батя.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Отец</span></div>
+          <div class="deg-box" aria-hidden="true"><div class="grade deg">100</div><span>степень победы</span><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span>уровень 4 из 4</span></div>
+        </div>
+        <div class="stamp">Сломлен</div>
+        <p class="leaf-phrase">Ну... Я просто хотел как лучше. Вот и всё, что я хотел сказать.</p>
+        <div class="leaf-foot"><span class="sign">— Батя</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">Ответы нейросети на карточку не попадают: только финальная фраза Бати из заготовленных.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="battle.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="mother" data-label="Мама · провал" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <figure class="stage">
+      <div class="leaf-wrap"><div class="leaf" role="img" aria-label="Карточка для чата. Дневник, родитель: мать, оценка 2, штамп «Задача провалена». Фраза: Дочка, ты опять провалила задачу. Я для тебя всё, а ты даже это не можешь. Подпись: Мама.">
+        <div class="leaf-top">
+          <div class="leaf-role"><span class="k">Родитель</span><span class="v">Мать</span></div>
+          <div class="grade" aria-hidden="true">2</div>
+        </div>
+        <div class="stamp">Задача провалена</div>
+        <p class="leaf-phrase">Дочка, ты опять провалила задачу. Я для тебя всё, а ты даже это не можешь.</p>
+        <div class="leaf-foot"><span class="sign">— Мама</span><span class="url">t.me/имя_бота</span></div>
+      </div></div>
+      <figcaption class="small muted">Так карточка выглядит в чате</figcaption>
+    </figure>
+    <p class="small muted note">Вместо имени стоит «дочка» или «сынок» по твоему полу.</p>
+    <div class="btns">
+      <button class="btn" type="button">Отправить в чат</button>
+      <a class="btn link" href="fail.html">Назад</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="creating" data-label="Создаётся" hidden aria-busy="true">
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <div class="stage">
+      <div class="skel leaf-skel"></div>
+      <p class="small muted note center" role="status">Батя берёт ручку…</p>
+    </div>
+    <div class="btns">
+      <button class="btn" type="button" disabled>Отправить в чат</button>
+      <a class="btn link" href="done.html#medium" data-share-back>Отмена</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <div class="banner" role="alert"><b>Не получилось, ещё раз?</b> Карточка не создалась, ничего не отправлено.</div>
+    <div class="btns">
+      <button class="btn" type="button" data-go="#creating">Повторить</button>
+      <a class="btn link" href="done.html#medium" data-share-back>Отмена</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="creating-battle" data-label="Создаётся: из боя" hidden aria-busy="true"><h1>Карточка боя</h1><div class="skel"></div><p role="status">Карточка создаётся…</p><a class="btn link" href="battle.html#break">Отмена: в бой</a></section>
+  <section class="page" data-view="error-battle" data-label="Ошибка: из боя" hidden><h1>Карточка боя</h1><div class="banner" role="alert">Не получилось, ещё раз? Карточка не создалась, ничего не отправлено.</div><a class="btn" href="#creating-battle">Повторить</a><a class="btn link" href="battle.html#break">Отмена: в бой</a></section>
+  <section class="page" data-view="creating-fail" data-label="Создаётся: из провала" hidden aria-busy="true"><h1>Карточка провала</h1><div class="skel"></div><p role="status">Карточка создаётся…</p><a class="btn link" href="fail.html">Отмена: к провалу</a></section>
+  <section class="page" data-view="error-fail" data-label="Ошибка: из провала" hidden><h1>Карточка провала</h1><div class="banner" role="alert">Не получилось, ещё раз? Карточка не создалась, ничего не отправлено.</div><a class="btn" href="#creating-fail">Повторить</a><a class="btn link" href="fail.html">Отмена: к провалу</a></section>
+  <section class="page" data-view="sent" data-label="Отправлено" hidden>
+    <div><div class="eyebrow">Поделиться</div><h1>Карточка</h1></div>
+    <div class="toast" role="status">Карточка ушла в чат. Теперь все узнают, как тебя воспитывали.</div>
+    <div class="btns">
+      <a class="btn" href="home.html">На главную</a>
+      <button class="btn ghost" type="button">Отправить ещё раз</button>
+    </div>
+  </section>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

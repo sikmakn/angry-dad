@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Раздел владельца</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .back { display: inline-flex; align-items: center; align-self: flex-start; min-height: var(--target-small); color: var(--ink); }
+    .head-line { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .tabs { display: flex; gap: var(--space-1); overflow-x: auto; border-bottom: 1px solid var(--line); }
+    .tabs a { flex: none; display: inline-flex; align-items: center; min-height: var(--target-small); padding: 0 var(--space-3); color: var(--muted); text-decoration: none; border-bottom: 3px solid transparent; }
+    .tabs a[aria-current="page"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+    h2.sec { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+    h2.sec .n { font: 400 var(--text-s)/1 var(--font-body); }
+    .form { display: grid; gap: var(--space-3); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .field textarea { min-height: var(--grade-small); resize: vertical; }
+    fieldset.field { margin: 0; padding: 0; border: 0; min-width: 0; }
+    .field legend { padding: 0; margin-bottom: var(--space-1); font-weight: 700; font-size: var(--text-s); }
+    .seg label { position: relative; }
+    .field label.check { display: flex; align-items: center; gap: var(--space-3); min-height: var(--target); font-weight: 400; font-size: var(--text-m); cursor: pointer; }
+    .check input { flex: none; width: var(--check-size); height: var(--check-size); min-height: 0; padding: 0; accent-color: var(--accent); }
+    .list-gap { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .ph { display: grid; gap: var(--space-2); }
+    .ph .tpl { margin: 0; }
+    .ph .was { margin: 0; padding-left: var(--space-3); border-left: 3px solid var(--line); }
+    .chips { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+    .acts { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; justify-content: space-between; }
+    .acts .btns.inline { flex: 1; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .tbl { min-width: var(--sheet-width); }
+    .tbl th { color: var(--muted); font-weight: 700; white-space: nowrap; }
+    .tbl td.num, .tbl th.num { text-align: right; white-space: nowrap; }
+    .tbl .minus { color: var(--red); font-weight: 700; }
+    .tbl .plus { color: var(--ink); font-weight: 700; }
+    .tbl .btn.small { white-space: nowrap; }
+    table.metrics td:last-child, table.metrics th:last-child { text-align: right; white-space: nowrap; }
+    table.metrics .v { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); }
+    .who { display: grid; gap: var(--space-1); }
+    .who .id { font-variant-numeric: tabular-nums; }
+    .bal { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .bal .num { font: 700 var(--hand-xl)/1 var(--font-hand); color: var(--ink); }
+    .wsp { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2); align-items: end; }
+    .wsp .btn { width: auto; }
+    details.card > summary { min-height: var(--target); display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+    details.card[open] > summary { margin-bottom: var(--space-3); }
+    .pk { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+    .pk:last-of-type { border-bottom: 0; }
+    .pk .pkn { grid-column: 1 / -1; font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); }
+    .pk .field:last-child { grid-column: 1 / -1; }
+    .step { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--red); }
+    .denied-box { display: grid; gap: var(--space-4); justify-items: center; text-align: center; padding-top: var(--space-5); }
+    .app:has(section:not([hidden]) .sheet) .tabbar { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Раздел владельца»: F-16, доступ только владельцу (R-126). UC-89 (добавить фразу, перефразы), UC-90 (включить фразу, цена, метрики), UC-91 (удары без причины), UC-92 (последняя фраза ячейки), UC-93 (отказ, журнал), UC-94 (пустые списки); UC-76 и UC-75 (начисление и возврат Stars).
+       Задачи и диалоги пользователей владельцу не показываются (A-54). Автор фразы виден только здесь (A-53). -->
+
+  <!-- Фразы -->
+  <section class="page" data-view="phrases" data-label="Фразы">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases" aria-current="page">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+
+    <h2 class="sec">Добавить фразу</h2>
+    <form class="card form" onsubmit="return false">
+      <div class="grid2">
+        <div class="field"><label for="pa-role">Роль</label><select id="pa-role"><option selected>Отец</option><option>Мать</option><option>Любая</option></select></div>
+        <div class="field"><label for="pa-cat">Категория</label>
+          <select id="pa-cat">
+            <option>onGreeting</option><option>onTaskSet</option><option>onDelete</option><option>onVague</option><option>onReminder</option><option>onCheckIn</option><option>onCheckInReply</option><option>onCheckInMissed</option><option selected>onFail</option><option>onExcuse</option><option>onExcuseDenied</option><option>onRetry</option><option>onSuccess</option><option>onAbsent</option><option>onBattleStart</option><option>onBreak</option><option>onRecovery</option>
+          </select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="pa-lvl">Уровень</label><select id="pa-lvl"><option selected>Без уровня</option><option>1</option><option>2</option><option>3</option></select></div>
+        <div class="field"><label for="pa-def">Уровень побеждённости</label><select id="pa-def"><option selected>Любой</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      </div>
+      <div class="field"><label for="pa-combo">Сочетание роли и пола</label><select id="pa-combo"><option selected>Любое</option><option>Отец × сын</option><option>Отец × дочь</option><option>Мать × сын</option><option>Мать × дочь</option></select></div>
+      <div class="grid2">
+        <div class="field"><label for="pa-src">Источник</label><select id="pa-src"><option>Владелец</option><option selected>Подписчик</option></select></div>
+        <div class="field"><label for="pa-auth">Автор</label><input id="pa-auth" type="text" value="@ivan" aria-describedby="pa-auth-h"><span class="hint" id="pa-auth-h">Видите только вы.</span></div>
+      </div>
+      <div class="field"><label for="pa-tpl">Текст фразы</label><textarea id="pa-tpl" aria-describedby="pa-tpl-h">Сергей из пятого подъезда такое за час делал(а). А ты опять тянешь «{task}».</textarea><span class="hint" id="pa-tpl-h">Слова по роду пишите с окончанием в скобках: сделал(а). Переменные: {task}, {time}, {left}, {name}, {other}.</span></div>
+      <div class="btns">
+        <button class="btn" type="submit">Добавить фразу</button>
+        <button class="btn ghost" type="button" data-go="#paraphrases-loading">Добавить и запросить перефразы</button>
+      </div>
+    </form>
+
+    <h2 class="sec">Перефразы на одобрение <span class="n">2</span></h2>
+    <ul class="list-gap">
+      <li class="card ph">
+        <p class="small muted was">Была: Сергей из пятого подъезда такое за час делал(а). А ты опять тянешь «{task}».</p>
+        <p class="tpl">Сергей из пятого подъезда управлялся(лась) с таким за час. А ты снова откладываешь «{task}».</p>
+        <div class="chips"><span class="tag">отец</span><span class="tag">onFail</span><span class="tag">любой × любое</span><span class="tag">перефраз</span></div>
+        <div class="btns inline">
+          <button class="btn small" type="button" aria-label="Одобрить перефраз про Сергея из пятого подъезда">Одобрить</button>
+          <a class="btn small danger" href="#confirm-reject" aria-label="Отклонить перефраз про Сергея из пятого подъезда">Отклонить</a>
+        </div>
+      </li>
+      <li class="card ph">
+        <p class="small muted was">Была: Сергей из пятого подъезда такое за час делал(а). А ты опять тянешь «{task}».</p>
+        <p class="tpl">За час такое делал(а) даже Сергей из пятого подъезда. «{task}» у тебя всё ещё впереди.</p>
+        <div class="chips"><span class="tag">отец</span><span class="tag">onFail</span><span class="tag">любой × любое</span><span class="tag">перефраз</span></div>
+        <div class="btns inline">
+          <button class="btn small" type="button" aria-label="Одобрить перефраз «За час такое делал(а)»">Одобрить</button>
+          <a class="btn small danger" href="#confirm-reject" aria-label="Отклонить перефраз «За час такое делал(а)»">Отклонить</a>
+        </div>
+      </li>
+    </ul>
+    <p class="small muted m0">Отклонённый перефраз пользователям не показывается. Одобренный становится отдельной фразой.</p>
+
+    <h2 class="sec">Выключенные и ниже порога <span class="n">3</span></h2>
+    <ul class="list-gap">
+      <li class="card ph">
+        <div class="chips"><span class="tag">отец</span><span class="tag">onCheckIn</span><span class="tag">уровень 2</span><span class="tag">любой × любое</span></div>
+        <p class="tpl">Опять «{task}»? Я с тобой уже разговаривал(а) на эту тему.</p>
+        <div class="small muted mono">avg 0,31 · 124 голоса · источник: владелец</div>
+        <div class="acts"><span class="tag red">Выключена: avg ниже 0,4</span><button class="btn small ghost" type="button" aria-label="Включить фразу «Опять задача? Я с тобой уже разговаривал»">Включить</button></div>
+      </li>
+      <li class="card ph">
+        <div class="chips"><span class="tag">мать</span><span class="tag">onReminder</span><span class="tag">уровень 1</span><span class="tag">побеждённость 3</span><span class="tag">мать × сын</span></div>
+        <p class="tpl">{name}, до срока {left}. Я не напоминаю, я надеюсь.</p>
+        <div class="small muted mono">avg 0,52 · 47 голосов · автор @ivan</div>
+        <div class="acts"><span class="tag">Выключена вручную</span><button class="btn small ghost" type="button" aria-label="Включить фразу «до срока, я не напоминаю, я надеюсь»">Включить</button></div>
+      </li>
+      <li class="card ph">
+        <div class="chips"><span class="tag">отец</span><span class="tag">onCheckIn</span><span class="tag">уровень 1</span><span class="tag">любой × любое</span></div>
+        <p class="tpl">Ну что, герой, показывай, что сделано.</p>
+        <div class="small muted mono">avg 0,30 · 120 голосов · источник: владелец</div>
+        <div class="acts"><span class="tag red">Ниже порога, включена</span><button class="btn small ghost" type="button" aria-label="Выключить фразу «Ну что, герой, показывай»">Выключить</button></div>
+        <p class="small muted m0">Последняя включённая в своей ячейке: выключить нельзя.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="page" data-view="phrases-refuse" data-label="Фразы: отказ" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases" aria-current="page">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+    <h2 class="sec">Выключенные и ниже порога <span class="n">3</span></h2>
+    <div class="banner" role="alert"><b>В ячейке не останется фраз.</b> Эта фраза последняя включённая в ячейке «отец · onCheckIn · уровень 1 · любой × любое». Сначала добавьте другую, потом выключайте.</div>
+    <ul class="list-gap">
+      <li class="card ph red-edge">
+        <div class="chips"><span class="tag">отец</span><span class="tag">onCheckIn</span><span class="tag">уровень 1</span><span class="tag">любой × любое</span></div>
+        <p class="tpl">Ну что, герой, показывай, что сделано.</p>
+        <div class="small muted mono">avg 0,30 · 120 голосов · источник: владелец</div>
+        <div class="acts"><span class="tag red">Ниже порога, включена</span><button class="btn small ghost" type="button" aria-label="Выключить фразу «Ну что, герой, показывай»">Выключить</button></div>
+      </li>
+    </ul>
+    <button class="btn ghost" type="button" data-go="phrases">Добавить фразу в эту ячейку</button>
+  </section>
+
+  <section class="page" data-view="empty" data-label="Фразы: пусто" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases" aria-current="page">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+    <h2 class="sec">Перефразы на одобрение <span class="n">0</span></h2>
+    <div class="card"><h3>Перефразов на одобрение нет</h3><p class="muted small mt1">Они появятся, когда вы запросите перефразы у добавленной фразы.</p></div>
+    <h2 class="sec">Выключенные и ниже порога <span class="n">0</span></h2>
+    <div class="card"><h3>Выключенных фраз нет</h3><p class="muted small mt1">Все фразы в деле, ни одна не ниже порога.</p></div>
+    <button class="btn" type="button" data-go="phrases">Добавить фразу</button>
+  </section>
+
+  <!-- Роли и цены -->
+  <section class="page" data-view="roles" data-label="Роли и цены" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles" aria-current="page">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+
+    <h2 class="sec">Карточки ролей</h2>
+    <p class="small muted m0">Изменение действует на новые ходы боя. Больных мест не меньше 5.</p>
+    <details class="card" open>
+      <summary>Отец · 5 больных мест</summary>
+      <form class="form" onsubmit="return false">
+        <div class="field"><label for="rc-f-char">Характер</label><textarea id="rc-f-char">Суровый, уставший, обиженный на мир. Не кричит, а вздыхает. Любит «в наше время» и сравнения с чужими детьми.</textarea></div>
+        <div class="wsp"><div class="field"><label for="rc-f-1">Деньги</label><input id="rc-f-1" type="text" value="«В твои годы я уже кормил семью»"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Деньги»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-f-2">Соседские дети</label><input id="rc-f-2" type="text" value="Сравнение с Серёгой из пятого подъезда"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Соседские дети»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-f-3">Режим</label><input id="rc-f-3" type="text" value="Сон до обеда и еда на бегу"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Режим»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-f-4">Обещания</label><input id="rc-f-4" type="text" value="Сказал «завтра» и не сделал"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Обещания»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-f-5">Поколение</label><input id="rc-f-5" type="text" value="«Вы, молодёжь, всё в телефоне»"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Поколение»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <p class="small muted m0">Убрать больное место нельзя, пока их пять. Сначала добавьте новое.</p>
+        <button class="btn ghost" type="button">Добавить больное место</button>
+        <button class="btn" type="submit">Сохранить карточку «Отец»</button>
+      </form>
+    </details>
+    <details class="card">
+      <summary>Мать · 5 больных мест</summary>
+      <form class="form" onsubmit="return false">
+        <div class="field"><label for="rc-m-char">Характер</label><textarea id="rc-m-char">Вздыхает так, что слышно в соседней комнате. Не ругается, а разочаровывается. Всё помнит и напомнит.</textarea></div>
+        <div class="wsp"><div class="field"><label for="rc-m-1">Здоровье</label><input id="rc-m-1" type="text" value="«Опять не поел, опять не выспался»"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Здоровье»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-m-2">Внуки</label><input id="rc-m-2" type="text" value="Когда уже порадуешь семьёй"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Внуки»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-m-3">Звонки</label><input id="rc-m-3" type="text" value="Не звонишь, пока не нужны деньги"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Звонки»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-m-4">Порядок</label><input id="rc-m-4" type="text" value="Бардак в комнате и в голове"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Порядок»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <div class="wsp"><div class="field"><label for="rc-m-5">Знакомые</label><input id="rc-m-5" type="text" value="Тётя Люда уже всё рассказала"></div><button class="btn small danger" type="button" aria-disabled="true" aria-label="Убрать больное место «Знакомые»: нельзя, их должно быть не меньше пяти">Убрать</button></div>
+        <button class="btn ghost" type="button">Добавить больное место</button>
+        <button class="btn" type="submit">Сохранить карточку «Мать»</button>
+      </form>
+    </details>
+
+    <h2 class="sec">Пакеты ударов</h2>
+    <form class="card form" onsubmit="return false">
+      <div class="pk">
+        <span class="pkn">Первый пакет</span>
+        <div class="field"><label for="pr-1-n">Ударов</label><input id="pr-1-n" type="number" min="1" value="1" inputmode="numeric"></div>
+        <div class="field"><label for="pr-1-p">Цена, Stars</label><input id="pr-1-p" type="number" min="1" value="15" inputmode="numeric"></div>
+        <div class="field"><label class="check" for="pr-1-a"><input id="pr-1-a" type="checkbox" checked>Продаётся</label></div>
+      </div>
+      <div class="pk">
+        <span class="pkn">Второй пакет</span>
+        <div class="field"><label for="pr-2-n">Ударов</label><input id="pr-2-n" type="number" min="1" value="3" inputmode="numeric"></div>
+        <div class="field"><label for="pr-2-p">Цена, Stars</label><input id="pr-2-p" type="number" min="1" value="39" inputmode="numeric"></div>
+        <div class="field"><label class="check" for="pr-2-a"><input id="pr-2-a" type="checkbox" checked>Продаётся</label></div>
+      </div>
+      <div class="pk">
+        <span class="pkn">Третий пакет</span>
+        <div class="field"><label for="pr-3-n">Ударов</label><input id="pr-3-n" type="number" min="1" value="5" inputmode="numeric"></div>
+        <div class="field"><label for="pr-3-p">Цена, Stars</label><input id="pr-3-p" type="number" min="1" value="60" inputmode="numeric"></div>
+        <div class="field"><label class="check" for="pr-3-a"><input id="pr-3-a" type="checkbox" checked>Продаётся</label></div>
+      </div>
+      <button class="btn" type="button" data-go="#confirm-prices">Сохранить цены</button>
+      <p class="small muted m0">Пользователи увидят новые цены при следующем открытии магазина. Уже выставленные счета останутся по старой цене.</p>
+    </form>
+  </section>
+
+  <!-- Удары -->
+  <section class="page" data-view="strikes" data-label="Удары" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes" aria-current="page">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+
+    <form class="card form" onsubmit="return false" role="search">
+      <div class="field"><label for="su-id-a">Telegram ID пользователя</label><input id="su-id-a" type="text" inputmode="numeric" value="482190337"></div>
+      <button class="btn" type="submit">Найти</button>
+    </form>
+
+    <div class="card who">
+      <div class="bal"><div><div class="small muted">Баланс</div><div class="num">7</div></div><div class="hand hand-large">ударов</div></div>
+      <div><b>@ivan_k</b> · Telegram ID <span class="id">482190337</span></div>
+      <!-- R-131, A-54: профиль пользователя владельцу продукта не отдаётся. -->
+      <div class="small muted">Задачи и диалоги вы не видите, только платежи и удары.</div>
+    </div>
+
+    <h2 class="sec">Начислить или списать</h2>
+    <form class="card form" onsubmit="return false">
+      <fieldset class="field">
+        <legend>Операция</legend>
+        <div class="seg">
+          <label><input type="radio" name="op-a" value="grant" checked><span>Начислить</span></label>
+          <label><input type="radio" name="op-a" value="revoke"><span>Списать</span></label>
+        </div>
+      </fieldset>
+      <div class="field"><label for="su-n-a">Сколько ударов</label><input id="su-n-a" type="number" min="1" value="2" inputmode="numeric"></div>
+      <div class="field"><label for="su-r-a">Причина (обязательно)</label><textarea id="su-r-a" aria-describedby="su-r-a-h">возврат по жалобе</textarea><span class="hint" id="su-r-a-h">Попадёт в историю пользователя и в ваш журнал.</span></div>
+      <button class="btn operation-submit" type="button" data-go="#grant-done">Начислить 2 удара</button>
+    </form>
+
+    <h2 class="sec">История операций <span class="n">3</span></h2>
+    <div class="scroll-x card" tabindex="0" role="region" aria-label="Таблица владельца, прокрутка по горизонтали">
+      <table class="tbl">
+        <thead><tr><th>Дата</th><th>Операция</th><th class="num">Удары</th><th>Причина</th><th>Действие</th></tr></thead>
+        <tbody>
+          <tr><td>23 окт, 11:50</td><td>Покупка: пакет «Пять»<br><span class="small muted">60 Stars</span></td><td class="num plus">+5</td><td class="muted">—</td><td><button class="btn small danger" type="button" data-go="#refund-confirm" aria-label="Вернуть Stars за пакет «Пять»">Вернуть Stars</button></td></tr>
+          <tr><td>22 окт, 18:02</td><td>Списание: реплика в бою</td><td class="num minus">−1</td><td class="muted">ход в бою с отцом</td><td class="muted">—</td></tr>
+          <tr><td>22 окт, 17:20</td><td>Покупка: пакет «Три»<br><span class="small muted">39 Stars</span></td><td class="num plus">+3</td><td class="muted">—</td><td class="small muted">Возврат Stars недоступен: израсходован 1 удар</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="sec">Обращения /paysupport <span class="n">1 открыто</span></h2>
+    <ul class="list-gap">
+      <li class="card ph">
+        <div class="chips"><span class="tag red">Открыто</span><span class="tag">23 окт, 09:12</span></div>
+        <div><b>@ivan_k</b> · Telegram ID <span class="mono">482190337</span></div>
+        <p class="tpl">Купил «Пять» по ошибке, прошу вернуть Stars. Ни одного удара из него не тратил.</p>
+        <div class="btns inline">
+          <button class="btn small ghost" type="button">Открыть пользователя</button>
+          <button class="btn small ghost" type="button">Отметить решённым</button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="page" data-view="reason-error" data-label="Удары: нет причины" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes" aria-current="page">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+    <div class="card who">
+      <div class="bal"><div><div class="small muted">Баланс</div><div class="num">7</div></div><div class="hand hand-large">ударов</div></div>
+      <div><b>@ivan_k</b> · Telegram ID <span class="id">482190337</span></div>
+    </div>
+
+    <h2 class="sec">Начислить или списать</h2>
+    <form class="card form" onsubmit="return false">
+      <fieldset class="field">
+        <legend>Операция</legend>
+        <div class="seg">
+          <label><input type="radio" name="op-b" value="grant" checked><span>Начислить</span></label>
+          <label><input type="radio" name="op-b" value="revoke"><span>Списать</span></label>
+        </div>
+      </fieldset>
+      <div class="field"><label for="su-n-b">Сколько ударов</label><input id="su-n-b" type="number" min="1" value="2" inputmode="numeric"></div>
+      <div class="field bad"><label for="su-r-b">Причина (обязательно)</label><textarea id="su-r-b" aria-invalid="true" aria-describedby="su-r-b-e"></textarea><span class="err" id="su-r-b-e" role="alert"><b>Укажите причину.</b> Баланс не изменился: операция без причины не выполняется.</span></div>
+      <button class="btn" type="submit">Начислить 2 удара</button>
+    </form>
+  </section>
+
+  <section class="page" data-view="refund-confirm" data-label="Подтверждение возврата Stars" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <div class="card who">
+      <div class="bal"><div><div class="small muted">Баланс</div><div class="num">7</div></div><div class="hand hand-large">ударов</div></div>
+      <div><b>@ivan_k</b> · Telegram ID <span class="id">482190337</span></div>
+    </div>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="rf-t" aria-describedby="rf-d">
+      <div class="step">Нужно подтверждение</div>
+      <h2 id="rf-t">Вернуть 60 Stars за пакет «Пять»?</h2>
+      <p id="rf-d" class="m0">Удары пакета спишутся: баланс станет 2 вместо 7. Из пакета не израсходовано ни одного удара. Отменить возврат нельзя, запись попадёт в историю пользователя и в журнал.</p>
+      <div class="field"><label for="rf-reason">Причина (обязательно)</label><input id="rf-reason" type="text" value="возврат по обращению /paysupport"></div>
+      <div class="btns">
+        <button class="btn ghost" type="button">Отмена</button>
+        <button class="btn red" type="button">Вернуть 60 Stars</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" data-view="strikes-empty" data-label="Удары: пусто" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes" aria-current="page">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+    <form class="card form" onsubmit="return false" role="search">
+      <div class="field"><label for="su-id-c">Telegram ID пользователя</label><input id="su-id-c" type="text" inputmode="numeric" aria-describedby="su-id-c-h"><span class="hint" id="su-id-c-h">Введите ID, чтобы увидеть баланс и историю операций.</span></div>
+      <button class="btn" type="submit">Найти</button>
+    </form>
+    <h2 class="sec">Обращения /paysupport <span class="n">0</span></h2>
+    <div class="card"><h3>Обращений нет</h3><p class="muted small mt1">Когда пользователь напишет /paysupport, обращение появится здесь вместе с его Telegram ID.</p></div>
+  </section>
+
+  <!-- Метрики -->
+  <section class="page" data-view="metrics" data-label="Метрики" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics" aria-current="page">Метрики</a>
+      <a href="#log" data-go="log">Журнал</a>
+    </nav>
+
+    <form class="card form" onsubmit="return false">
+      <fieldset class="field">
+        <legend>Период</legend>
+        <div class="seg">
+          <label><input type="radio" name="per-m" value="7" checked><span>7 дней</span></label>
+          <label><input type="radio" name="per-m" value="30"><span>30 дней</span></label>
+          <label><input type="radio" name="per-m" value="custom"><span>Свой</span></label>
+        </div>
+      </fieldset>
+      <div class="grid2">
+        <div class="field"><label for="m-from">С</label><input id="m-from" type="date" value="2026-10-17"></div>
+        <div class="field"><label for="m-to">По</label><input id="m-to" type="date" value="2026-10-23"></div>
+      </div>
+    </form>
+
+    <h2 class="sec">17–23 октября</h2>
+    <div class="scroll-x card" tabindex="0" role="region" aria-label="Таблица владельца, прокрутка по горизонтали">
+      <table class="metrics">
+        <thead><tr><th>Метрика</th><th>Значение</th></tr></thead>
+        <tbody>
+          <tr><td>Возврат на 7-й день<br><span class="small muted">живёт ли продукт после первой шутки</span></td><td><span class="v">18%</span></td></tr>
+          <tr><td>Доля закрытых задач и периодов<br><span class="small muted">работает ли давление</span></td><td><span class="v">54%</span></td></tr>
+          <tr><td>Доля отвеченных проверок<br><span class="small muted">эффективность проверок</span></td><td><span class="v">61%</span></td></tr>
+          <tr><td>Конверсия в первую покупку<br><span class="small muted">работает ли триггер «Ответить»</span></td><td><span class="v">4,2%</span></td></tr>
+          <tr><td>Стоимость хода в токенах к выручке с удара<br><span class="small muted">экономика боя</span></td><td><span class="v">22%</span></td></tr>
+          <tr><td>Заблокировали бота<br><span class="small muted">не перегибает ли давление</span></td><td><span class="v">3,1%</span></td></tr>
+          <tr><td>Средний балл фраз<br><span class="small muted">качество контента</span></td><td><span class="v">0,58</span></td></tr>
+          <tr><td>Пересылок карточки на 100 активных<br><span class="small muted">работает ли шеринг</span></td><td><span class="v">7</span></td></tr>
+          <tr><td>Медиана от /start до первой задачи<br><span class="small muted">понятен ли старт</span></td><td><span class="v">2 мин 40 с</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted m0">Пороги пока не заданы, поэтому значения не оцениваются цветом. Числа в макете примерные.</p>
+  </section>
+
+  <!-- Журнал -->
+  <section class="page" data-view="log" data-label="Журнал" hidden>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <nav class="tabs" aria-label="Разделы владельца">
+      <a href="#phrases" data-go="phrases">Фразы</a>
+      <a href="#roles" data-go="roles">Роли и цены</a>
+      <a href="#strikes" data-go="strikes">Удары</a>
+      <a href="#metrics" data-go="metrics">Метрики</a>
+      <a href="#log" data-go="log" aria-current="page">Журнал</a>
+    </nav>
+
+    <div class="field">
+      <label for="log-f">Действие</label>
+      <select id="log-f">
+        <option selected>Все действия</option><option>Фраза добавлена</option><option>Фраза включена или выключена</option><option>Перефраз проверен</option><option>Карточка роли изменена</option><option>Цена пакета изменена</option><option>Удары начислены</option><option>Удары списаны</option><option>Stars возвращены</option>
+      </select>
+    </div>
+    <div class="scroll-x card" tabindex="0" role="region" aria-label="Таблица владельца, прокрутка по горизонтали">
+      <table class="tbl">
+        <thead><tr><th>Когда</th><th>Действие</th><th>Над чем</th><th>Подробности</th></tr></thead>
+        <tbody>
+          <tr><td>23 окт, 10:14</td><td>Удары начислены</td><td class="mono">482190337</td><td>+2 удара, «возврат по жалобе»</td></tr>
+          <tr><td>23 окт, 10:02</td><td>Перефраз проверен</td><td>отец · onFail</td><td>одобрен 1 из 2</td></tr>
+          <tr><td>22 окт, 21:40</td><td>Цена пакета изменена</td><td>пакет на 1 удар</td><td>12 → 15 Stars</td></tr>
+          <tr><td>22 окт, 21:31</td><td>Фраза выключена</td><td>мать · onReminder · уровень 1</td><td>вручную</td></tr>
+          <tr><td>22 окт, 16:05</td><td>Карточка роли изменена</td><td>отец</td><td>добавлено больное место «Режим»</td></tr>
+          <tr><td>21 окт, 12:20</td><td>Удары списаны</td><td class="mono">771204518</td><td>−1 удар, «двойной зачёт хода»</td></tr>
+          <tr><td>21 окт, 09:00</td><td>Фраза добавлена</td><td>мать · onFail</td><td>автор @ivan</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted m0">Записи только добавляются, исправить или удалить их нельзя.</p>
+  </section>
+
+  <!-- Отказ доступа обычному пользователю -->
+  <section class="page" data-view="denied" data-label="Отказ доступа" hidden role="alert">
+    <h1 class="sr-only">Раздел владельца · denied</h1>
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="denied-box">
+      <div class="stamp">Нет доступа</div>
+      <h2>Эта страница только для владельца</h2>
+      <p class="muted m0">Батя здесь один, и это не ты. Ничего не изменилось, твои данные на месте.</p>
+      <a class="btn" href="more.html">Вернуться в «Ещё»</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <a class="back" href="more.html">← Ещё</a>
+    <div class="head-line"><div class="eyebrow">Раздел владельца</div><span class="tag">только владелец</span></div>
+    <h1>Кабинет</h1>
+    <div class="banner"><b>Не загрузилось.</b> Данные раздела не пришли, ничего не изменилось. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#phrases">Повторить</button>
+  </section>
+
+  <section class="page" data-view="user-missing" data-label="ID не найден" hidden>
+    <h1>Удары пользователя</h1><div class="banner" role="alert">Пользователь с таким Telegram ID не найден. Проверь цифры и повтори поиск.</div><a class="btn" href="#strikes">Изменить ID</a>
+  </section>
+  <section class="page" data-view="over-balance" data-label="Списание больше баланса" hidden>
+    <h1>Списание ударов</h1><div class="banner" role="alert">Нельзя списать 8 ударов: на балансе 7. Баланс не изменился. Укажи число от 1 до 7.</div><a class="btn" href="#strikes">Исправить число</a>
+  </section>
+  <section class="page" data-view="paraphrases-loading" data-label="Перефразы: ожидание" hidden aria-busy="true">
+    <h1>Перефразы</h1><p role="status">Фраза добавлена. Готовим перефразы, пользователи их пока не видят.</p><div class="skel"></div><a class="btn ghost" href="#phrases">К фразам: образец результата</a>
+  </section>
+  <section class="page" data-view="confirm-revoke" data-label="Подтверждение списания" hidden>
+    <h1>Удары пользователя</h1><div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="revoke-h" aria-describedby="revoke-d"><h2 id="revoke-h">Списать 2 удара?</h2><p id="revoke-d">Telegram ID 482190337 · @ivan_k. Было 7, станет 5. Причина: исправление ручного начисления. Операция попадёт в историю пользователя и журнал.</p><a class="btn red" href="#operation-done">Да, списать 2 удара</a><a class="btn ghost" href="#strikes">Отмена</a></div>
+  </section>
+  <section class="page" data-view="confirm-prices" data-label="Подтверждение цен" hidden>
+    <h1>Цены</h1><div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="prices-h" aria-describedby="prices-d"><h2 id="prices-h">Сохранить цены для всех?</h2><p id="prices-d">1 удар — 15 Stars; 3 — 39; 5 — 60. Новые цены применятся к новым счетам. Выставленные счета останутся по прежней цене.</p><a class="btn" href="#prices-saved">Сохранить цены</a><a class="btn ghost" href="#roles">Отмена</a></div>
+  </section>
+  <section class="page" data-view="confirm-reject" data-label="Подтверждение отклонения" hidden>
+    <h1>Перефразы</h1><div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="reject-h" aria-describedby="reject-d"><h2 id="reject-h">Отклонить перефраз?</h2><p id="reject-d">Этот вариант исчезнет из очереди и не будет показан пользователям. Исходная фраза останется. Отменить действие нельзя.</p><a class="btn danger" href="#rejected">Да, отклонить</a><a class="btn ghost" href="#phrases">Отмена</a></div>
+  </section>
+  <section class="page" data-view="grant-done" data-label="Начисление выполнено" hidden><h1>Начислено 2 удара</h1><p role="status">Баланс: 7 → 9. Причина сохранена в истории пользователя и журнале.</p><a class="btn" href="#strikes">К операциям</a></section>
+  <section class="page" data-view="operation-done" data-label="Списание выполнено" hidden><h1>Списано 2 удара</h1><p role="status">Баланс: 7 → 5. Причина сохранена в истории пользователя и журнале.</p><a class="btn" href="#strikes">К операциям</a></section>
+  <section class="page" data-view="prices-saved" data-label="Цены сохранены" hidden><h1>Цены сохранены</h1><p role="status">Новые счета будут выставлены по сохранённым ценам. Запись добавлена в журнал.</p><a class="btn" href="#roles">К ценам</a></section>
+  <section class="page" data-view="rejected" data-label="Перефраз отклонён" hidden><h1>Перефраз отклонён</h1><p role="status">Вариант удалён из очереди, исходная фраза на месте.</p><a class="btn" href="#phrases">К фразам</a></section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html" aria-current="page"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+<script>
+  /* вкладки раздела переключают состояния макета, как панель сверху */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-go]');
+    if (!a) return;
+    e.preventDefault();
+    var b = document.querySelector('.viewer button[data-state="' + a.dataset.go + '"]');
+    if (b) { b.click(); window.scrollTo(0, 0); }
+  });
+</script>
+</body>
+</html>

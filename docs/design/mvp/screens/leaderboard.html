@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Рейтинг</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .lead { margin: 0; }
+    .mine { display: grid; gap: var(--space-3); }
+    .mine .cap { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--muted); }
+    .board { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+    .rk { display: grid; grid-template-columns: 3.5rem 1fr auto; align-items: center; gap: var(--space-3); min-height: var(--target); padding: var(--space-2) var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+    .rk .pos { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--muted); }
+    .rk.top .pos { color: var(--ink); font-weight: 700; }
+    .rk .nm { font-weight: 700; overflow-wrap: anywhere; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .rk .cnt { text-align: right; white-space: nowrap; }
+    .rk .cnt b { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); }
+    .rk.me { border: 2px solid var(--ink); }
+    .rk.plain { grid-template-columns: 1fr auto; }
+    .gap { padding: var(--space-1) 0; text-align: center; color: var(--muted); font-size: var(--text-s); }
+    .under { border: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+    .under b { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--ink); }
+    .quiet { margin: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Рейтинг»: F-15. UC-83 (топ-100 и своя карточка), UC-84 (выход и возврат), UC-85 (имя вместо username), UC-86 (своё место под таблицей, без закрытых задач), UC-87 (чужим видны только имя и число), UC-88 (пусто). -->
+
+  <section class="page" data-view="normal" data-label="Я в топ-100">
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <p class="lead muted">Считаются закрытые задачи, а не добрые намерения. Размер не важен: микрозадача идёт за одну, как и большая.</p>
+
+    <div class="card mine">
+      <div class="cap">Так тебя видят другие</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag">Вы</span></span><span class="cnt"><b>76</b> задач</span></div>
+      <p class="small muted quiet">Ты на 14 месте. Другим видны только username и число закрытых задач.</p>
+      <button class="btn ghost" type="button">Выйти из рейтинга</button>
+    </div>
+
+    <ol class="board" aria-label="Первые 100 участников по числу закрытых задач">
+      <li class="rk top" value="1"><span class="pos">1</span><span class="nm">@sergei_p5</span><span class="cnt"><b>214</b> задач</span></li>
+      <li class="rk top" value="2"><span class="pos">2</span><span class="nm">Ольга</span><span class="cnt"><b>187</b> задач</span></li>
+      <li class="rk top" value="3"><span class="pos">3</span><span class="nm">@anya_vovremya</span><span class="cnt"><b>163</b> задачи</span></li>
+      <li class="rk" value="4"><span class="pos">4</span><span class="nm">@pavel_k</span><span class="cnt"><b>151</b> задача</span></li>
+      <li class="rk" value="5"><span class="pos">5</span><span class="nm">@ne_zavtra</span><span class="cnt"><b>148</b> задач</span></li>
+      <li class="gap" aria-hidden="true">· · · ещё 7 строк · · ·</li>
+      <li class="rk" value="13"><span class="pos">13</span><span class="nm">@kirill_b</span><span class="cnt"><b>77</b> задач</span></li>
+      <li class="rk me" value="14" aria-current="true"><span class="pos">14</span><span class="nm">@ivan_k <span class="tag">Вы</span></span><span class="cnt"><b>76</b> задач</span></li>
+      <li class="rk" value="15"><span class="pos">15</span><span class="nm">Марина</span><span class="cnt"><b>74</b> задачи</span></li>
+      <li class="gap" aria-hidden="true">· · · до сотни ещё 85 строк · · ·</li>
+    </ol>
+    <p class="small muted quiet">При равенстве выше тот, кто закрыл последнюю задачу раньше. Если нет username, показываем имя из Telegram.</p>
+  </section>
+
+  <section class="page" data-view="outside" data-label="Вне сотни" hidden>
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <p class="lead muted">Считаются закрытые задачи, а не добрые намерения. Размер не важен: микрозадача идёт за одну, как и большая.</p>
+
+    <div class="card mine">
+      <div class="cap">Так тебя видят другие</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag">Вы</span></span><span class="cnt"><b>12</b> задач</span></div>
+      <p class="small muted quiet">В сотню лучших ты пока не попал. Свою строку другие видят в общем списке.</p>
+      <button class="btn ghost" type="button">Выйти из рейтинга</button>
+    </div>
+
+    <ol class="board" aria-label="Первые 100 участников по числу закрытых задач">
+      <li class="rk top" value="1"><span class="pos">1</span><span class="nm">@sergei_p5</span><span class="cnt"><b>214</b> задач</span></li>
+      <li class="rk top" value="2"><span class="pos">2</span><span class="nm">Ольга</span><span class="cnt"><b>187</b> задач</span></li>
+      <li class="rk top" value="3"><span class="pos">3</span><span class="nm">@anya_vovremya</span><span class="cnt"><b>163</b> задачи</span></li>
+      <li class="rk" value="4"><span class="pos">4</span><span class="nm">@pavel_k</span><span class="cnt"><b>151</b> задача</span></li>
+      <li class="rk" value="5"><span class="pos">5</span><span class="nm">@ne_zavtra</span><span class="cnt"><b>148</b> задач</span></li>
+      <li class="gap" aria-hidden="true">· · · ещё 92 строки · · ·</li>
+      <li class="rk" value="98"><span class="pos">98</span><span class="nm">@dmitry_gym</span><span class="cnt"><b>41</b> задача</span></li>
+      <li class="rk" value="99"><span class="pos">99</span><span class="nm">Алексей</span><span class="cnt"><b>40</b> задач</span></li>
+      <li class="rk" value="100"><span class="pos">100</span><span class="nm">@lena_potom</span><span class="cnt"><b>40</b> задач</span></li>
+    </ol>
+    <div class="card under" role="status">
+      <b>Вы: 340 место, 12 задач</b>
+    </div>
+    <p class="small muted quiet">При равенстве выше тот, кто закрыл последнюю задачу раньше. Поэтому у двоих по 40 задач, а места разные.</p>
+  </section>
+
+  <section class="page" data-view="zero" data-label="Без закрытых задач" hidden>
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <p class="lead muted">Считаются закрытые задачи, а не добрые намерения. Размер не важен: микрозадача идёт за одну, как и большая.</p>
+
+    <div class="card mine">
+      <div class="cap">Так тебя видят другие</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag">Вы</span></span><span class="cnt"><b>0</b> задач</span></div>
+      <p class="small muted quiet">В таблице тебя нет: туда попадают с первой закрытой задачей. Закрой хотя бы микрозадачу.</p>
+      <button class="btn ghost" type="button">Выйти из рейтинга</button>
+    </div>
+
+    <ol class="board" aria-label="Первые 100 участников по числу закрытых задач">
+      <li class="rk top" value="1"><span class="pos">1</span><span class="nm">@sergei_p5</span><span class="cnt"><b>214</b> задач</span></li>
+      <li class="rk top" value="2"><span class="pos">2</span><span class="nm">Ольга</span><span class="cnt"><b>187</b> задач</span></li>
+      <li class="rk top" value="3"><span class="pos">3</span><span class="nm">@anya_vovremya</span><span class="cnt"><b>163</b> задачи</span></li>
+      <li class="rk" value="4"><span class="pos">4</span><span class="nm">@pavel_k</span><span class="cnt"><b>151</b> задача</span></li>
+      <li class="rk" value="5"><span class="pos">5</span><span class="nm">@ne_zavtra</span><span class="cnt"><b>148</b> задач</span></li>
+      <li class="gap" aria-hidden="true">· · · до сотни ещё 95 строк · · ·</li>
+    </ol>
+    <div class="card under" role="status">
+      <b>Вы: 1 284 место, 0 задач</b>
+    </div>
+    <a class="btn" href="task-new.html#empty">Поставить задачу</a>
+  </section>
+
+  <section class="page" data-view="left" data-label="Вышел из рейтинга" hidden>
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <p class="lead muted">Считаются закрытые задачи, а не добрые намерения. Размер не важен: микрозадача идёт за одну, как и большая.</p>
+
+    <div class="card mine">
+      <div class="cap">Твоя карточка</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag red">Вы не участвуете</span></span><span class="cnt"><b>76</b> задач</span></div>
+      <p class="small muted quiet">Другие тебя не видят. Твои 76 закрытых задач никуда не делись, при возвращении они учтутся.</p>
+      <button class="btn" type="button">Участвовать снова</button>
+    </div>
+
+    <ol class="board" aria-label="Первые 100 участников по числу закрытых задач">
+      <li class="rk top" value="1"><span class="pos">1</span><span class="nm">@sergei_p5</span><span class="cnt"><b>214</b> задач</span></li>
+      <li class="rk top" value="2"><span class="pos">2</span><span class="nm">Ольга</span><span class="cnt"><b>187</b> задач</span></li>
+      <li class="rk top" value="3"><span class="pos">3</span><span class="nm">@anya_vovremya</span><span class="cnt"><b>163</b> задачи</span></li>
+      <li class="rk" value="4"><span class="pos">4</span><span class="nm">@pavel_k</span><span class="cnt"><b>151</b> задача</span></li>
+      <li class="rk" value="5"><span class="pos">5</span><span class="nm">@ne_zavtra</span><span class="cnt"><b>148</b> задач</span></li>
+      <li class="gap" aria-hidden="true">· · · до сотни ещё 95 строк · · ·</li>
+    </ol>
+  </section>
+
+  <section class="page" data-view="empty" data-label="Пусто" hidden>
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <div class="card">
+      <h3>Пока никого. Будь первым</h3>
+      <p class="muted mt2">Закрытых задач ни у кого нет, таблица пуста. Закрой первую, и твоё имя будет вверху.</p>
+    </div>
+
+    <div class="card mine">
+      <div class="cap">Так тебя видят другие</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag">Вы</span></span><span class="cnt"><b>0</b> задач</span></div>
+      <button class="btn ghost" type="button">Выйти из рейтинга</button>
+    </div>
+    <a class="btn" href="task-new.html#empty">Поставить задачу</a>
+  </section>
+
+  <section class="page" data-view="empty-left" data-label="Пусто, я вышел" hidden>
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <div class="card">
+      <h3>Пока никого. Будь первым</h3>
+      <p class="muted mt2">В таблице пусто: все, включая тебя, из рейтинга вышли.</p>
+    </div>
+
+    <div class="card mine">
+      <div class="cap">Твоя карточка</div>
+      <div class="rk plain"><span class="nm">@ivan_k <span class="tag red">Вы не участвуете</span></span><span class="cnt"><b>76</b> задач</span></div>
+      <button class="btn" type="button">Участвовать снова</button>
+    </div>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <div class="eyebrow">Рейтинг · за всё время</div>
+    <h1>Кто сколько закрыл</h1>
+    <div class="banner"><b>Не загрузилось.</b> Таблица не открылась: сеть отвалилась. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#normal">Повторить</button>
+  </section>
+
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html" aria-current="page"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

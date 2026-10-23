@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Провал</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .fail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+    .fail-top .stamp { margin: 0; }
+    .task-name { font: 500 var(--hand-l)/1.1 var(--font-hand); margin: 0; text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+    .delta { display: flex; justify-content: space-between; align-items: baseline; }
+    .delta b { font: 700 var(--hand-l)/1 var(--font-hand); color: var(--red); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Экран «Провал»: UC-20…UC-25. Штамп «ЗАДАЧА ПРОВАЛЕНА», фраза Бати, изменение уважения, три действия. -->
+  <section class="page" data-view="normal" data-label="Провал по сроку">
+    <h1 class="sr-only">Провал · normal</h1>
+    <div class="eyebrow">Дневник · сегодня, 22:00</div>
+    <p class="task-name">Отправить отчёт по продажам за квартал</p>
+    <div class="fail-top">
+      <div class="stamp">Задача провалена</div>
+      <div class="grade" aria-hidden="true">2</div>
+    </div>
+    <blockquote class="quote">Сергей из пятого подъезда в твои годы квартальный отчёт сдавал до обеда. Но ты у нас особенный.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>−2</b> &nbsp;<span class="muted">14 → 12</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task.html#retry">Сделаю за час</a>
+      <a class="btn ghost" href="battle.html#dialog">Ответить</a>
+      <a class="btn link" href="share-card.html#fail">Поделиться провалом</a>
+    </div>
+    <p class="small muted m0">«Сделаю за час» работает один раз на задачу. Снятое уважение не возвращается.</p>
+  </section>
+
+  <section class="page" data-view="surrender" data-label="«Сдаюсь»" hidden>
+    <h1 class="sr-only">Провал · surrender</h1>
+    <div class="eyebrow">Дневник · сегодня, 15:40</div>
+    <p class="task-name">Убраться в гараже</p>
+    <div class="fail-top">
+      <div class="stamp">Задача провалена</div>
+      <div class="grade" aria-hidden="true">2</div>
+    </div>
+    <blockquote class="quote">Сам сдался, сам и расскажешь, почему. Гараж подождёт. Он привык.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>−1</b> &nbsp;<span class="muted">12 → 11</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task.html#retry">Сделаю за час</a>
+      <a class="btn ghost" href="battle.html#dialog">Ответить</a>
+      <a class="btn link" href="share-card.html#fail">Поделиться провалом</a>
+    </div>
+  </section>
+
+  <section class="page" data-view="used" data-label="Час уже брал" hidden>
+    <h1 class="sr-only">Провал · used</h1>
+    <div class="eyebrow">Дневник · сегодня, 19:00</div>
+    <p class="task-name">Отправить отчёт по продажам за квартал</p>
+    <div class="fail-top">
+      <div class="stamp">Задача провалена</div>
+      <div class="grade" aria-hidden="true">2</div>
+    </div>
+    <blockquote class="quote">Час тебе давали. Час прошёл, отчёта нет. Дважды я одно и то же не повторяю.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>−2</b> &nbsp;<span class="muted">12 → 10</span></span></div>
+    <div class="btns">
+      <button class="btn" type="button" disabled aria-describedby="used-note">Сделаю за час</button>
+      <a class="btn ghost" href="battle.html#dialog">Ответить</a>
+      <a class="btn link" href="share-card.html#fail">Поделиться провалом</a>
+    </div>
+    <p id="used-note" class="small muted m0">Час по этой задаче уже был. Теперь только новая задача.</p>
+  </section>
+
+  <section class="page" data-view="period" data-label="Период повторяющейся" hidden>
+    <h1 class="sr-only">Провал · period</h1>
+    <div class="eyebrow">Дневник · вторник, 22:00</div>
+    <p class="task-name">Сделать зарядку · вторник</p>
+    <div class="fail-top">
+      <div class="stamp">Задача провалена</div>
+      <div class="grade" aria-hidden="true">2</div>
+    </div>
+    <blockquote class="quote">Вторник сам себя не сделает. Завтра новый день, и я опять спрошу.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><span><b>−2</b> &nbsp;<span class="muted">12 → 10</span></span></div>
+    <div class="btns">
+      <a class="btn" href="task.html#retry-period">Сделаю за час</a>
+      <a class="btn ghost" href="battle.html#dialog">Ответить</a>
+      <a class="btn link" href="share-card.html#fail">Поделиться провалом</a>
+    </div>
+    <p class="small muted m0">Провален только вторник. Задача «Каждый день» остаётся, среда начнётся в 00:00.</p>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Провал · loading</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="error" data-label="Ошибка" hidden role="alert">
+    <h1 class="sr-only">Провал · error</h1>
+    <div class="banner"><b>Не загрузилось.</b> Бате не до тебя, сеть тоже отвалилась. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#normal">Повторить</button>
+  </section>
+  <section class="page" data-view="period-no-hour" data-label="Период: час не помещается" hidden>
+    <h1>Период провален</h1><p class="task-name">Повторять английский · пятница, 23 октября</p><div class="stamp">Период провален</div>
+    <blockquote class="quote">На сегодня всё. Завтра снова спрошу.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><b>−2 · 14 → 12</b></div><p>Сейчас 23:30. Час уже не поместится до следующего периода: он начнётся в 00:00. Задача остаётся.</p>
+    <a class="btn" href="battle.html#dialog">Ответить</a><a class="btn ghost" href="share-card.html#fail">Поделиться провалом</a><a class="btn link" href="home.html">К задачам</a>
+  </section>
+  <section class="page" data-view="period-surrender" data-label="Период: сдаюсь, −1" hidden>
+    <h1>Период провален</h1><div class="stamp">Период провален</div>
+    <blockquote class="quote">На сегодня всё. Завтра снова спрошу.<span class="who">Батя</span></blockquote>
+    <div class="delta card"><span>Уважение</span><b>−1 · 14 → 13</b></div><p>Провален только период за пятницу, 23 октября. Задача остаётся, следующий период начнётся в 00:00.</p>
+    <a class="btn" href="task.html#retry-period">Сделаю за час</a><a class="btn ghost" href="battle.html#dialog">Ответить</a><a class="btn ghost" href="share-card.html#fail">Поделиться провалом</a>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>

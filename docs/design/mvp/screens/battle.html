@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Бой</title>
+  <link rel="stylesheet" href="../tokens.css?v=4">
+  <link rel="stylesheet" href="../base.css?v=4">
+  <style>
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+    /* шапка: аватар по режиму, роль, подпись режима */
+    .b-head { display: grid; grid-template-columns: var(--avatar-size) 1fr auto; gap: var(--space-3); align-items: center; }
+    .face { width: var(--avatar-size); height: var(--avatar-size); display: grid; place-items: center; background: var(--surface); color: var(--fg); border: 3px solid var(--ink); border-radius: 50%; }
+    .face svg { width: var(--target-small); height: var(--target-small); fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .face.m-aggr { border-color: var(--red); border-style: solid; }
+    .face.m-def { border-style: dashed; }
+    .face.m-conf { border-style: dotted; }
+    .face.m-soft { border-style: double; border-width: 5px; }
+    .b-head h1 { line-height: 1; }
+    .mode { margin: var(--space-1) 0 0; font: 500 var(--hand-m)/1.1 var(--font-hand); color: var(--muted); }
+
+    /* шкалы и баланс */
+    .status { display: grid; gap: var(--space-4); }
+    .chip { display: inline-block; margin-left: var(--space-2); padding: 0 var(--space-2); border: 1px solid currentColor; border-radius: 999px; font: 700 var(--text-s)/1.6 var(--font-body); vertical-align: middle; }
+    .scale .track { position: relative; }
+    .ruler { position: relative; height: 22px; }
+    .ruler span { position: absolute; top: 0; transform: translateX(-50%); font-size: var(--text-s); line-height: 1; color: var(--muted); }
+    .ruler span::before { content: ""; display: block; width: 2px; height: 5px; margin: 0 auto 2px; background: var(--muted); }
+    .bal { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+    .bal b { font: 700 var(--hand-m)/1 var(--font-hand); color: var(--ink); }
+
+    /* диалог */
+    .log { display: grid; gap: var(--space-3); }
+    .taskmark { display: block; margin-bottom: var(--space-2); font-size: var(--text-s); color: var(--muted); }
+    .bubble-me .meta { display: block; font: 700 var(--hand-m)/1 var(--font-hand); margin-bottom: var(--space-1); }
+    .bubble-me .stat { display: block; margin-top: var(--space-1); font-size: var(--text-s); }
+    .typing { margin: 0; font: 500 var(--hand-m)/1.2 var(--font-hand); color: var(--muted); }
+    .turn-sum { margin: 0; }
+    .howto { display: grid; gap: var(--space-2); }
+    .howto p { margin: 0; }
+
+    /* поле реплики, прижато над нижним меню */
+    .composer { position: sticky; bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px)); z-index: 5; margin: auto calc(var(--space-4) * -1) calc(var(--space-5) * -1); padding: var(--space-2) var(--space-4); display: grid; gap: var(--space-2); background: var(--surface); border-top: 1px solid var(--line); }
+    .field textarea { min-height: var(--target); height: var(--target); max-height: calc(3 * var(--target)); resize: vertical; }
+    .keyboard-open .composer { bottom: 0; }
+    .keyboard-open .composer .hint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .field textarea::placeholder { color: var(--muted); opacity: 1; }
+    .field textarea:disabled { color: var(--muted); background: var(--surface); border-style: dashed; }
+    .field .under { display: flex; justify-content: space-between; gap: var(--space-3); align-items: baseline; }
+    .count { font-size: var(--text-s); color: var(--muted); white-space: nowrap; }
+    .count.full { color: var(--red); font-weight: 700; }
+    .price { padding-left: var(--space-2); border-left: 1px solid currentColor; font-weight: 400; }
+    .note { margin: 0; }
+
+    /* слом */
+    .break { display: grid; gap: var(--space-3); justify-items: stretch; }
+    .break p { margin: 0; text-align: center; }
+    .break .stamp { justify-self: center; }
+  </style>
+</head>
+<body>
+<!-- Лицо Бати по режиму (R-98, R-109): рисуется линией, цвет берётся из текста -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" class="absolute">
+  <symbol id="f-aggr" viewBox="0 0 48 48"><path d="M10 14 L21 20 M38 14 L27 20"/><circle cx="17" cy="26" r="2" fill="currentColor" stroke="none"/><circle cx="31" cy="26" r="2" fill="currentColor" stroke="none"/><path d="M16 37 Q24 31 32 37"/></symbol>
+  <symbol id="f-def" viewBox="0 0 48 48"><path d="M10 19 L21 19 M27 14 L38 18"/><circle cx="17" cy="26" r="2" fill="currentColor" stroke="none"/><circle cx="31" cy="26" r="2" fill="currentColor" stroke="none"/><path d="M17 36 L31 33"/></symbol>
+  <symbol id="f-conf" viewBox="0 0 48 48"><path d="M10 20 L21 15 M38 20 L27 15"/><circle cx="17" cy="26" r="2.5" fill="currentColor" stroke="none"/><circle cx="31" cy="26" r="2.5" fill="currentColor" stroke="none"/><path d="M15 36 Q19 32 23 36 T31 36 T35 36"/></symbol>
+  <symbol id="f-soft" viewBox="0 0 48 48"><path d="M10 19 Q16 15 21 18 M38 19 Q32 15 27 18"/><path d="M13 27 Q17 30 21 27 M27 27 Q31 30 35 27"/><path d="M18 35 Q24 39 30 35"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- Экран «Бой»: UC-60…UC-71, UC-46, UC-62, UC-73, UC-74, UC-82. Один макет на обе роли, роль в заголовке. -->
+
+  <!-- 1. Пустой диалог: первая фраза onBattleStart, побеждённость 0 (R-91, UC-65, UC-71) -->
+  <section class="page" data-view="empty" data-label="Пустой диалог">
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle1">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="e-rl">Уважение</span><b>12</b></div>
+        <div class="track" role="progressbar" aria-labelledby="e-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12"><div class="fill w12"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="e-dl">Побеждённость</span><b>0</b></div>
+        <div class="track" role="progressbar" aria-labelledby="e-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill w0"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>3</b></span><a class="btn small ghost" href="shop.html?balance=3&amp;from=empty#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad">Ну что, пришёл разговаривать? Я слушаю. Недолго.<span class="who">Батя</span></blockquote>
+    </div>
+    <div class="card howto">
+      <h3>Как это работает</h3>
+      <p class="small">Пиши по делу: Батя засчитывает аргументы, а не крик. Каждая реплика стоит 1 удар. Доведи побеждённость до 100, и Батя сломлен.</p>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="e-ta">Твоя реплика</label>
+        <textarea id="e-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="e-hint"></textarea>
+        <div class="under"><span class="hint" id="e-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="e-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 2. Обычный диалог после «Ответить» на упрёк: пометка задачи, режим aggression (R-86, R-87, UC-60) -->
+  <section class="page" data-view="dialog" data-label="Диалог, давит" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="d-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="d-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="d-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="d-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=dialog#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad">Ну что, пришёл разговаривать? Я слушаю. Недолго.<span class="who">Батя</span></blockquote>
+      <div class="bubble-me"><span class="meta">Ты</span>Мне нужно поговорить про отчёт.</div>
+      <blockquote class="quote bubble-dad">Про отчёт надо было говорить до срока. Сейчас говорят только те, кому нечего показать.<span class="who">Батя</span></blockquote>
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Отправить отчёт по продажам за квартал</span>Сергей из пятого подъезда в твои годы квартальный отчёт сдавал до обеда. Но ты у нас особенный.<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="d-ta">Твоя реплика</label>
+        <textarea id="d-ta" rows="3" maxlength="300" aria-describedby="d-hint">Сергей сдавал отчёт по пяти клиентам. У меня их сорок, и три поставки сорвались не по моей вине. Сравнивай при равных условиях.</textarea>
+        <div class="under"><span class="hint" id="d-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">127 / 300</span></div>
+      </div>
+      <button class="btn" type="button" data-go="#answered">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 3. Ход в обработке: удар зарезервирован, кнопка заблокирована (R-95, UC-69) -->
+  <section class="page" data-view="sending" data-label="Ход в обработке" hidden aria-busy="true">
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="s-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="s-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="s-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="s-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>1</b></span><button class="btn small ghost" type="button" disabled>Купить</button></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Отправить отчёт по продажам за квартал</span>Сергей из пятого подъезда в твои годы квартальный отчёт сдавал до обеда. Но ты у нас особенный.<span class="who">Батя</span></blockquote>
+      <div class="bubble-me"><span class="meta">Ты</span>Сергей сдавал отчёт по пяти клиентам. У меня их сорок, и три поставки сорвались не по моей вине. Сравнивай при равных условиях.<span class="stat">Отправляется…</span></div>
+      <p class="typing" role="status">Батя печатает…</p>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="s-ta">Твоя реплика</label>
+        <textarea id="s-ta" rows="3" maxlength="300" disabled aria-describedby="s-hint"></textarea>
+        <div class="under"><span class="hint" id="s-hint">Пока Батя отвечает, новую реплику не отправить.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="s-hint">Батя отвечает…</button>
+    </form>
+  </section>
+
+  <!-- 4. Ответ получен: шкалы обновились, побеждённость 43 перевела Батю в режим defense (R-98, R-109, UC-66) -->
+  <section class="page" data-view="answered" data-label="Ответ получен" hidden>
+    <header class="b-head">
+      <div class="face m-def" role="img" aria-label="Батя огрызается"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-def"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Огрызается</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="a-rl">Уважение</span><b>14 <span class="chip">+1</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="a-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="14"><div class="fill w14"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="a-dl">Побеждённость</span><b>43 <span class="chip">+22</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="a-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43"><div class="fill w43"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>1</b></span><a class="btn small ghost" href="shop.html?balance=1&amp;from=answered#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Отправить отчёт по продажам за квартал</span>Сергей из пятого подъезда в твои годы квартальный отчёт сдавал до обеда. Но ты у нас особенный.<span class="who">Батя</span></blockquote>
+      <div class="bubble-me"><span class="meta">Ты</span>Сергей сдавал отчёт по пяти клиентам. У меня их сорок, и три поставки сорвались не по моей вине. Сравнивай при равных условиях.</div>
+      <blockquote class="quote bubble-dad">Ты на отца не огрызайся. Я эту семью кормил, пока ты в песочнице сидел. Равные условия ему подавай.<span class="who">Батя</span></blockquote>
+      <p class="turn-sum small muted">Ход засчитан. Побеждённость 21 → 43, уважение 13 → 14.</p>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="a-ta">Твоя реплика</label>
+        <textarea id="a-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="a-hint"></textarea>
+        <div class="under"><span class="hint" id="a-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="a-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 5. Режим confusion: побеждённость больше 70 до 90 включительно -->
+  <section class="page" data-view="confusion" data-label="Растерян (71–90)" hidden>
+    <header class="b-head">
+      <div class="face m-conf" role="img" aria-label="Батя сбит с толку"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-conf"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Сбит с толку</p></div>
+      <a class="btn link small" href="share-card.html#battle3">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="c-rl">Уважение</span><b>20 <span class="chip">+2</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="c-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20"><div class="fill w20"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="c-dl">Побеждённость</span><b>78 <span class="chip">+15</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="c-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78"><div class="fill w78"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>5</b></span><a class="btn small ghost" href="shop.html?balance=5&amp;from=confusion#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <div class="bubble-me"><span class="meta">Ты</span>Ты учил меня, что работа не место для эмоций. А сам кричал из-за одного отчёта. Выбери что-то одно.</div>
+      <blockquote class="quote bubble-dad">Погоди. Я не кричал. Я повышал голос. Это другое. Ты к чему вообще клонишь?<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="c-ta">Твоя реплика</label>
+        <textarea id="c-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="c-hint"></textarea>
+        <div class="under"><span class="hint" id="c-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="c-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 6. Режим softening: побеждённость больше 90, но ещё не 100 -->
+  <section class="page" data-view="softening" data-label="Смягчился (91–99)" hidden>
+    <header class="b-head">
+      <div class="face m-soft" role="img" aria-label="Батя смягчился"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-soft"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Смягчился</p></div>
+      <a class="btn link small" href="share-card.html#battle4">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="f-rl">Уважение</span><b>24 <span class="chip">+1</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="f-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="24"><div class="fill w24"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="f-dl">Побеждённость</span><b>94 <span class="chip">+16</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="f-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="94"><div class="fill w94"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>4</b></span><a class="btn small ghost" href="shop.html?balance=4&amp;from=softening#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <div class="bubble-me"><span class="meta">Ты</span>Ты просто боишься, что я справлюсь без тебя.</div>
+      <blockquote class="quote bubble-dad">Может, и боюсь. Не говори никому. Ладно. Неплохо у тебя получается.<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="f-ta">Твоя реплика</label>
+        <textarea id="f-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="f-hint"></textarea>
+        <div class="under"><span class="hint" id="f-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="f-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 7. Слом при 100: onBreak, +12 уважения, поделиться (R-103, UC-67) -->
+  <section class="page" data-view="break" data-label="Слом, 100" hidden>
+    <header class="b-head">
+      <div class="face m-soft" role="img" aria-label="Батя сломлен и смягчился"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-soft"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Сломлен</p></div>
+      <span></span>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="b-rl">Уважение</span><b>36 <span class="chip">+12</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="b-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="36"><div class="fill w36"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="b-dl">Побеждённость</span><b>100 <span class="chip">+6</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="b-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="fill w100"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>3</b></span><a class="btn small ghost" href="shop.html?balance=3&amp;from=break#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <div class="bubble-me"><span class="meta">Ты</span>Ты хотел как лучше. А получилось, что я боюсь тебе звонить.</div>
+      <blockquote class="quote bubble-dad">Ну... Я просто хотел как лучше. Вот и всё, что я хотел сказать.<span class="who">Батя</span></blockquote>
+    </div>
+    <div class="card red break">
+      <div class="stamp">Батя сломлен</div>
+      <p>Уважение +12: 24 → 36. Батя на несколько дней мягче, проверки реже.</p>
+      <a class="btn" href="share-card.html#break">Поделиться</a>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="b-ta">Твоя реплика</label>
+        <textarea id="b-ta" rows="3" maxlength="300" placeholder="Бой продолжается: Батя смягчён, но слушает." aria-describedby="b-hint"></textarea>
+        <div class="under"><span class="hint" id="b-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn ghost" type="submit" disabled aria-describedby="b-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <section class="page" data-view="history-reply" data-label="Ответ из Истории" hidden>
+    <a class="back" href="history.html#list">← История</a><header class="b-head"><h1>Батя</h1><span class="tag">Бой · ответ на сообщение</span></header>
+    <div class="card"><p>Побеждённость: 0 · Удары: 2</p></div>
+    <div class="log" role="log" aria-label="Диалог с Батей"><blockquote class="quote bubble-dad"><span class="taskmark" data-history-task>К задаче: Написать отчёт по продажам за октябрь</span><span data-history-quote>Я тебе говорил, а ты так и не сделал «Написать отчёт по продажам за октябрь». Осталось 1 ч 30 мин.</span><span class="who">Батя</span></blockquote></div>
+    <form class="composer" onsubmit="return false"><div class="field"><label for="history-reply-text">Твоя реплика</label><textarea id="history-reply-text" rows="3" minlength="2" maxlength="300" aria-describedby="history-reply-hint"></textarea><p class="small muted" id="history-reply-hint">Минимум 2 символа. Реплика стоит 1 удар.</p></div><button class="btn" disabled>Отправить · 1 удар</button></form>
+  </section>
+
+  <!-- 8. Повторный слом раньше чем через 3 суток: onBreak есть, +12 нет (R-103, UC-69) -->
+  <section class="page" data-view="norew" data-label="Слом без награды" hidden>
+    <header class="b-head">
+      <div class="face m-soft" role="img" aria-label="Батя сломлен и смягчился"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-soft"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Сломлен</p></div>
+      <span></span>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="n-rl">Уважение</span><b>36</b></div>
+        <div class="track" role="progressbar" aria-labelledby="n-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="36"><div class="fill w36"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="n-dl">Побеждённость</span><b>100 <span class="chip">+9</span></b></div>
+        <div class="track" role="progressbar" aria-labelledby="n-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="fill w100"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=norew#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <div class="bubble-me"><span class="meta">Ты</span>А помнишь, как ты не пришёл на мой выпускной из-за совещания?</div>
+      <blockquote class="quote bubble-dad">Помню. Зря не пришёл. Я просто хотел как лучше. Опять.<span class="who">Батя</span></blockquote>
+    </div>
+    <div class="card red break">
+      <div class="stamp">Батя сломлен</div>
+      <p>В этот раз уважение без прибавки: награда за слом даётся не чаще раза в 3 суток.</p>
+      <a class="btn" href="share-card.html#break">Поделиться</a>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="n-ta">Твоя реплика</label>
+        <textarea id="n-ta" rows="3" maxlength="300" placeholder="Бой продолжается: Батя смягчён, но слушает." aria-describedby="n-hint"></textarea>
+        <div class="under"><span class="hint" id="n-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn ghost" type="submit" disabled aria-describedby="n-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 9. Откат: побеждённость снизилась сама, первая реплика напоминает об отдыхе (R-105, onRecovery) -->
+  <section class="page" data-view="recovered" data-label="После отката" hidden>
+    <header class="b-head">
+      <div class="face m-def" role="img" aria-label="Батя огрызается"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-def"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Огрызается</p></div>
+      <a class="btn link small" href="share-card.html#battle3">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="r-rl">Уважение</span><b>36</b></div>
+        <div class="track" role="progressbar" aria-labelledby="r-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="36"><div class="fill w36"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="r-dl">Побеждённость</span><b>50</b></div>
+        <div class="track" role="progressbar" aria-labelledby="r-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div class="fill w50"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <p class="small muted note">Побеждённость сама снижается на 25 в сутки, пока ты не бьёшь. Уважение не откатывается.</p>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=recovered#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <div class="bubble-me"><span class="meta">Ты</span>Привет, пап. Я вернулся.</div>
+      <blockquote class="quote bubble-dad">Явился. Отдохнул я, пока тебя не было, и снова за своё. Что у тебя с задачами?<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="r-ta">Твоя реплика</label>
+        <textarea id="r-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="r-hint"></textarea>
+        <div class="under"><span class="hint" id="r-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="r-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 10. Нулевой баланс: поле доступно, текст сохранён, вместо «Отправить» «Купить удары» (R-90, UC-62, UC-73) -->
+  <section class="page" data-view="zero" data-label="Нет ударов" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="z-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="z-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="z-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="z-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>0</b></span></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Убраться в гараже</span>Гараж не убран, а языком ты работаешь исправно. Давай, оправдывайся.<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="z-ta">Твоя реплика</label>
+        <textarea id="z-ta" rows="3" maxlength="300" aria-describedby="z-hint">Гараж не убран, потому что там лежат твои вещи, которые ты просил не трогать.</textarea>
+        <div class="under"><span class="hint" id="z-hint">Ударов нет. Текст сохранён: купи удар и отправь.</span><span class="count">76 / 300</span></div>
+      </div>
+      <a class="btn" href="shop.html?balance=0&amp;from=zero#battle" aria-describedby="z-hint">Купить удары</a>
+    </form>
+  </section>
+
+  <!-- 11. Покупка идёт в «Магазине» (shop.html, состояния «Из боя»): оттуда возврат в бой, текст реплики сохраняется (R-117, UC-73) -->
+
+  <!-- 12. Реплика короче 2 символов: кнопка неактивна, удар не списан (R-93, UC-62) -->
+  <section class="page" data-view="short" data-label="Реплика «.»" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="t-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="t-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="t-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="t-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=short#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad">Что молчишь? Сказать нечего?<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field bad">
+        <label for="t-ta">Твоя реплика</label>
+        <textarea id="t-ta" rows="3" maxlength="300" aria-invalid="true" aria-describedby="t-err">.</textarea>
+        <div class="under"><span class="err" id="t-err">Слишком коротко: нужно минимум 2 символа. Удар не списан.</span><span class="count">1 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="t-err">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 14. Предел 300 символов: 301-й не вводится (R-93, UC-63) -->
+  <section class="page" data-view="limit" data-label="Предел 300" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="l-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="l-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="l-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="l-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=limit#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad">Я тебя не для того растил, чтобы ты оправдывался. Делом отвечай.<span class="who">Батя</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="l-ta">Твоя реплика</label>
+        <textarea id="l-ta" rows="5" maxlength="300" aria-describedby="l-hint">Ты сам учил меня отвечать за слова. Я отвечаю: отчёт был сорван из-за поставок, а не из-за лени. Ты говорил: «Не оправдывайся, делай». Я делал, а ты видел только срок и Сергея из пятого подъезда. Сравнивай меня с собой, а не с ним, и сравнивай честно. Тебе самому было бы обидно, если бы так с тобой?</textarea>
+        <div class="under"><span class="hint" id="l-hint">Больше 300 символов не поместится.</span><span class="count full">300 / 300</span></div>
+      </div>
+      <button class="btn" type="button" data-go="#answered">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 15. Ошибка хода (таймаут актёра): удар возвращён, шкалы прежние, текст на месте (R-94, UC-46, UC-68) -->
+  <section class="page" data-view="turnerr" data-label="Ошибка хода" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="x-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="x-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="x-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="x-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=turnerr#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Отправить отчёт по продажам за квартал</span>Сергей из пятого подъезда в твои годы квартальный отчёт сдавал до обеда. Но ты у нас особенный.<span class="who">Батя</span></blockquote>
+    </div>
+    <div class="banner" role="alert"><b>Ход не засчитан, удар возвращён.</b> Батя не ответил за 30 секунд. Шкалы остались прежними, реплика на месте: отправь ещё раз.</div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="x-ta">Твоя реплика</label>
+        <textarea id="x-ta" rows="3" maxlength="300" aria-describedby="x-hint">Сергей сдавал отчёт по пяти клиентам. У меня их сорок, и три поставки сорвались не по моей вине. Сравнивай при равных условиях.</textarea>
+        <div class="under"><span class="hint" id="x-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">127 / 300</span></div>
+      </div>
+      <button class="btn" type="button" data-go="#answered">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 16. Отказ провайдера ИИ — тоже ошибка хода (R-101, UC-68) -->
+  <section class="page" data-view="refusal" data-label="Отказ провайдера" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Батя давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Батя</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle2">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="u-rl">Уважение</span><b>13</b></div>
+        <div class="track" role="progressbar" aria-labelledby="u-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13"><div class="fill w13"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="u-dl">Побеждённость</span><b>21</b></div>
+        <div class="track" role="progressbar" aria-labelledby="u-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="21"><div class="fill w21"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>2</b></span><a class="btn small ghost" href="shop.html?balance=2&amp;from=refusal#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с Батей">
+      <blockquote class="quote bubble-dad">Что молчишь? Сказать нечего?<span class="who">Батя</span></blockquote>
+    </div>
+    <div class="banner" role="alert"><b>Ход не засчитан, удар возвращён.</b> Нейросеть отказалась отвечать на такую реплику. Скажи то же другими словами и отправь ещё раз.</div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="u-ta">Твоя реплика</label>
+        <textarea id="u-ta" rows="3" maxlength="300" aria-describedby="u-hint">Ты сам всегда говорил, что слабым места нет. Вот и посмотрим, какой ты сильный.</textarea>
+        <div class="under"><span class="hint" id="u-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">79 / 300</span></div>
+      </div>
+      <button class="btn" type="button" data-go="#answered">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <!-- 17. Мать: тот же макет, роль подписью; пользователь — женщина -->
+  <section class="page" data-view="mother" data-label="Мама" hidden>
+    <header class="b-head">
+      <div class="face m-aggr" role="img" aria-label="Мама давит в полную силу"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#f-aggr"/></svg></div>
+      <div><div class="eyebrow">Бой</div><h1>Мама</h1><p class="mode">Давит в полную силу</p></div>
+      <a class="btn link small" href="share-card.html#battle1">Поделиться</a>
+    </header>
+    <div class="card status">
+      <div class="scale">
+        <div class="head"><span id="m-rl">Уважение</span><b>12</b></div>
+        <div class="track" role="progressbar" aria-labelledby="m-rl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12"><div class="fill w12"></div></div>
+      </div>
+      <div class="scale red">
+        <div class="head"><span id="m-dl">Побеждённость</span><b>8</b></div>
+        <div class="track" role="progressbar" aria-labelledby="m-dl" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8"><div class="fill w8"></div></div>
+        <div class="ruler" aria-hidden="true"><span class="l40">40</span><span class="l70">70</span><span class="l90">90</span></div>
+      </div>
+      <div class="bal"><span>Удары: <b>3</b></span><a class="btn small ghost" href="shop.html?balance=3&amp;from=mother#battle-positive">Купить</a></div>
+    </div>
+    <div class="log" role="log" aria-label="Диалог с мамой">
+      <blockquote class="quote bubble-dad"><span class="taskmark">К задаче: Позвонить бабушке</span>Позвонила бабушке? Она спрашивала, почему ты не звонишь. Я, конечно, промолчала. Я же мать.<span class="who">Мама</span></blockquote>
+      <div class="bubble-me"><span class="meta">Ты</span>Позвонила, мам. Двадцать минут говорили. Можно не ссорить меня с бабушкой?</div>
+      <blockquote class="quote bubble-dad">Двадцать минут бабушке, а матери «некогда». Ладно, я не обижаюсь. Я привыкла.<span class="who">Мама</span></blockquote>
+    </div>
+    <form class="composer" onsubmit="return false">
+      <div class="field">
+        <label for="m-ta">Твоя реплика</label>
+        <textarea id="m-ta" rows="3" maxlength="300" placeholder="Попробуй возразить по делу. Крик не считается." aria-describedby="m-hint"></textarea>
+        <div class="under"><span class="hint" id="m-hint">Минимум 2 символа. Реплика стоит 1 удар.</span><span class="count">0 / 300</span></div>
+      </div>
+      <button class="btn" type="submit" disabled aria-describedby="m-hint">Отправить <span class="price">1 удар</span></button>
+    </form>
+  </section>
+
+  <section class="page" data-view="loading" data-label="Загрузка" hidden aria-busy="true">
+    <h1 class="sr-only">Бой</h1>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </section>
+
+  <section class="page" data-view="loaderr" data-label="Ошибка загрузки" hidden role="alert">
+    <h1 class="sr-only">Бой</h1>
+    <div class="banner"><b>Не загрузилось.</b> Батя ждёт, но диалог не открылся: сеть отвалилась. История цела. Проверь интернет и нажми «Повторить».</div>
+    <button class="btn" type="button" data-go="#empty">Повторить</button>
+  </section>
+
+  <section class="page" data-view="half" data-label="Ход: +0,5 уважения" hidden>
+    <h1>Бой</h1><blockquote class="quote">Ладно, в этом есть смысл.<span class="who">Батя</span></blockquote><p class="card" role="status">Уважение 13 → 13 (+0,5). Уважение теперь 13,5; на шкале показана целая часть. Побеждённость 21 → 29 (+8). Списан 1 удар, осталось 2.</p><a class="btn" href="#dialog">Продолжить бой</a>
+  </section>
+  <section class="page" data-view="no-gain" data-label="Ход: уважение без прироста" hidden>
+    <h1>Бой</h1><blockquote class="quote">Это всё? Делом отвечай.<span class="who">Батя</span></blockquote><p class="card" role="status">Уважение не изменилось: довод слабый. 13 → 13 (+0). Побеждённость 21 → 23 (+2). Списан 1 удар, осталось 2.</p><a class="btn" href="#dialog">Продолжить бой</a>
+  </section>
+  <section class="page" data-view="keyboard" data-label="Клавиатура открыта" hidden>
+    <h1>Бой</h1><blockquote class="quote">Про отчёт надо было говорить до срока. Я слушаю.<span class="who">Батя</span></blockquote>
+    <div class="bubble-me">Сейчас объясню по делу.</div><form class="composer" onsubmit="return false"><div class="field"><label for="kb-reply">Твоя реплика</label><textarea id="kb-reply" rows="1" maxlength="300" aria-describedby="kb-h">Сейчас объясню по делу.</textarea><span id="kb-h" class="hint">Одна реплика — 1 удар. До 300 символов.</span></div><button class="btn" type="button" data-go="#answered">Отправить · 1 удар</button></form>
+  </section>
+  <nav class="tabbar" aria-label="Основное меню">
+    <a href="home.html"><span class="ico" aria-hidden="true">№</span>Главная</a>
+    <a href="battle.html" aria-current="page"><span class="ico" aria-hidden="true">!</span>Бой</a>
+    <a href="history.html"><span class="ico" aria-hidden="true">≡</span>История</a>
+    <a href="leaderboard.html"><span class="ico" aria-hidden="true">5</span>Рейтинг</a>
+    <a href="more.html"><span class="ico" aria-hidden="true">+</span>Ещё</a>
+  </nav>
+</div>
+<script src="../viewer.js?v=4"></script>
+</body>
+</html>
