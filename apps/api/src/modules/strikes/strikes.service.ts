@@ -10,11 +10,29 @@ import type { PageInput } from '../../common/utils/presentation';
 import { decodeCursor, encodeCursor } from '../../common/utils/pagination';
 import type { StrikeOperation } from '../../database/schemas/strike-operation.schema';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { AppConfigService } from '../../config/app-config.service';
 import type { StrikeBalanceResponseView, OwnerStrikeBalanceResponseView, StrikeOperationListResponseView, StrikeOperationResponseView } from './strikes.types';
 @Injectable()
 export class StrikesService {
-  constructor(private readonly db: DatabaseService, private readonly analytics: AnalyticsService) { }
+  constructor(private readonly db: DatabaseService, private readonly analytics: AnalyticsService, private readonly config: AppConfigService) { }
+  // Владелец и исключения из конфигурации не платят: их запас удар за ударом пополняется бесплатной партией.
+  private async topUpExempt(userId: string, session?: ClientSession): Promise<void> {
+    const user = await this.db.model('User').findById(userId).session(session ?? null).lean();
+    const exempt = !!user && (user.telegramId === this.config.ownerId || (!!user.username && this.config.freeBattleUsernames.includes(user.username.toLowerCase())));
+    if (!exempt) {
+      return;
+    }
+    const lots = await this.db.model('StrikeLot').find({
+      userId,
+      refundedAt: { $exists: false },
+    }).session(session ?? null).lean();
+    if (lots.reduce((sum, row) => sum + row.remaining, 0) < 20) {
+      await this.grant(userId, 100, 'manual', 'Бесплатные удары: исключение', session as ClientSession);
+    }
+  }
+
   async balance(userId: string, session?: ClientSession): Promise<StrikeBalanceResponseView> {
+    await this.topUpExempt(userId, session);
     const lots = await this.db.model('StrikeLot').find({
       userId,
       refundedAt: { $exists: false },
@@ -72,6 +90,7 @@ export class StrikesService {
   }
 
   async reserve(userId: string, turnId: string, session: ClientSession): Promise<void> {
+    await this.topUpExempt(userId, session);
     const lot = await this.db.model('StrikeLot').findOneAndUpdate({
       userId,
       remaining: { $gt: 0 },

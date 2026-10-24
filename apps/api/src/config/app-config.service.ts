@@ -23,6 +23,11 @@ export class AppConfigService {
     return Number(this.config.getOrThrow<string>('OWNER_TELEGRAM_ID'));
   }
 
+  // Владелец и перечисленные в FREE_BATTLE_USERNAMES (через запятую, без @) бьются бесплатно.
+  get freeBattleUsernames(): string[] {
+    return (this.config.get<string>('FREE_BATTLE_USERNAMES') ?? '').split(',').map(name => name.trim().replace(/^@/, '').toLowerCase()).filter(Boolean);
+  }
+
   get authMaxAge(): number {
     return Number(this.config.get<string>('TELEGRAM_AUTH_MAX_AGE_SECONDS') ?? 3600);
   }
