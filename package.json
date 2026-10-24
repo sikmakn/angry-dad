@@ -14,7 +14,8 @@
     "check:database-safety": "node scripts/testing/check-database-safety.mjs",
     "docs:api": "node scripts/docs/serve-api.mjs",
     "generate:openapi": "node scripts/docs/generate-openapi.mjs",
-    "check:openapi": "npm run generate:openapi -- --check"
+    "check:openapi": "npm run generate:openapi -- --check",
+    "online": "node scripts/online.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

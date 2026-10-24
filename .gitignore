@@ -16,3 +16,5 @@ dist/
 
 # Worktree Codex
 .codex/worktrees/
+
+.online/
