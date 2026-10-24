@@ -62,9 +62,31 @@ describe('Adaptive notification scheduling and dispatch', () => {
     await Promise.all([h.app.get(DispatcherService).dispatch(), h.app.get(DispatcherService).dispatch()]);
     const calls = send.mock.calls.filter(call => call[0] === u.telegramId);
     expect(calls).toHaveLength(1);
-    expect(calls[0][1]).toContain('Про «Написать три страницы»');
+    expect(calls[0][1]).toContain('Про <b>«Написать три страницы»</b>\n\n');
+    expect(calls[0][1]).toContain('<b>🟡 Проверка</b> <i>· Батя</i>');
+    expect(calls[0][4]).toBe('HTML');
     const outbox = (await h.db.model('OutboxMessage').findById(message._id).lean())!;
     expect(outbox.status).toBe('sent');
+    expect(calls[0][2]?.inline_keyboard).toEqual([
+      [{
+        text: 'Открыть приложение',
+        web_app: { url: expect.stringContaining(`notification=${outbox.feedMessageId}`) },
+      }],
+      [
+        {
+          text: '😐',
+          callback_data: `r:${outbox.feedMessageId}:0`,
+        },
+        {
+          text: '😞',
+          callback_data: `r:${outbox.feedMessageId}:1`,
+        },
+        {
+          text: '😭',
+          callback_data: `r:${outbox.feedMessageId}:2`,
+        },
+      ],
+    ]);
     expect(await h.app.get(DeliveryService).get(u._id, outbox.feedMessageId!)).toMatchObject({ id: outbox.feedMessageId });
     const state = (await h.db.model('TaskNotificationState').findById(u._id).lean())!;
     expect(state.nextAt!.getTime() - outbox.sentAt!.getTime()).toBeGreaterThanOrEqual(180000);
@@ -194,6 +216,8 @@ describe('Adaptive notification scheduling and dispatch', () => {
     await h.app.get(TaskNotificationsService).missed();
     await h.app.get(TaskNotificationsService).missed();
     expect((await h.db.model('User').findById(u._id).lean())?.respect).toBe(11);
+    const deltas = await Promise.all([origin, followup].map(feed => h.app.get(DeliveryService).get(u._id, feed._id)));
+    expect(deltas.map(feed => feed.checkIn?.respectDelta).sort()).toEqual([-1, 0]);
     expect(await h.db.model('RespectChange').countDocuments({
       userId: u._id,
       reason: 'missed_check_in',
@@ -204,7 +228,9 @@ describe('Adaptive notification scheduling and dispatch', () => {
     const feeds = await Promise.all([checkIn(h.db, u, period._id), checkIn(h.db, u, period._id)]);
     await h.app.get(DeliveryService).answer(u, feeds[0]._id, 'partial');
     const first = (await h.db.model('TaskNotificationState').findById(u._id).lean())!;
-    await h.app.get(DeliveryService).answer(u, feeds[1]._id, 'not_started');
+    await expect(h.app.get(DeliveryService).answer(u, feeds[1]._id, 'not_started')).rejects.toMatchObject({ status: 409 });
+    const future = await checkIn(h.db, u, period._id);
+    await h.app.get(DeliveryService).answer(u, future._id, 'not_started');
     expect((await h.db.model('TaskNotificationState').findById(u._id).lean())?.series).toEqual(first.series);
   });
   it('expired unknown lease drops rather than blindly resending', async () => {

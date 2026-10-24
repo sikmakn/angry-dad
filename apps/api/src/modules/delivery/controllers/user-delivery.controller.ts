@@ -95,7 +95,27 @@ export class UserDeliveryController {
     @Param()
     params: RateFeedMessageParamsDto): Promise<FeedMessageResponseDto> {
     await this.phrases.rate(request.user._id, params.feedMessageId, body.score);
+    await this.delivery.refreshRating(request.user._id, params.feedMessageId);
     return this.delivery.get(request.user._id, params.feedMessageId);
+  }
+
+  @Put('feed/:feedMessageId/read')
+  @HttpCode(200)
+  @ApiOperation({
+    operationId: 'markFeedMessageRead',
+    summary: 'Отметить уведомление прочитанным',
+  })
+  @UseGuards(TelegramAuthGuard, OnboardedGuard)
+  @ApiResponse({
+    status: 200,
+    type: FeedMessageResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Сообщение не найдено',
+  })
+  async markFeedMessageRead(@Req() request: AuthRequest, @Param() params: RateFeedMessageParamsDto): Promise<FeedMessageResponseDto> {
+    return this.delivery.markRead(request.user._id, params.feedMessageId);
   }
 
   @Put('feed/:feedMessageId/check-in-answer')

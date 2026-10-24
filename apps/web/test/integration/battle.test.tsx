@@ -7,6 +7,23 @@ import { apiLifecycle, at, base, dialog, me, problem, renderApi, reply, server, 
 
 apiLifecycle();
 describe('battle transport and recovery', () => {
+  it.each([[0, 'red'], [40, 'yellow'], [80, 'green'], [100, 'gold'], [99.75, 'gold']] as const)('uses the authority colour at defeat %s', async (defeat, colour) => {
+    server.use(http.get(`${base}/battle/father`, () => HttpResponse.json({ ...dialog, defeat })));
+    renderApi(<BattleScreen me={me} share={vi.fn()} />);
+    const meter = await screen.findByRole('meter', { name: 'Авторитет' });
+    expect(meter.closest('.scale')).toHaveClass(colour);
+    expect(meter).toHaveAttribute('aria-valuenow', String(100 - defeat));
+  });
+
+  it('shows zero authority at victory and restores it as defeat decays', async () => {
+    let defeat = 100;
+    server.use(http.get(`${base}/battle/father`, () => HttpResponse.json({ ...dialog, defeat })));
+    renderApi(<BattleScreen me={me} share={vi.fn()} />);
+    expect(await screen.findByRole('meter', { name: 'Авторитет' })).toHaveAttribute('aria-valuenow', '0');
+    defeat = 75;
+    await waitFor(() => expect(screen.getByRole('meter', { name: 'Авторитет' })).toHaveAttribute('aria-valuenow', '25'), { timeout: 5000 });
+  });
+
   it('recovers the server reply after mounting during a turn without another reload', async () => {
     let finished = false;
     server.use(
@@ -17,7 +34,7 @@ describe('battle transport and recovery', () => {
     expect(await screen.findByRole('button', { name: 'Батя отвечает…' })).toBeDisabled();
     finished = true;
     expect(await screen.findByText(reply.text, {}, { timeout: 5000 })).toBeVisible();
-    expect(screen.getByRole('meter', { name: 'Побеждённость' })).toHaveAttribute('aria-valuenow', '21');
+    expect(screen.getByRole('meter', { name: 'Авторитет' })).toHaveAttribute('aria-valuenow', '79');
   });
 
   it('reuses the identical key and body for an unknown turn and sends no automatic retry', async () => {
@@ -30,13 +47,14 @@ describe('battle transport and recovery', () => {
     const user = userEvent.setup();
     await waitFor(() => expect(screen.getByLabelText('Твоя реплика')).toBeEnabled());
     await user.type(screen.getByLabelText('Твоя реплика'), 'Ты сам ничего не доделал.');
-    await user.click(await screen.findByRole('button', { name: 'Отправить · 1 удар' }));
+    await user.click(await screen.findByRole('button', { name: 'Огрызнуться' }));
     const retry = await screen.findByRole('button', { name: 'Узнать результат той же попытки' });
     expect(attempts).toHaveLength(1);
     expect(screen.getByLabelText('Твоя реплика')).toBeDisabled();
     expect(screen.getByLabelText('Твоя реплика')).toHaveValue('Ты сам ничего не доделал.');
     await user.click(retry);
     await screen.findByText(/Ход засчитан/);
+    expect(screen.getByRole('status')).toHaveTextContent('Авторитет 100 → 79');
     expect(attempts).toHaveLength(2);
     expect(attempts[0].key).toBeTruthy();
     expect(attempts[1]).toEqual(attempts[0]);
@@ -52,11 +70,11 @@ describe('battle transport and recovery', () => {
     renderApi(<BattleScreen me={me} share={vi.fn()} />);
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('Твоя реплика'), 'Я сделал всё вовремя.');
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Отправить · 1 удар' })).toBeEnabled());
-    await user.click(screen.getByRole('button', { name: 'Отправить · 1 удар' }));
-    await screen.findByText(/Ход не засчитан, удар возвращён/);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Огрызнуться' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: 'Огрызнуться' }));
+    await screen.findByText(/Попытка не засчитана и не потрачена/);
     expect(screen.getByLabelText('Твоя реплика')).toHaveValue('Я сделал всё вовремя.');
-    await user.click(screen.getByRole('button', { name: 'Отправить · 1 удар' }));
+    await user.click(screen.getByRole('button', { name: 'Огрызнуться' }));
     await waitFor(() => expect(keys).toHaveLength(2));
     expect(keys[1]).not.toBe(keys[0]);
   });

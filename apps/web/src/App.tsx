@@ -4,12 +4,14 @@ import type { Me, Schema } from './api/contract';
 import { config, telegram, useTelegram } from './platform/telegram';
 import { useRead, useWrite } from './hooks/useApi';
 import { useNavigation } from './hooks/useNavigation';
+import { useNotificationCounts } from './hooks/useNotificationCounts';
 import { Feedback } from './components/Feedback';
 import { StartScreen } from './start/StartScreen';
 import { HomeScreen } from './tasks/HomeScreen';
 import { TaskNewScreen } from './tasks/TaskNewScreen';
 import { TaskScreen } from './tasks/TaskScreen';
 import { HistoryScreen } from './history/HistoryScreen';
+import { NotificationScreen } from './history/NotificationScreen';
 import { BattleScreen } from './battle/BattleScreen';
 import { ShopContent } from './shop/ShopContent';
 import { ShareScreen } from './sharing/ShareScreen';
@@ -41,18 +43,20 @@ function TimeZonePrompt({ me }: { me: Me }) {
   );
 }
 
-const tabs = [['home', 'Главная'], ['battle', 'Бой'], ['history', 'История'], ['leaderboard', 'Рейтинг'], ['more', 'Ещё']];
+const tabs = [['home', 'Главная'], ['battle', 'Перепалка'], ['history', 'История'], ['leaderboard', 'Рейтинг'], ['more', 'Ещё']];
 
 function Session({ me, deleted }: { me: Me; deleted: () => void }) {
   const { route, go } = useNavigation();
   const [starting, setStarting] = useState(me.onboarding === 'guest');
   const [firstTask, setFirstTask] = useState(false);
   const [sharing, setSharing] = useState<Schema<'CreateShareRequest'>>();
+  const notifications = useNotificationCounts(me.id, !starting && me.onboarding === 'done');
+  const activeNotifications = notifications.data?.activeCount ?? 0;
   const back = useCallback(() => {
     if (sharing) {
       setSharing(undefined);
     } else {
-      go(route.startsWith('task/') || route === 'task-new' ? 'home' : 'more');
+      go(route.startsWith('notification/') ? 'history' : route.startsWith('task/') || route === 'task-new' ? 'home' : 'more');
     }
   }, [sharing, go, route]);
   useTelegram(!sharing && (starting || route === 'home') ? undefined : back);
@@ -70,7 +74,7 @@ function Session({ me, deleted }: { me: Me; deleted: () => void }) {
       </main>
     );
   }
-  const current = route.startsWith('task') ? 'home' : ['shop', 'settings', 'owner'].includes(route) ? 'more' : route;
+  const current = route.startsWith('notification/') ? 'history' : route.startsWith('task') ? 'home' : ['shop', 'settings', 'owner'].includes(route) ? 'more' : route;
   let screen;
   if (route === 'task-new') {
     screen = (
@@ -87,14 +91,16 @@ function Session({ me, deleted }: { me: Me; deleted: () => void }) {
   } else if (route === 'battle') {
     screen = <BattleScreen key={me.role} me={me} share={setSharing} />;
   } else if (route === 'history') {
-    screen = <HistoryScreen me={me} go={go} />;
+    screen = <HistoryScreen me={me} />;
+  } else if (route.startsWith('notification/')) {
+    screen = <NotificationScreen key={route} id={decodeURIComponent(route.slice(13))} me={me} go={go} />;
   } else if (route === 'leaderboard') {
     screen = <LeaderboardScreen me={me} />;
   } else if (route === 'shop') {
     screen = (
       <>
         <a className="back" href="#more">← Ещё</a>
-        <h1 tabIndex={-1}>Удары</h1>
+        <h1 tabIndex={-1}>Огрызнуться ещё</h1>
         <ShopContent me={me} />
       </>
     );
@@ -119,7 +125,14 @@ function Session({ me, deleted }: { me: Me; deleted: () => void }) {
       </main>
       {!firstTask && !sharing && (
         <nav className="tabbar" aria-label="Основная навигация">
-          {tabs.map(([value, label]) => <a href={`#${value}`} key={value} aria-current={current === value ? 'page' : undefined}>{label}</a>)}
+          {tabs.map(([value, label]) => (
+            <a href={`#${value}`} key={value} aria-label={value === 'history' && activeNotifications ? `История, активных уведомлений: ${activeNotifications}` : undefined} aria-current={current === value ? 'page' : undefined}>
+              <span className="tab-label">
+                {label}
+                {value === 'history' && activeNotifications > 0 && <span className="nav-badge" aria-hidden="true">{activeNotifications > 99 ? '99+' : activeNotifications}</span>}
+              </span>
+            </a>
+          ))}
         </nav>
       )}
     </>
@@ -127,6 +140,9 @@ function Session({ me, deleted }: { me: Me; deleted: () => void }) {
 }
 
 function AuthenticatedApp() {
+  useEffect(() => {
+    telegram()?.ready();
+  }, []);
   const [accountDeleted, setAccountDeleted] = useState(false);
   const enabled = config.mocks || !!telegram()?.initData;
   const profile = useRead('session', 'getMe', {}, enabled && !accountDeleted, true);
@@ -167,7 +183,7 @@ function AuthenticatedApp() {
     return (
       <main className="page">
         <h1 tabIndex={-1}>Аккаунт удалён</h1>
-        <p>Задачи и бои удалены. Вернуться можно через /start в боте.</p>
+        <p>Задачи и перепалки удалены. Вернуться можно через /start в боте.</p>
       </main>
     );
   }
@@ -175,7 +191,7 @@ function AuthenticatedApp() {
     return (
       <main className="page">
         <h1>Батя</h1>
-        <p className="banner">Открой приложение через Telegram.</p>
+        <p className="banner">Открой чат с ботом и нажми кнопку «Открыть Батю» под полем ввода сообщения.</p>
         {config.botUsername
           ? <a className="btn" href={`https://t.me/${encodeURIComponent(config.botUsername)}`}>Открыть бота</a>
           : <p className="muted">Имя бота ещё не настроено владельцем.</p>}

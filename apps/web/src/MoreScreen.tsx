@@ -9,7 +9,7 @@ export function MoreScreen({ me }: { me: Me }) {
     <>
       <div className="eyebrow">Дневник · остальное</div>
       <h1 tabIndex={-1}>Ещё</h1>
-      <a className="btn ghost" href="#shop">Удары</a>
+      <a className="btn ghost" href="#shop">Огрызнуться ещё</a>
       <a className="btn ghost" href="#settings">Настройки</a>
       <button className="btn ghost" onClick={() => setLegal(true)}>Условия и политика конфиденциальности</button>
       <p className="hint">Вопросы по оплате — /paysupport в боте.</p>

@@ -45,7 +45,7 @@ describe('Phrase pagination and rating', () => {
     expect(found).toEqual(expected);
     expect(new Set(found).size).toBe(4);
   });
-  it('concurrent equal votes count once; conflicting vote and foreign feed are rejected', async () => {
+  it('equal votes count once; changed votes replace the score across repeated shows; foreign feed is rejected', async () => {
     const u = await user(h.db), other = await user(h.db);
     const { period } = await taskPeriod(h.db, u);
     const phrases = h.app.get(PhrasesService);
@@ -74,7 +74,25 @@ describe('Phrase pagination and rating', () => {
       userId: u._id,
       phraseId: phrase.id,
     })).toBe(1);
-    await expect(phrases.rate(u._id, first._id, 0)).rejects.toMatchObject({ status: 409 });
+    await phrases.rate(u._id, first._id, 1);
+    expect(await h.db.model('Phrase').findById(phrase.id).lean()).toMatchObject({
+      votes: 1,
+      scoreSum: 1,
+    });
+    expect(await h.db.model('FeedMessage').findById(second._id).lean()).toMatchObject({ rating: 1 });
+    await Promise.all([phrases.rate(u._id, first._id, 0), phrases.rate(u._id, second._id, 2)]);
+    const vote = (await h.db.model('PhraseVote').findOne({
+      userId: u._id,
+      phraseId: phrase.id,
+    }).lean())!;
+    expect(await h.db.model('Phrase').findById(phrase.id).lean()).toMatchObject({
+      votes: 1,
+      scoreSum: vote.score,
+    });
+    expect(await h.db.model('PhraseVote').countDocuments({
+      userId: u._id,
+      phraseId: phrase.id,
+    })).toBe(1);
     await expect(phrases.rate(other._id, first._id, 2)).rejects.toMatchObject({ status: 404 });
   });
 });

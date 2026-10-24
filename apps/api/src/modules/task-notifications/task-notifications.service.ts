@@ -244,49 +244,104 @@ export class TaskNotificationsService {
   }
 
   async missed(): Promise<void> {
-    const feeds = await this.db.model('FeedMessage').find({
-      'category': 'on_check_in',
-      'draft': { $ne: true },
-      'telegramMessageId': { $exists: true },
-      'checkIn.answer': { $exists: false },
-      'checkIn.missedAt': { $exists: false },
-      'sentAt': { $lte: new Date(Date.now() - p.answerWindow) },
-    }).limit(100).lean();
-    for (const feed of feeds) {
-      await this.db.transaction(async (session) => {
-        const updated = await this.db.model('FeedMessage').updateOne({
-          '_id': feed._id,
+    // One response window per task period. Reading or delivering another message
+    // does not restart it; an answer closes this batch and lets a new one begin.
+    const groups = await this.db.model('FeedMessage').aggregate<{ _id: string;
+      userId: string; }>([
+      {
+        $match: {
+          'category': 'on_check_in',
+          'draft': { $ne: true },
+          'telegramMessageId': { $exists: true },
+          'periodId': { $exists: true },
           'checkIn.answer': { $exists: false },
-          'checkIn.missedAt': { $exists: false },
-        }, { $set: { 'checkIn.missedAt': new Date() } }, { session });
+          'checkIn.resolvedAt': { $exists: false },
+        },
+      },
+      {
+        $group: {
+          _id: '$periodId',
+          userId: { $first: '$userId' },
+          firstAt: { $min: '$sentAt' },
+          unprocessed: { $sum: { $cond: [{ $ifNull: ['$checkIn.missedAt', false] }, 0, 1] } },
+        },
+      },
+      {
+        $match: {
+          firstAt: { $lte: new Date(Date.now() - p.answerWindow) },
+          unprocessed: { $gt: 0 },
+        },
+      },
+      { $limit: 100 },
+    ]);
+    for (const group of groups) {
+      await this.db.transaction(async (session) => {
+        const feeds = await this.db.model('FeedMessage').find({
+          'userId': group.userId,
+          'periodId': group._id,
+          'category': 'on_check_in',
+          'draft': { $ne: true },
+          'telegramMessageId': { $exists: true },
+          'checkIn.answer': { $exists: false },
+          'checkIn.resolvedAt': { $exists: false },
+        }).sort({
+          sentAt: 1,
+          _id: 1,
+        }).session(session).lean();
+        const first = feeds[0];
+        if (!first || first.sentAt.getTime() + p.answerWindow > Date.now()) {
+          return;
+        }
         const period = await this.db.model('Period').findOne({
-          _id: feed.periodId,
+          _id: group._id,
+          userId: group.userId,
           status: 'active',
+          deadline: { $gt: new Date() },
         }).session(session).lean();
         const task = period
           ? await this.db.model('Task').exists({
               _id: period.taskId,
+              userId: group.userId,
               currentPeriodId: period._id,
               status: 'active',
               deletedAt: { $exists: false },
             }).session(session)
           : null;
-        if (!updated.modifiedCount || !period || !task) {
+        if (!period || !task) {
+          return;
+        }
+        const at = new Date();
+        const updated = await this.db.model('FeedMessage').updateMany({
+          '_id': { $in: feeds.map(row => row._id) },
+          'checkIn.answer': { $exists: false },
+          'checkIn.resolvedAt': { $exists: false },
+          'checkIn.missedAt': { $exists: false },
+        }, {
+          $set: {
+            'checkIn.missedAt': at,
+            'checkIn.respectDelta': 0,
+          },
+        }, { session });
+        if (!updated.modifiedCount || feeds.some(row => row.checkIn?.missedAt)) {
           return;
         }
         const origin = await this.db.model('OutboxMessage').findOne({
-          feedMessageId: feed._id,
+          feedMessageId: first._id,
           status: 'sent',
         }).session(session).lean();
         const additional = Boolean(origin?.seriesId || origin?.kind === 'series_check_in');
-        const originFeedId = additional ? origin?.seriesOriginFeedId ?? origin?.sourceFeedId : feed._id;
-        // A series after a negative answer can incur its first missed penalty.
-        // The shared key survives series expiry and deduplicates every follow-up.
+        const originFeedId = additional ? origin?.seriesOriginFeedId ?? origin?.sourceFeedId : first._id;
         if (originFeedId) {
-          await this.respect.apply(feed.userId, 'missed_check_in', `${originFeedId}:missed`, -1, session);
+          const eventKey = `${originFeedId}:missed`;
+          const previous = await this.db.model('RespectChange').exists({
+            userId: group.userId,
+            eventKey,
+          }).session(session);
+          const penalty = await this.respect.apply(group.userId, 'missed_check_in', eventKey, -1, session);
+          await this.db.model('FeedMessage').updateOne({ _id: first._id }, { $set: { 'checkIn.respectDelta': previous ? 0 : penalty.applied } }, { session });
         }
         if (!additional) {
-          await this.startSeries(period, session, true, feed._id);
+          await this.startSeries(period, session, true, first._id);
         }
       });
     }

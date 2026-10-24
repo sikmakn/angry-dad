@@ -3,6 +3,14 @@ import type { Phrase } from './schemas/phrase.schema';
 import { Injectable } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import { DatabaseService } from './database.service';
+import { extensionPhrases } from './extension-phrases';
+const notStartedReplies = [
+  'Даже не начал(а)? Зато кнопку нажать силы нашлись. Начинай.',
+  'Ноль сделано, зато планы были грандиозные. Удиви меня: начни.',
+  'Всё ещё собираешься? Сборы уже длиннее самой работы. За дело.',
+  'Задача ждёт, время идёт, ты отдыхаешь. Прекрасное распределение обязанностей.',
+  'Не начал(а). Какая неожиданность. Может, хоть сейчас перестанешь репетировать начало?',
+];
 const phrases: Record<string, string[]> = {
   on_greeting: ['Ну что, опять без дела?', 'Ты ко мне за советом или оправданиями?', 'Заходи. Покажешь, чем занят.', 'Давно тебя не видно. Сделал хоть что-нибудь?', 'Сначала дело, потом разговоры.'],
   on_task_set: ['Записал. Посмотрим.', 'Вот и проверим, чего стоят твои слова.', 'Теперь у обещания есть срок.', 'Дело назвал — назад не отговоришься.', 'Жду результат, а не красивый план.', 'Хорошо. За язык тебя никто не тянул.', 'Слова услышал. Дальше показывай дело.', 'Посмотрим, доберёшься ли ты до конца.'],
@@ -73,14 +81,26 @@ export class SeedService implements OnModuleInit {
     const operations: AnyBulkWriteOperation<Phrase>[] = [];
     for (const [category, templates] of Object.entries(phrases)) {
       const roles = category === 'on_greeting' ? ['any'] as const : ['father', 'mother'] as const;
-      const levels = ['on_reminder', 'on_check_in', 'on_absent'].includes(category) ? [1, 2, 3] : category === 'on_check_in_reply' ? [1, 2] : [undefined];
+      const levels = ['on_reminder', 'on_check_in', 'on_absent', 'on_excuse'].includes(category) ? [1, 2, 3] : category === 'on_check_in_reply' ? [1, 2] : [undefined];
       for (const role of roles) {
         for (const level of levels) {
           const defeatLevels: Phrase['defeatLevel'][] = ['on_reminder', 'on_check_in', 'on_fail'].includes(category) ? ['any', '2', '3', '4'] : ['any'];
           for (const defeatLevel of defeatLevels) {
-            const source = defeatLevel === 'any' ? templates : ['Ладно, после того спора спрошу спокойнее: как {task}?', 'Я помню твой характер. А дело-то движется?'];
+            const source = category === 'on_check_in_reply' && level === 2 ? notStartedReplies : category === 'on_excuse' ? extensionPhrases[level!] : defeatLevel === 'any' ? templates : ['Ладно, после того спора спрошу спокойнее: как {task}?', 'Я помню твой характер. А дело-то движется?'];
             for (const [index, template] of source.entries()) {
               const _id = `seed-${role}-${category}-${level ?? 0}-${defeatLevel}-${index}`;
+              if (category === 'on_check_in_reply' && level === 2) {
+                // Upgrade untouched seed text while preserving owner edits and ratings.
+                operations.push({
+                  updateOne: {
+                    filter: {
+                      _id,
+                      template: templates[index],
+                    },
+                    update: { $set: { template } },
+                  },
+                });
+              }
               operations.push({
                 updateOne: {
                   filter: { _id },

@@ -46,7 +46,7 @@ export function OwnerStrikes({ me }: { me: Me }) {
               {user.data.telegramId}
             </p>
             <p>
-              Удары:
+              Попытки:
               {balance.data?.balance ?? '…'}
             </p>
           </div>
@@ -65,9 +65,9 @@ export function OwnerStrikes({ me }: { me: Me }) {
               </select>
             </div>
             <div className="field">
-              <label htmlFor="strike-amount">Удары</label>
+              <label htmlFor="strike-amount">Попытки</label>
               <input id="strike-amount" type="number" min={1} max={type === 'manual_revoke' ? balance.data?.balance : undefined} step={1} required value={amount} onChange={event => setAmount(Number(event.target.value))} />
-              {invalidAmount && <p className="err" role="alert">Нельзя списать больше баланса. Укажите целое число ударов от 1.</p>}
+              {invalidAmount && <p className="err" role="alert">Нельзя списать больше баланса. Укажите целое число попыток от 1.</p>}
             </div>
             <div className="field">
               <label htmlFor="strike-reason">Причина</label>
@@ -144,7 +144,7 @@ export function OwnerStrikes({ me }: { me: Me }) {
       {tickets.hasNextPage && <button className="btn ghost" disabled={tickets.isFetchingNextPage} onClick={() => void tickets.fetchNextPage()}>Показать ещё</button>}
       {confirmation && (
         <Sheet title={confirmation === 'strikes' ? 'Подтвердить операцию?' : 'Вернуть Stars?'} close={() => !pending && setConfirmation(undefined)}>
-          <p>{confirmation === 'strikes' ? `${type === 'manual_grant' ? 'Начислить' : 'Списать'} ${amount} ударов · ${id}` : `Вернуть ${confirmation.packageSnapshot.priceStars} Stars за весь платёж. Партия ударов будет списана.`}</p>
+          <p>{confirmation === 'strikes' ? `${type === 'manual_grant' ? 'Начислить' : 'Списать'} ${amount} попыток · ${id}` : `Вернуть ${confirmation.packageSnapshot.priceStars} Stars за весь платёж. Партия попыток будет списана.`}</p>
           {confirmation === 'strikes' && <p>{`Баланс: ${balance.data?.balance ?? '…'} → ${(balance.data?.balance ?? 0) + (type === 'manual_grant' ? amount : -amount)}. Причина: ${reason}. Операция попадёт в историю пользователя и журнал.`}</p>}
           {confirmation !== 'strikes' && (
             <div className="field">

@@ -223,8 +223,8 @@ export class TasksService {
     return this.reader.listPeriods(userId, taskId, input);
   }
 
-  async action(user: User, id: string, action: 'done' | 'extend' | 'surrender' | 'retry' | 'deadline', closedBy: 'done_button' | 'check_in' = 'done_button', session?: ClientSession): Promise<PeriodActionResponseView> {
-    return this.periods.action(user, id, action, closedBy, session);
+  async action(user: User, id: string, action: 'done' | 'extend' | 'surrender' | 'retry' | 'deadline', closedBy: 'done_button' | 'check_in' = 'done_button', session?: ClientSession, extensionDeadline?: string): Promise<PeriodActionResponseView> {
+    return this.periods.action(user, id, action, closedBy, session, extensionDeadline);
   }
 
   async sweep(): Promise<void> {

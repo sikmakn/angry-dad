@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ApiError, request } from '../../api/client';
 import type { Me, Schema, Task } from '../../api/contract';
 import { useWrite } from '../../hooks/useApi';
-import { calendarDay, zonedDeadline } from '../taskFormat';
+import { calendarDay, safeZonedDeadline } from '../taskFormat';
 import { suggestRecurrence } from '../recurrenceSuggestion';
 import { recurrenceError } from '../recurrenceValidation';
 import { clearTaskSubmission, readTaskSubmission, rememberTaskSubmission } from '../taskSubmissionRecovery';
@@ -114,7 +114,11 @@ export function useTaskForm(me: Me) {
     }
     setValidation('');
     const { kind, day, time, recurrence, anchorTime } = schedule;
-    const deadline = kind === 'one_time' ? zonedDeadline(day, time, me.timeZone) : undefined;
+    const deadline = kind === 'one_time' ? safeZonedDeadline(day, time, me.timeZone) : undefined;
+    if (kind === 'one_time' && !deadline) {
+      setValidation('Укажи корректную дату и время.');
+      return;
+    }
     if (deadline && Date.parse(deadline) - Date.now() < 900000) {
       setValidation('Срок — не раньше чем через 15 минут.');
       return;

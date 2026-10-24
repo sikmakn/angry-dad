@@ -34,13 +34,18 @@ interface World {
   creates: Schema<'CreateTaskRequest'>[];
   onboarding: Schema<'OnboardingRequest'>[];
   completions: number;
+  extensions: string[];
+  defeat: number;
+  battleMessages: Schema<'BattleMessageResponse'>[];
+  feed: Schema<'FeedMessageResponse'>[];
+  answers: string[];
 }
 
 export const test = base.extend<{ world: World }>({
   world: async ({ page }, provide) => {
     const world: World = {
       me: { id: 'u_browser', isOwner: false, onboarding: 'done', role: 'father', gender: 'male', timeZone: 'Europe/Minsk', quietHours: { start: 1380, end: 480 }, respect: 12, inLeaderboard: true, closedCount: 0 },
-      tasks: [], loseCreateResponse: false, creates: [], onboarding: [], completions: 0,
+      tasks: [], loseCreateResponse: false, creates: [], onboarding: [], completions: 0, extensions: [], defeat: 0, battleMessages: [], feed: [], answers: [],
     };
     const unexpected: string[] = [];
     page.on('pageerror', error => unexpected.push(error.message));
@@ -110,6 +115,14 @@ export const test = base.extend<{ world: World }>({
       const json = async (body: unknown, status = 200) => route.fulfill({ status, json: body });
       if (key === 'GET /api/me') {
         await json(world.me);
+      } else if (key === 'GET /api/battle/father') {
+        await json({ role: 'father', defeat: world.defeat, defeatAt: at, mode: 'aggression', turnInProgress: false });
+      } else if (key === 'GET /api/battle/father/messages') {
+        await json({ items: world.battleMessages, nextCursor: null });
+      } else if (key === 'GET /api/me/strikes') {
+        await json({ balance: 3, lots: [] });
+      } else if (key === 'GET /api/packages') {
+        await json({ items: [{ id: 'pack-browser', strikes: 1, priceStars: 15 }] });
       } else if (key === 'POST /api/me/onboarding') {
         const body = request.postDataJSON() as Schema<'OnboardingRequest'>;
         world.onboarding.push(body);
@@ -131,7 +144,32 @@ export const test = base.extend<{ world: World }>({
       } else if (request.method() === 'GET' && world.tasks.some(item => url.pathname === `/api/tasks/${item.id}`)) {
         await json(world.tasks.find(item => url.pathname === `/api/tasks/${item.id}`));
       } else if (key === 'GET /api/feed') {
-        await json({ items: [], nextCursor: null } satisfies Schema<'FeedListResponse'>);
+        const category = url.searchParams.get('category');
+        const periodId = url.searchParams.get('periodId');
+        const items = world.feed.map(item => ({ ...item, needsAnswer: item.category === 'on_check_in' && !item.checkIn?.answer && world.tasks.some(row => row.status === 'active' && !!row.currentPeriod && row.currentPeriod.id === item.periodId && row.currentPeriod.status === 'active') }));
+        const unread = items.filter(item => (item.rateable || item.category === 'on_check_in') && !item.readAt);
+        const pending = items.filter(item => item.needsAnswer);
+        await json({ items: items.filter(item => (!category || item.category === category) && (!periodId || item.periodId === periodId)), nextCursor: null, unreadCount: unread.length, unansweredCount: pending.length, activeCount: unread.length + pending.filter(item => !!item.readAt).length, nextAnswerDueAt: pending.map(item => item.checkIn?.answerDueAt).filter((value): value is string => !!value).sort()[0] } satisfies Schema<'FeedListResponse'>);
+      } else if (request.method() === 'PUT' && /\/api\/feed\/[^/]+\/read$/.test(url.pathname)) {
+        const id = url.pathname.split('/')[3];
+        world.feed = world.feed.map(item => item.id === id ? { ...item, readAt: item.readAt ?? new Date().toISOString() } : item);
+        await json(world.feed.find(item => item.id === id));
+      } else if (request.method() === 'PUT' && /\/api\/feed\/[^/]+\/check-in-answer$/.test(url.pathname)) {
+        const id = url.pathname.split('/')[3];
+        const body = request.postDataJSON() as Schema<'CheckInAnswerRequest'>;
+        world.answers.push(body.answer);
+        world.feed = world.feed.map(item => item.id === id ? { ...item, readAt: item.readAt ?? new Date().toISOString(), checkIn: { ...item.checkIn, answer: body.answer, answeredAt: new Date().toISOString() } } : item);
+        await json({ task: world.tasks[0] ?? task, respect: 12, respectDelta: 0, reply: 'Ответ услышал. Доделывай.' } satisfies Schema<'PeriodActionResponse'>);
+      } else if (request.method() === 'PUT' && /\/api\/feed\/[^/]+\/rating$/.test(url.pathname)) {
+        const id = url.pathname.split('/')[3];
+        const body = request.postDataJSON() as Schema<'RateFeedMessageRequest'>;
+        world.feed = world.feed.map(item => item.id === id ? { ...item, rating: body.score } : item);
+        await json(world.feed.find(item => item.id === id));
+      } else if (key === `POST /api/periods/${task.currentPeriod!.id}/extension`) {
+        const body = request.postDataJSON() as { deadline: string };
+        world.extensions.push(body.deadline);
+        world.tasks = world.tasks.map(item => ({ ...item, currentPeriod: { ...item.currentPeriod!, deadline: body.deadline } }));
+        await json({ task: world.tasks[0], respect: 12, respectDelta: 0, reply: 'Срок сдвинулся, задача осталась.' });
       } else if (key === `POST /api/periods/${task.currentPeriod!.id}/completion`) {
         world.completions++;
         world.tasks = world.tasks.map(item => item.id === task.id ? { ...closed, title: item.title } : item);

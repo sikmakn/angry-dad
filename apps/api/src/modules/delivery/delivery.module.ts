@@ -1,4 +1,5 @@
 import { FeedService } from './services/feed.service';
+import { FeedStatusService } from './services/feed-status.service';
 import { DispatcherService } from './services/dispatcher.service';
 import { UserDeliveryController } from './controllers/user-delivery.controller';
 import { Module } from '@nestjs/common';
@@ -12,7 +13,7 @@ import { DeliveryService } from './delivery.service';
 @Module({
   controllers: [UserDeliveryController],
   imports: [TaskNotificationsModule, PhrasesModule, TasksModule, PressureModule, AnalyticsModule, TelegramClientModule],
-  providers: [FeedService, DispatcherService, DeliveryService],
+  providers: [FeedService, FeedStatusService, DispatcherService, DeliveryService],
   exports: [DeliveryService],
 })
 export class DeliveryModule {

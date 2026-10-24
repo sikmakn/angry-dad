@@ -1,12 +1,12 @@
 import type { Me, Task } from '../../api/contract';
 import { formatDate, mood, recurrenceText, remaining } from '../taskFormat';
 
-export function TaskSummary({ task, me, now }: { task: Task; me: Me; now: number }) {
+export function TaskSummary({ task, me, now, heading = false }: { task: Task; me: Me; now: number; heading?: boolean }) {
   const period = task.currentPeriod;
   const state = period ? mood(period, me.role, now) : undefined;
   return (
     <>
-      <b>{task.title}</b>
+      {heading ? <h1 className="task-title" tabIndex={-1}>{task.title}</h1> : <b>{task.title}</b>}
       <span className="tag">{recurrenceText(task)}</span>
       {period?.status === 'active' && (
         <>

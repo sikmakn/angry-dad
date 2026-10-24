@@ -28,7 +28,7 @@ export function OwnerRoles({ me }: { me: Me }) {
         </button>
       )}
       {card.data && <RoleEditor key={role} role={role} me={me} card={card.data} />}
-      <h2>Пакеты ударов</h2>
+      <h2>Пакеты попыток</h2>
       {packages.data?.items.map(pack => <PackageEditor key={pack.id} me={me} pack={pack} />)}
       {packages.data && !packages.data.items.length && <p className="card">Пакетов пока нет</p>}
     </>

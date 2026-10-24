@@ -14,8 +14,8 @@ const turns = new Map<string, Schema<'TurnResponse'>>();
 const turnTexts = new Map<string, string>();
 const failedTurns = new Set<string>();
 const quotes = new Map<string, Schema<'BattleMessageResponse'>>();
+const rewardedSteps = new Map<Role, number>();
 const archivedPeriods = new Map<string, Schema<'PeriodResponse'>[]>();
-const extended = new Set<string>();
 
 function list<T>(items: T[], url: URL) {
   const start = Number(url.searchParams.get('cursor') ?? 0);
@@ -122,7 +122,6 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       failedTurns.clear();
       quotes.clear();
       archivedPeriods.clear();
-      extended.clear();
       payments.forEach((payment) => {
         payment.refundable = false;
       });
@@ -222,16 +221,32 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
         return conflict(task.status === 'stopped' ? 'stopped' : period.status === 'done' ? 'done' : 'failed');
       }
       if (operation === 'extendPeriod') {
-        if (extended.has(period.id)) {
-          return problem('urn:angry-dad:problem:extension_denied', 409, { reply: 'Один час в сутки. Свой ты уже взял. Дальше сам.' });
+        const data = await request.json().catch(() => ({})) as Body<'extendPeriod'>;
+        const previous = Date.parse(period.deadline);
+        const next = data.deadline ? Date.parse(data.deadline) : previous + 3600000;
+        if (!Number.isFinite(next) || next <= previous || next > Date.now() + 365 * 86400000) {
+          return problem('urn:angry-dad:problem:deadline_out_of_range', 400);
         }
-        extended.add(period.id);
-        period.deadline = new Date(Date.parse(period.deadline) + 3600000).toISOString();
-        return HttpResponse.json({ task, respect: me.respect, respectDelta: 0, reply: 'Час добавлен. Успевай.' });
+        period.deadline = new Date(next).toISOString();
+        const reply = next - previous <= 3600000 ? 'Час добавили. Задача от этого короче не стала.' : next - previous <= 86400000 ? 'Удобно у тебя работа движется — вместе с дедлайном.' : 'Ты задачу выполняешь или ждёшь, пока её отменят?';
+        return HttpResponse.json({ task, respect: me.respect, respectDelta: 0, reply });
       }
       return HttpResponse.json(finish(task, operation === 'completePeriod'));
     }
-    case 'listFeed': return HttpResponse.json(list(feed.filter(item => (!url.searchParams.get('periodId') || item.periodId === url.searchParams.get('periodId')) && (!url.searchParams.get('category') || item.category === url.searchParams.get('category'))), url));
+    case 'listFeed': {
+      const items = feed.map(item => ({ ...item, needsAnswer: item.category === 'on_check_in' && !item.checkIn?.answer && tasks.some(task => task.status === 'active' && !!task.currentPeriod && task.currentPeriod.id === item.periodId && task.currentPeriod.status === 'active' && Date.parse(task.currentPeriod.deadline) > Date.now()) }));
+      const unread = items.filter(item => item.rateable && !item.readAt);
+      const pending = items.filter(item => item.needsAnswer);
+      return HttpResponse.json({ ...list(items.filter(item => (!url.searchParams.get('periodId') || item.periodId === url.searchParams.get('periodId')) && (!url.searchParams.get('category') || item.category === url.searchParams.get('category'))), url), unreadCount: unread.length, unansweredCount: pending.length, activeCount: unread.length + pending.filter(item => !!item.readAt).length });
+    }
+    case 'markFeedMessageRead': {
+      const item = feed.find(message => message.id === path('feedMessageId'));
+      if (!item) {
+        return notFound();
+      }
+      item.readAt ??= now();
+      return HttpResponse.json(item);
+    }
     case 'rateFeedMessage': {
       const item = feed.find(message => message.id === path('feedMessageId'));
       if (!item) {
@@ -240,9 +255,6 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       const data = await body<'rateFeedMessage'>();
       if (!item.rateable || ![0, 1, 2].includes(data.score)) {
         return problem('urn:angry-dad:problem:validation_failed', 400);
-      }
-      if (item.rating !== undefined && item.rating !== data.score) {
-        return problem('urn:angry-dad:problem:already_rated', 409);
       }
       item.rating = data.score;
       return HttpResponse.json(item);
@@ -258,6 +270,7 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       }
       const data = await body<'answerCheckIn'>();
       item.checkIn = { ...item.checkIn, answer: data.answer, answeredAt: now() };
+      item.readAt ??= now();
       return HttpResponse.json(data.answer === 'done' ? finish(task, true, true) : { task, respect: me.respect, respectDelta: 0, reply: 'Посмотрим, что будет через час.' });
     }
     case 'getBattleDialog': return role === me.role ? HttpResponse.json(dialogs[role]) : problem('urn:angry-dad:problem:role_mismatch', 409);
@@ -311,8 +324,13 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       dialog.defeat = Math.min(100, before + 21);
       dialog.mode = dialog.defeat < 40 ? 'aggression' : dialog.defeat <= 70 ? 'defense' : dialog.defeat <= 90 ? 'confusion' : 'softening';
       const broken = before < 100 && dialog.defeat === 100;
-      const delta = Math.min(100 - me.respect, broken ? 12.5 : 0.5);
-      me.respect = Math.min(100, me.respect + delta);
+      const paidBefore = rewardedSteps.get(role) ?? Math.floor(before / 20);
+      const paidAfter = Math.max(paidBefore, Math.floor(dialog.defeat / 20));
+      rewardedSteps.set(role, paidAfter);
+      const milestoneRespect = Math.min(Math.max(94, me.respect), me.respect + paidAfter - paidBefore);
+      const nextRespect = Math.min(100, milestoneRespect + (broken ? 12 : 0));
+      const delta = nextRespect - me.respect;
+      me.respect = nextRespect;
       spendStrikes(1);
       const added: Schema<'BattleMessageResponse'>[] = [{ seq: messages[role].length + 1, author: 'player', text: data.text, origin: 'turn' }, { seq: messages[role].length + 2, author: 'character', text: broken ? 'Ну... Я просто хотел как лучше. Вот и всё, что я хотел сказать.' : 'Погоди. Я не кричал. Я повышал голос. Это другое. Ты к чему вообще клонишь?', origin: broken ? 'break' : 'turn' }];
       messages[role].push(...added);

@@ -36,13 +36,13 @@ export function useOwnerStrikes(me: Me) {
           return;
         }
         const latest = await balance.refetch();
-        setNotice(`${type === 'manual_grant' ? 'Начислено' : 'Списано'} ${amount} ударов. Баланс: ${before} → ${latest.data?.balance ?? 'обновляется'}. Причина сохранена в истории пользователя и журнале.`);
+        setNotice(`${type === 'manual_grant' ? 'Начислено' : 'Списано'} ${amount} попыток. Баланс: ${before} → ${latest.data?.balance ?? 'обновляется'}. Причина сохранена в истории пользователя и журнале.`);
       } else if (confirmation) {
         const response = await refund.run({ path: { paymentId: confirmation.id }, body: { reason: reason.trim() } });
         if (!response) {
           return;
         }
-        setNotice('Stars возвращены. Партия ударов списана. Запись добавлена в историю пользователя и журнал.');
+        setNotice('Stars возвращены. Партия попыток списана. Запись добавлена в историю пользователя и журнал.');
       }
       setConfirmation(undefined);
     } catch { /* Keep reason and confirmation for an explicit user decision. */ }

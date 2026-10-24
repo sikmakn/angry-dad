@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { InlineKeyboard } from 'grammy';
+import { notificationKeyboard } from '../helpers/notification-keyboard';
+import { notificationText } from '../helpers/notification-text';
 import { AppConfigService } from '../../../config/app-config.service';
 import { DatabaseService } from '../../../database/database.service';
 import type { OutboxMessage } from '../../../database/schemas/outbox-message.schema';
@@ -121,7 +122,7 @@ export class DispatcherService {
       const secondary = message.secondaryTaskId ? await this.db.model('Task').findById(message.secondaryTaskId).lean() : null;
       // One rated phrase, with an explicit primary subject for its buttons.
       const title = task.title.replace(/[\r\n]+/g, ' ');
-      const text = `Про «${title}». ${phrase.text}` + (secondary ? ` И про «${secondary.title.replace(/[\r\n]+/g, ' ')}» я тоже помню.` : '');
+      const text = `Про «${title}»\n\n${phrase.text}` + (secondary ? ` И про «${secondary.title.replace(/[\r\n]+/g, ' ')}» я тоже помню.` : '');
       feed = (await this.db.model('FeedMessage').create({
         userId: user._id,
         periodId: period._id,
@@ -141,19 +142,10 @@ export class DispatcherService {
         return;
       }
     }
-    const keyboard = new InlineKeyboard();
-    if (category === 'on_check_in') {
-      keyboard.text('Сделано', `a:${feed._id}:done`).text('Частично', `a:${feed._id}:partial`).text('Не начинал', `a:${feed._id}:not_started`).row();
-    } else if (message.kind === 'reminder') {
-      keyboard.text('Готово', `p:${period._id}:done`).text('Больше времени', `p:${period._id}:extend`).text('Сдаюсь', `p:${period._id}:surrender`).row();
-    }
-    keyboard.url('Ответить', `${this.miniAppLink()}?startapp=feed_${feed._id}`).row();
-    if (rateableCategories.includes(category)) {
-      keyboard.text('слабо', `r:${feed._id}:0`).text('неприятно', `r:${feed._id}:1`).text('в самое больное', `r:${feed._id}:2`);
-    }
+    const keyboard = notificationKeyboard(this.config.miniAppUrl, feed._id, rateableCategories.includes(category), feed.rating);
     let sent = false, releaseLease = false;
     try {
-      const telegramMessageId = await this.telegram.send(user.telegramId, feed.text, keyboard, async (): Promise<void> => {
+      const telegramMessageId = await this.telegram.send(user.telegramId, notificationText(feed, user.role), keyboard, async (): Promise<void> => {
         const acquiredUntil = await this.db.transaction(async (session): Promise<number> => {
           if (!await this.notifications.valid(message, session)) {
             return 0;
@@ -221,7 +213,7 @@ export class DispatcherService {
           await cancel();
           throw new DeliveryDeferred();
         }
-      });
+      }, 'HTML');
       sent = true;
       const sentAt = new Date();
       // This single transaction ties outbox, visible feed, history, cooldown and

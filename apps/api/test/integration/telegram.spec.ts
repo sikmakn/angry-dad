@@ -4,6 +4,7 @@ import { BotService } from '../../src/modules/bot/bot.service';
 import { TelegramClient } from '../../src/modules/bot/services/telegram-client.service';
 import { DeliveryService } from '../../src/modules/delivery/delivery.service';
 import { PaymentsService } from '../../src/modules/payments/payments.service';
+import { ratingFeedback } from '../../src/modules/phrases/rating-feedback';
 
 describe('Telegram durable ingestion and callbacks', () => {
   let h: Awaited<ReturnType<typeof backend>>;
@@ -15,6 +16,46 @@ describe('Telegram durable ingestion and callbacks', () => {
   });
   afterEach(() => jest.restoreAllMocks());
   const nextId = () => Number.parseInt(uid().replaceAll('-', '').slice(0, 10), 16);
+  it.each([0, 1, 2] as const)('rating %i explains the changed phrase frequency without another chat message', async (score) => {
+    const u = await user(h.db), { period } = await taskPeriod(h.db, u);
+    const phrase = (await h.db.model('Phrase').findOne({
+      category: 'on_check_in',
+      status: 'enabled',
+    }).lean())!;
+    const feed = await checkIn(h.db, u, period._id, { phraseId: phrase._id });
+    const callbackId = uid();
+    const ack = jest.spyOn(h.app.get(TelegramClient), 'answerCallback');
+    const send = jest.spyOn(h.app.get(TelegramClient), 'send');
+    const edit = jest.spyOn(h.app.get(TelegramClient), 'editKeyboard');
+    await h.app.get(BotService).receive('synthetic-webhook-secret', {
+      update_id: nextId(),
+      callback_query: {
+        id: callbackId,
+        from: {
+          id: u.telegramId,
+          is_bot: false,
+          first_name: 'Synthetic',
+        },
+        chat_instance: 'test',
+        data: `r:${feed._id}:${score}`,
+        message: {
+          message_id: 1,
+          date: 1,
+          chat: {
+            id: u.telegramId,
+            type: 'private',
+          },
+          text: 'Как дело?',
+        },
+      },
+    });
+    expect(ack).toHaveBeenCalledWith(callbackId, ratingFeedback[score]);
+    expect(send).not.toHaveBeenCalled();
+    const buttons = edit.mock.calls[0][2].inline_keyboard.flat();
+    expect(buttons.filter(button => button.style === 'primary')).toHaveLength(1);
+    expect(buttons.find(button => button.style === 'primary')).toMatchObject({ callback_data: `r:${feed._id}:${score}` });
+    expect((await h.db.model('FeedMessage').findById(feed._id).lean())?.rating).toBe(score);
+  });
   it('done receipt persists across instances, isolates botId and retains for 48h', async () => {
     const id = nextId(), call = jest.fn(async () => undefined);
     await new TelegramUpdateReceiver(h.db).receive(1, id, call);

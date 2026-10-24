@@ -610,7 +610,7 @@ paths:
         - delivery
   /feed/{feedMessageId}/rating:
     put:
-      description: "score: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один голос на пару пользователь/фраза: тот же score повторно даёт 200 с текущим состоянием, другой — 409 already_rated, даже под повторным показом фразы. В ответе поле rating. Неоцениваемая категория: 400. Требует завершённый старт."
+      description: "score: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один изменяемый голос на пару пользователь/фраза: тот же score повторно даёт 200 без повторного учёта; другой заменяет предыдущий, обновляет сумму оценок без увеличения числа голосов. Поле rating обновляется у всех показов этой фразы пользователю. В ответе поле rating. Неоцениваемая категория: 400. Требует завершённый старт."
       operationId: rateFeedMessage
       parameters:
         - in: path
@@ -695,6 +695,58 @@ paths:
                 $ref: "#/components/schemas/Problem"
           description: "internal_error: внутренняя ошибка без раскрытия подробностей."
       summary: Оценить фразу
+      tags:
+        - delivery
+  /feed/{feedMessageId}/read:
+    put:
+      operationId: markFeedMessageRead
+      parameters:
+        - in: path
+          name: feedMessageId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedMessageResponse"
+          description: ""
+        "400":
+          content:
+            application/problem+json:
+              examples:
+                vague:
+                  value:
+                    reply: Это что за задача? Конкретно.
+                    status: 400
+                    title: task vague
+                    type: urn:angry-dad:problem:task_vague
+                validation:
+                  value:
+                    errors:
+                      - field: quietHours
+                        message: Quiet hours must not exceed 12 hours
+                    status: 400
+                    title: validation failed
+                    type: urn:angry-dad:problem:validation_failed
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: Сообщение не найдено. Ресурс не найден, включая чужой ресурс.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: "internal_error: внутренняя ошибка без раскрытия подробностей."
+      summary: Отметить уведомление прочитанным
       tags:
         - delivery
   /leaderboard:
@@ -2946,7 +2998,7 @@ paths:
         - tasks
   /periods/{periodId}/extension:
     post:
-      description: "Бесплатно продлевает на час не больше раза в календарные сутки пользователя на задачу, возвращает onExcuse. Новый срок повторяющейся задачи не позже начала следующего периода. Повтор в те же сутки или выход за следующий период: 409 extension_denied с reply onExcuseDenied. Требует завершённый старт."
+      description: "Попросить больше времени без суточного лимита. Необязательный deadline задаёт новый срок; без него добавляется час для совместимости с кнопками бота. Срок строго позже текущего и не дальше 365 дней от сейчас. Для повторяющейся задачи не позже начала следующего периода (иначе 409 extension_denied). Ответ onExcuse выбирается по добавленному времени: до часа — уровень 1, до суток — 2, больше суток — 3. Требует завершённый старт."
       operationId: extendPeriod
       parameters:
         - in: path
@@ -2954,6 +3006,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtendPeriodRequest"
+        required: false
       responses:
         "200":
           content:
@@ -3024,7 +3082,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Problem"
           description: "internal_error: внутренняя ошибка без раскрытия подробностей."
-      summary: «Мне нужно больше времени…»
+      summary: Попросить больше времени
       tags:
         - tasks
   /periods/{periodId}/retry:
@@ -4073,15 +4131,38 @@ components:
         - title
         - kind
       type: object
+    ExtendPeriodRequest:
+      properties:
+        deadline:
+          description: Новый срок позже текущего. Без поля — плюс один час к текущему сроку.
+          format: date-time
+          type: string
+      type: object
     FeedListResponse:
       properties:
+        activeCount:
+          description: Непрочитанные уведомления и проверки, ожидающие ответа, без двойного счёта
+          minimum: 0
+          type: number
         items:
           items:
             $ref: "#/components/schemas/FeedMessageResponse"
           type: array
+        nextAnswerDueAt:
+          description: "Ближайший общий срок ответа: 15 минут от первой проверки без ответа. Чтение и новые сообщения его не сдвигают."
+          format: date-time
+          type: string
         nextCursor:
           nullable: true
           type: string
+        unansweredCount:
+          description: Все проверки активных задач, на которые ещё можно ответить
+          minimum: 0
+          type: number
+        unreadCount:
+          description: Непрочитанные уведомления пользователя (напоминания, проверки, пропуски, провалы и отсутствие), без ограничения страницей
+          minimum: 0
+          type: number
       required:
         - items
         - nextCursor
@@ -4114,6 +4195,9 @@ components:
           description: Только у проверок. Без `answer` и `missedAt` проверка ждёт ответа.
         id:
           type: string
+        needsAnswer:
+          description: Проверка ещё ждёт ответа и относится к активному периоду задачи
+          type: boolean
         periodId:
           type: string
         rateable:
@@ -4126,8 +4210,18 @@ components:
             - 1
             - 2
           type: number
+        readAt:
+          description: Когда пользователь открыл уведомление в приложении
+          format: date-time
+          type: string
         sentAt:
           format: date-time
+          type: string
+        taskOutcome:
+          enum:
+            - done
+            - give_up
+            - failed
           type: string
         taskTitle:
           description: Снимок названия задачи для «Ответить»
@@ -4149,12 +4243,27 @@ components:
             - partial
             - not_started
           type: string
+        answerDueAt:
+          format: date-time
+          type: string
         answeredAt:
           format: date-time
           type: string
+        expired:
+          type: boolean
+        groupRespectDelta:
+          description: Списание всей группы, только на верхней карточке.
+          type: number
         missedAt:
           format: date-time
           type: string
+        resolvedAt:
+          description: "Закрыто без оценки: пользователь ответил на другую проверку этой задачи."
+          format: date-time
+          type: string
+        respectDelta:
+          description: Фактическое изменение уважения за молчание 15 минут. Ноль означает отсутствие списания.
+          type: number
       type: object
     GameSettingsRequest:
       properties:

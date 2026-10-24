@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { BattleScreen } from '../../src/battle/BattleScreen';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -5,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { HomeScreen } from '../../src/tasks/HomeScreen';
 import { TaskNewScreen } from '../../src/tasks/TaskNewScreen';
 import { TaskScreen } from '../../src/tasks/TaskScreen';
+import { NotificationScreen } from '../../src/history/NotificationScreen';
 import { useRead } from '../../src/hooks/useApi';
 import type { Schema, Task } from '../../src/api/contract';
 import { apiLifecycle, base, check, closed, completed, me, problem, renderApi, server, task } from '../helpers/api';
@@ -12,6 +15,7 @@ import { apiLifecycle, base, check, closed, completed, me, problem, renderApi, s
 apiLifecycle();
 const newTask = () => renderApi(<TaskNewScreen me={me} go={vi.fn()} />);
 const detail = () => renderApi(<TaskScreen id={task.id} me={me} go={vi.fn()} share={vi.fn()} />);
+const notification = () => renderApi(<NotificationScreen id={check.id} me={me} go={vi.fn()} />);
 async function fillRecurring() {
   const user = userEvent.setup();
   await user.type(screen.getByLabelText('Что нужно сделать'), 'повторять английский каждый день');
@@ -46,6 +50,25 @@ describe('task creation through real client', () => {
     expect(screen.getByText('Записал. Посмотрим.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'К задачам' })).toBeEnabled();
     expect(bodies).toHaveLength(1);
+  });
+
+  it('lets today and tomorrow use a manually chosen time and preserves it when changing days', async () => {
+    let body: Schema<'CreateTaskRequest'> | undefined;
+    server.use(http.post(`${base}/tasks`, async ({ request }) => {
+      body = await request.json() as Schema<'CreateTaskRequest'>;
+      return HttpResponse.json({ task, reply: 'Записал.' });
+    }));
+    newTask();
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Что нужно сделать'), 'подготовить отчёт');
+    fireEvent.change(screen.getByLabelText('Время'), { target: { value: '18:35' } });
+    expect(screen.getByRole('button', { name: /^Сегодня/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: /^Завтра/ }));
+    expect(screen.getByLabelText('Время')).toHaveValue('18:35');
+    expect(screen.getByRole('button', { name: /^Завтра/ })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Поставить' }));
+    await screen.findByRole('heading', { name: 'Новая задача поставлена' });
+    expect(body?.deadline).toMatch(/T15:35:00/);
   });
 
   it('preserves title and schedule after a known AI rejection and allows explicit retry', async () => {
@@ -172,14 +195,52 @@ describe('task list and critical period actions', () => {
     const view = detail();
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Готово' }));
-    expect(await screen.findByText('✓ Выполнено')).toBeVisible();
+    expect(await screen.findByText('Выполнено')).toBeVisible();
     await waitFor(() => expect(readsAfter).toBe(1));
     expect(screen.queryByRole('button', { name: 'Готово' })).not.toBeInTheDocument();
     expect(screen.getByText('Ну наконец-то.')).toBeVisible();
     expect(view.client.getQueryData([me.id, 'getTask', { taskId: task.id }, undefined])).toEqual(closed);
   });
 
-  it('answers a check-in as done through the API and disables all closed-period answers', async () => {
+  it('opens a check-in separately from task actions', async () => {
+    server.use(http.get(`${base}/feed`, () => HttpResponse.json({ items: [check], nextCursor: null })));
+    detail();
+    expect(await screen.findByRole('link', { name: 'Открыть проверку' })).toHaveAttribute('href', `#notification/${check.id}`);
+    expect(screen.queryByRole('button', { name: 'Сделано' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Готово' })).toBeEnabled();
+  });
+
+  it.each([[-1, 'Просрочено: −1 к уважению'], [0, 'Просрочено']] as const)('shows the actual expired notification penalty %s', async (respectDelta, label) => {
+    const missed = { ...check, readAt: check.sentAt, checkIn: { missedAt: check.sentAt, respectDelta, groupRespectDelta: respectDelta < 0 ? respectDelta : undefined, expired: true } };
+    server.use(http.get(`${base}/feed`, () => HttpResponse.json({ items: [missed], nextCursor: null })));
+    notification();
+    expect(await screen.findByText(label)).toBeVisible();
+    expect(screen.getByText('Не было ответа в течение 15 минут.')).toBeVisible();
+  });
+
+  it('quotes a check-in as the parent in battle before navigating there', async () => {
+    let quoted = false;
+    server.use(
+      http.get(`${base}/feed`, () => HttpResponse.json({ items: [check], nextCursor: null })),
+      http.post(`${base}/battle/father/quotes`, async ({ request }) => {
+        expect(await request.json()).toEqual({ feedMessageId: check.id });
+        quoted = true;
+        return HttpResponse.json({ seq: 1, author: 'character', text: check.text, origin: 'reply_to_feed', feedMessageId: check.id });
+      }),
+      http.get(`${base}/battle/father/messages`, () => HttpResponse.json({ items: quoted ? [{ seq: 1, author: 'character', text: check.text, origin: 'reply_to_feed' }] : [], nextCursor: null })),
+    );
+    function Flow() {
+      const [route, go] = useState('notification');
+      return route === 'battle' ? <BattleScreen me={me} share={vi.fn()} /> : <NotificationScreen id={check.id} me={me} go={go} />;
+    }
+    renderApi(<Flow />);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Ответить! 😠' }));
+    expect(await screen.findByRole('heading', { name: 'Батя' })).toBeVisible();
+    expect(await screen.findByText(check.text)).toBeVisible();
+    expect(quoted).toBe(true);
+  });
+
+  it('answers a check-in as done through its own page and removes answered controls', async () => {
     let answered = false;
     server.use(
       http.get(`${base}/feed`, () => HttpResponse.json({ items: [check], nextCursor: null })),
@@ -190,19 +251,21 @@ describe('task list and critical period actions', () => {
         return HttpResponse.json(completed);
       }),
     );
-    detail();
+    notification();
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Сделано' }));
-    await screen.findByText('✓ Выполнено');
-    expect(screen.getByRole('button', { name: 'Сделано' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Частично' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Не начинал' })).toBeDisabled();
+    await screen.findByText('Твой ответ: Сделано');
+    expect(answered).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Сделано' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Делаю' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Не начинал' })).not.toBeInTheDocument();
   });
 
-  it.each([['Частично', 'partial'], ['Не начинал', 'not_started']] as const)('sends %s without closing the period or restoring the silence penalty', async (label, answer) => {
+  it.each([['Делаю', 'partial'], ['Не начинал', 'not_started']] as const)('sends %s without closing the period or restoring the silence penalty', async (label, answer) => {
     let answered = false;
     const missed = { ...check, checkIn: { missedAt: check.sentAt } };
     server.use(
+      http.put(`${base}/feed/:id/read`, () => HttpResponse.json({ ...missed, readAt: new Date().toISOString() })),
       http.get(`${base}/feed`, () => HttpResponse.json({ items: answered ? [{ ...missed, checkIn: { ...missed.checkIn, answer } }] : [missed], nextCursor: null })),
       http.put(`${base}/feed/:id/check-in-answer`, async ({ request }) => {
         expect(await request.json()).toEqual({ answer });
@@ -210,13 +273,13 @@ describe('task list and critical period actions', () => {
         return HttpResponse.json({ task, respect: 11, respectDelta: 0, reply: 'Продолжай работать.' } satisfies Schema<'PeriodActionResponse'>);
       }),
     );
-    detail();
+    notification();
     const user = userEvent.setup();
-    expect(await screen.findByText('Штраф за молчание уже снят. Ответить ещё можно.')).toBeVisible();
+    expect(await screen.findByText('Срок уже вышел. Ответить ещё можно.')).toBeVisible();
     await user.click(screen.getByRole('button', { name: label }));
     expect(await screen.findByText('Продолжай работать.')).toBeVisible();
-    expect(screen.queryByText('✓ Выполнено')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Готово' })).toBeEnabled();
+    expect(screen.queryByText('Выполнено')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Готово' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: label })).not.toBeInTheDocument();
   });
 });

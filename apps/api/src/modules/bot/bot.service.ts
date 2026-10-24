@@ -2,6 +2,7 @@ import { BotError } from './bot.errors';
 import { TelegramUpdateReceiver } from './services/telegram-update-receiver.service';
 import { NotificationStateService } from '../task-notifications/services/notification-state.service';
 import { Injectable } from '@nestjs/common';
+import { ratingFeedback } from '../phrases/rating-feedback';
 import { Bot } from 'grammy';
 import type { Update } from 'grammy/types';
 import { timingSafeEqual } from 'node:crypto';
@@ -115,6 +116,9 @@ export class BotService {
           }
         } else if (kind === 'r' && ['0', '1', '2'].includes(value)) {
           await this.phrases.rate(user._id, id, Number(value) as 0 | 1 | 2);
+          await this.telegram.answerCallback(ctx.callbackQuery.id, ratingFeedback[Number(value) as 0 | 1 | 2]);
+          await this.delivery.refreshRating(user._id, id);
+          return;
         }
         await this.telegram.answerCallback(ctx.callbackQuery.id);
       } catch (error) {
@@ -151,7 +155,7 @@ export class BotService {
           }]],
         });
       } else if (text.startsWith('/terms')) {
-        await this.telegram.send(user.telegramId, 'Тексты задач и реплики боя передаются внешнему ИИ. Выполнение задач засчитывается с Ваших слов. Удары расходуются только в бою. Возврат оплаты возможен для целиком неиспользованного пакета. /paysupport — помощь по оплате.');
+        await this.telegram.send(user.telegramId, 'Тексты задач и реплики перепалки передаются внешнему ИИ. Выполнение задач засчитывается с Ваших слов. Одна отправленная реплика в перепалке — один раз огрызнуться. Возврат оплаты возможен для целиком неиспользованного пакета. /paysupport — помощь по оплате.');
       } else if (text.startsWith('/paysupport')) {
         await this.payments.support(user, text.slice('/paysupport'.length).trim() || 'Обращение по оплате', {
           botId: ctx.me.id,

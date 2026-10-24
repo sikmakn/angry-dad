@@ -13,9 +13,12 @@ export interface FeedMessage {
     answer?: 'done' | 'partial' | 'not_started';
     answeredAt?: Date;
     missedAt?: Date;
+    resolvedAt?: Date;
+    respectDelta?: number;
   };
   rating?: 0 | 1 | 2;
   sentAt: Date;
+  readAt?: Date;
   draft?: boolean;
 }
 export const FeedMessageSchema = new Schema<FeedMessage>({
@@ -64,6 +67,7 @@ export const FeedMessageSchema = new Schema<FeedMessage>({
     required: true,
   },
   draft: Boolean,
+  readAt: Date,
 }, {
   versionKey: false,
   strict: true,

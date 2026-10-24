@@ -1,6 +1,6 @@
-export function Meter({ label, value, red = false }: { label: string; value: number; red?: boolean }) {
+export function Meter({ label, value, red = false, tone }: { label: string; value: number; red?: boolean; tone?: 'red' | 'yellow' | 'green' | 'gold' }) {
   return (
-    <div className={`scale ${red ? 'red' : ''}`}>
+    <div className={`scale ${tone ?? (red ? 'red' : '')}`}>
       <div className="head">
         <span>{label}</span>
         <b>{`${Math.floor(value)} из 100`}</b>

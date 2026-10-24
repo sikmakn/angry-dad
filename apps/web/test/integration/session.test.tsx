@@ -96,7 +96,7 @@ describe('settings and deletion', () => {
     expect(calls).toBe(0);
     await user.click(within(sheet).getByRole('button', { name: 'Продолжить удаление' }));
     sheet = screen.getByRole('dialog', { name: 'Это насовсем' });
-    expect(await within(sheet).findByText('3 ударов сгорят без возврата Stars.')).toBeVisible();
+    expect(await within(sheet).findByText('Оставшиеся попытки (3) сгорят без возврата Stars.')).toBeVisible();
     expect(calls).toBe(0);
     await user.click(within(sheet).getByRole('button', { name: 'Удалить окончательно' }));
     await waitFor(() => expect(deleted).toHaveBeenCalledOnce());

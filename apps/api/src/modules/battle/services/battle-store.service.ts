@@ -37,6 +37,7 @@ export class BattleStoreService {
             defeatAt: new Date(),
             brokenArmed: true,
             defeatAtLastTurn: 0,
+            rewardedSteps: 0,
             nextSeq: 0,
           },
         }, {

@@ -8,6 +8,7 @@ export interface BattleDialog {
   defeatAt: Date;
   brokenArmed: boolean;
   defeatAtLastTurn: number;
+  rewardedSteps?: number;
   summary?: string;
   summaryUpTo?: number;
   activeTurnId?: string;
@@ -46,6 +47,7 @@ export const BattleDialogSchema = new Schema<BattleDialog>({
     type: String,
     required: false,
   },
+  rewardedSteps: Number,
   summaryUpTo: {
     type: Number,
     required: false,

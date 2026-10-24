@@ -6,6 +6,33 @@ import { FeedMessageResponseCheckInDto } from '../../delivery/dto/feed-message-r
 import type { RatingDto } from '../../phrases/dto/rating.dto';
 export class FeedMessageResponseDto {
   @ApiProperty({
+    required: false,
+    type: String,
+    format: 'date-time',
+    description: 'Когда пользователь открыл уведомление в приложении',
+  })
+  @ValidateIf((_value, value: unknown) => value !== undefined)
+  @IsISO8601()
+  readAt?: string;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+    description: 'Проверка ещё ждёт ответа и относится к активному периоду задачи',
+  })
+  @ValidateIf((_value, value: unknown) => value !== undefined)
+  @IsBoolean()
+  needsAnswer?: boolean;
+
+  @ApiProperty({
+    required: false,
+    enum: ['done', 'give_up', 'failed'],
+  })
+  @ValidateIf((_value, value: unknown) => value !== undefined)
+  @IsIn(['done', 'give_up', 'failed'])
+  taskOutcome?: 'done' | 'give_up' | 'failed';
+
+  @ApiProperty({
     required: true,
     type: String,
   })

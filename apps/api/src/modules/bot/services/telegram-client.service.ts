@@ -18,12 +18,13 @@ export interface StarHistoryTransaction {
   outgoing: boolean;
 }
 export abstract class TelegramClient {
-  abstract send(chatId: number, text: string, keyboard?: InlineKeyboardMarkup, beforeSend?: () => Promise<void>): Promise<number>;
+  abstract send(chatId: number, text: string, keyboard?: InlineKeyboardMarkup, beforeSend?: () => Promise<void>, parseMode?: 'HTML'): Promise<number>;
   abstract invoice(payload: string, strikes: number, price: number): Promise<string>;
   abstract preCheckout(id: string, ok: boolean): Promise<void>;
   abstract refund(telegramId: number, chargeId: string): Promise<void>;
   abstract getStarTransactions(offset: number, limit: number): Promise<StarHistoryTransaction[]>;
   abstract answerCallback(id: string, text?: string): Promise<void>;
+  abstract editKeyboard(chatId: number, messageId: number, keyboard: InlineKeyboardMarkup): Promise<void>;
   abstract prepare(telegramId: number, png: Buffer): Promise<string>;
 }
 @Injectable()
@@ -42,7 +43,7 @@ export class ConfiguredTelegramClient extends TelegramClient {
     this.api = new Api(config.botToken, { timeoutSeconds: 10 });
   }
 
-  async send(chatId: number, text: string, keyboard?: InlineKeyboardMarkup, beforeSend?: () => Promise<void>): Promise<number> {
+  async send(chatId: number, text: string, keyboard?: InlineKeyboardMarkup, beforeSend?: () => Promise<void>, parseMode?: 'HTML'): Promise<number> {
     if (this.config.testClients) {
       await beforeSend?.();
       this.sent.push({
@@ -60,7 +61,10 @@ export class ConfiguredTelegramClient extends TelegramClient {
     // Keep this outside the Telegram error wrapper so a denied lease is not retried as an API failure.
     await beforeSend?.();
     try {
-      return (await this.api.sendMessage(chatId, text, { reply_markup: keyboard })).message_id;
+      return (await this.api.sendMessage(chatId, text, {
+        reply_markup: keyboard,
+        parse_mode: parseMode,
+      })).message_id;
     } catch (error) {
       const failure = error as {
         error_code?: number;
@@ -76,8 +80,8 @@ export class ConfiguredTelegramClient extends TelegramClient {
     if (this.config.testClients) {
       return `https://t.me/$test_${payload}`;
     }
-    return this.api.createInvoiceLink('Удары', `${strikes} ударов для боя`, payload, '', 'XTR', [{
-      label: 'Удары',
+    return this.api.createInvoiceLink('Огрызнуться', `Огрызнуться: ${strikes} ${strikes % 10 >= 2 && strikes % 10 <= 4 && (strikes % 100 < 12 || strikes % 100 > 14) ? 'раза' : 'раз'} в перепалке`, payload, '', 'XTR', [{
+      label: 'Огрызнуться',
       amount: price,
     }]);
   }
@@ -120,6 +124,12 @@ export class ConfiguredTelegramClient extends TelegramClient {
   async answerCallback(id: string, text?: string): Promise<void> {
     if (!this.config.testClients) {
       await this.api.answerCallbackQuery(id, { text });
+    }
+  }
+
+  async editKeyboard(chatId: number, messageId: number, keyboard: InlineKeyboardMarkup): Promise<void> {
+    if (!this.config.testClients) {
+      await this.api.editMessageReplyMarkup(chatId, messageId, { reply_markup: keyboard });
     }
   }
 

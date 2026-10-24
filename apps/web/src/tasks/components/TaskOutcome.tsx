@@ -1,6 +1,7 @@
 import type { Me, Period, Schema, Task } from '../../api/contract';
 import { Meter } from '../../components/Meter';
 import { Quote } from '../../components/Quote';
+import { PenCheck } from '../../components/PenCheck';
 import { formatDate } from '../taskFormat';
 
 export function TaskOutcome({ task, period, result, me }: { task: Task; period: Period; result?: Schema<'PeriodActionResponse'>; me: Me }) {
@@ -16,7 +17,12 @@ export function TaskOutcome({ task, period, result, me }: { task: Task; period: 
               <div className="stamp">{task.kind === 'recurring' ? 'Период провален' : 'Задача провалена'}</div>
             </div>
           )
-        : <span className="tag">✓ Выполнено</span>}
+        : (
+            <span className="tag marked-result">
+              <PenCheck />
+              Выполнено
+            </span>
+          )}
       {reply && <Quote text={reply} role={me.role} />}
       <div className="card stack">
         <Meter label="Уважение" value={result?.respect ?? me.respect} />
@@ -25,7 +31,7 @@ export function TaskOutcome({ task, period, result, me }: { task: Task; period: 
         {period.closedAt && <p className="small">{`Закрыта ${formatDate(period.closedAt, me.timeZone)}`}</p>}
         {period.closedBy === 'give_up' && <p>Закрыта кнопкой «Сдаюсь».</p>}
       </div>
-      {!failed && (result?.respect ?? me.respect) >= 94 && <p className="banner">Выше 94 — только сломом в бою.</p>}
+      {!failed && (result?.respect ?? me.respect) >= 94 && <p className="banner">Выше 94 — только сломом в перепалке.</p>}
     </>
   );
 }

@@ -19,10 +19,12 @@ export function useTaskActions(me: Me) {
   const [result, setResult] = useState<Schema<'PeriodActionResponse'>>();
   const [notice, setNotice] = useState<string | null>();
   const [error, setError] = useState<unknown>();
-  async function periodAction(action: 'complete' | 'extend' | 'surrender' | 'retry', periodId: string) {
+  async function periodAction(action: 'complete' | 'extend' | 'surrender' | 'retry', periodId: string, deadline?: string) {
     setError(undefined);
     try {
-      const response = await ({ complete, extend, surrender, retry })[action].run({ path: { periodId } });
+      const response = action === 'extend'
+        ? await extend.run({ path: { periodId }, ...(deadline ? { body: { deadline } } : {}) })
+        : await ({ complete, surrender, retry })[action].run({ path: { periodId } });
       if (response) {
         if (action === 'complete' || action === 'surrender') {
           setResult(response);

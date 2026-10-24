@@ -26,6 +26,7 @@ export const server = setupServer(
   http.get(`${base}/tasks`, () => HttpResponse.json({ items: [], nextCursor: null } satisfies Schema<'TaskListResponse'>)),
   http.get(`${base}/tasks/:id`, () => HttpResponse.json(task)),
   http.get(`${base}/feed`, () => HttpResponse.json({ items: [], nextCursor: null } satisfies Schema<'FeedListResponse'>)),
+  http.put(`${base}/feed/:id/read`, () => HttpResponse.json({ ...check, readAt: new Date().toISOString() })),
   http.get(`${base}/battle/father`, () => HttpResponse.json(dialog)),
   http.get(`${base}/battle/father/messages`, () => HttpResponse.json({ items: [], nextCursor: null } satisfies Schema<'BattleMessageListResponse'>)),
   http.get(`${base}/me/strikes`, () => HttpResponse.json({ balance: 3, lots: [] } satisfies Schema<'StrikeBalanceResponse'>)),

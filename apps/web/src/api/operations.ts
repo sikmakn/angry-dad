@@ -17,6 +17,7 @@ export const endpoints = {
   surrenderPeriod: ['POST', '/periods/{periodId}/surrender'],
   retryPeriod: ['POST', '/periods/{periodId}/retry'],
   listFeed: ['GET', '/feed'],
+  markFeedMessageRead: ['PUT', '/feed/{feedMessageId}/read'],
   rateFeedMessage: ['PUT', '/feed/{feedMessageId}/rating'],
   answerCheckIn: ['PUT', '/feed/{feedMessageId}/check-in-answer'],
   getBattleDialog: ['GET', '/battle/{role}'],

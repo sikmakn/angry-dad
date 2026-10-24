@@ -1,3 +1,4 @@
+import { replyCount } from '../shop/replyCount';
 import { useState } from 'react';
 import type { Me, Schema } from '../api/contract';
 import { ApiError } from '../api/client';
@@ -6,14 +7,16 @@ import { Feedback } from '../components/Feedback';
 import { Sheet } from '../components/Sheet';
 import { ShopContent } from '../shop/ShopContent';
 import { ParentFace } from './components/ParentFace';
-import { modeLabel } from './battleFormat';
+import { authority, authorityTone, modeLabel } from './battleFormat';
 import { BattleLog } from './components/BattleLog';
 import { BattleComposer } from './components/BattleComposer';
+import { BattleHelp } from './components/BattleHelp';
 import { useBattle } from './hooks/useBattle';
 
 export function BattleScreen({ me, share }: { me: Me; share: (body: Schema<'CreateShareRequest'>) => void }) {
   const battle = useBattle(me);
   const [shop, setShop] = useState(false);
+  const [help, setHelp] = useState(false);
   const dialog = battle.dialog.data;
   const messages = battle.messages.data?.pages.flatMap(page => page.items).toSorted((a, b) => a.seq - b.seq) ?? [];
   const busy = !!(battle.turn.isPending || dialog?.turnInProgress);
@@ -22,12 +25,13 @@ export function BattleScreen({ me, share }: { me: Me; share: (body: Schema<'Crea
   const roleName = mother ? 'Мама' : 'Батя';
   const broken = battle.result?.messages.some(message => message.origin === 'break');
   const failed = battle.turn.error instanceof ApiError && battle.turn.error.problem?.type === 'urn:angry-dad:problem:turn_failed';
+  const emptyDialog = battle.messages.isSuccess && !battle.messages.hasNextPage && !battle.result && !busy && messages.every(message => message.origin === 'battle_start');
   return (
     <>
       <header className="row">
         {dialog && <ParentFace mode={dialog.mode} mother={mother} broken={dialog.defeat === 100} />}
         <div>
-          <div className="eyebrow">Бой</div>
+          <div className="eyebrow">Перепалка</div>
           <h1 tabIndex={-1}>{roleName}</h1>
           {dialog && <p className="small muted">{modeLabel(dialog.mode, mother, dialog.defeat === 100)}</p>}
         </div>
@@ -46,16 +50,23 @@ export function BattleScreen({ me, share }: { me: Me; share: (body: Schema<'Crea
           Повторить
         </button>
       )}
+      {dialog && emptyDialog && (
+        <section className="card stack battle-guide-card" aria-labelledby="battle-how-title">
+          <h2 id="battle-how-title">Как это работает</h2>
+          <BattleHelp roleName={roleName} mother={mother} />
+        </section>
+      )}
       {dialog && (
-        <div className="card stack">
+        <div className="card stack battle-stats">
+          <button type="button" className="battle-stats-trigger" aria-label="Как устроена перепалка" aria-haspopup="dialog" onClick={() => setHelp(true)} />
           <Meter label="Уважение" value={battle.result?.respect ?? me.respect} />
-          <Meter label="Побеждённость" value={dialog.defeat} red />
-          <p className="hint">Побеждённость сама снижается на 25 в сутки, пока ты не бьёшь. Уважение не откатывается.</p>
-          <div className="row">
+          <Meter label="Авторитет" value={authority(dialog.defeat)} tone={authorityTone(authority(dialog.defeat))} />
+          <p className="hint">Нажми на карточку, чтобы посмотреть правила перепалки.</p>
+          <div className="row battle-balance">
             <b>
-              {`Удары: ${balance ?? '…'}`}
+              {balance === undefined ? 'Считаем, сколько раз можно огрызнуться…' : balance > 0 ? `Можешь огрызнуться ещё ${replyCount(balance)}` : 'Всё? А столько возражений было.'}
             </b>
-            <button className="btn ghost small" disabled={busy} onClick={() => setShop(true)}>Купить</button>
+            <button className="btn ghost small battle-stats-buy" disabled={busy} onClick={() => setShop(true)}>Купить</button>
           </div>
         </div>
       )}
@@ -63,18 +74,10 @@ export function BattleScreen({ me, share }: { me: Me; share: (body: Schema<'Crea
         <button className="btn ghost" disabled={battle.messages.isFetchingNextPage} onClick={() => void battle.messages.fetchNextPage()}>Более ранние реплики</button>
       )}
       <BattleLog messages={messages} role={me.role!} busy={busy} />
-      {dialog && messages.length <= 1 && (
-        <div className="card stack">
-          <h2>Как это работает</h2>
-          <p className="small">
-            {`Пиши по делу: ${roleName} засчитывает аргументы, а не крик. Каждая реплика стоит 1 удар. Доведи побеждённость до 100, и ${mother ? 'мама сломлена' : 'Батя сломлен'}.`}
-          </p>
-        </div>
-      )}
       {battle.result && (
         <div role="status" className="banner">
           <p>
-            {`Ход засчитан. Побеждённость ${battle.result.defeatBefore} → ${battle.result.defeatAfter}. Уважение ${battle.result.respect - battle.result.respectDelta} → ${battle.result.respect} (+${battle.result.respectDelta}). Списан 1 удар, осталось ${battle.result.strikesBalance}.`}
+            {`Ход засчитан. Авторитет ${Math.floor(authority(battle.result.defeatBefore))} → ${Math.floor(authority(battle.result.defeatAfter))}. Уважение ${battle.result.respect - battle.result.respectDelta} → ${battle.result.respect} (+${battle.result.respectDelta}). Можешь огрызнуться ещё ${replyCount(battle.result.strikesBalance)}.`}
           </p>
           {broken && (
             <div className="stack">
@@ -85,12 +88,17 @@ export function BattleScreen({ me, share }: { me: Me; share: (body: Schema<'Crea
           )}
         </div>
       )}
-      {failed ? <p className="banner" role="alert">Ход не засчитан, удар возвращён. Шкалы остались прежними, реплика на месте: отправь ещё раз.</p> : <Feedback error={battle.turn.error} />}
-      {battle.unknown && <p className="banner" role="status">Результат пока неизвестен. Проверь ту же попытку: второй удар не спишется.</p>}
+      {failed ? <p className="banner" role="alert">Попытка не засчитана и не потрачена. Шкалы остались прежними, реплика на месте: отправь ещё раз.</p> : <Feedback error={battle.turn.error} />}
+      {battle.unknown && <p className="banner" role="status">Результат пока неизвестен. Проверь ту же попытку: ещё одна попытка не потратится.</p>}
       <BattleComposer text={battle.text} setText={battle.setText} send={() => void battle.send()} buy={() => setShop(true)} busy={busy} unknown={battle.unknown} ready={!!dialog && balance !== undefined} balance={balance ?? 0} roleName={roleName} />
       {shop && (
-        <Sheet title="Удары" close={() => setShop(false)}>
+        <Sheet title="Огрызнуться ещё" close={() => setShop(false)}>
           <ShopContent me={me} compact />
+        </Sheet>
+      )}
+      {help && (
+        <Sheet title="Как это работает" close={() => setHelp(false)} closeLabel="Понятно">
+          <BattleHelp roleName={roleName} mother={mother} />
         </Sheet>
       )}
     </>
