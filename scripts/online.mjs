@@ -91,7 +91,7 @@ async function registerBot(url) {
   await telegram('setChatMenuButton', { menu_button: { type: 'web_app', text: menu.result?.text ?? 'Открыть Батю', web_app: { url: `${url}/` } } });
 }
 
-let tunnelUrl;
+let tunnelUrl, tunnelSince = 0;
 let api;
 
 async function adopt(url) {
@@ -99,17 +99,23 @@ async function adopt(url) {
     return;
   }
   tunnelUrl = url;
+  tunnelSince = Date.now();
   say(`адрес: ${url}`);
   // API читает адрес Mini App из окружения при старте: при смене адреса его надо перезапустить.
   if (api) {
     api.env.MINI_APP_URL = url;
     api.restart();
   }
-  try {
-    await registerBot(url);
-    say('вебхук и кнопка меню бота обновлены');
-  } catch (error) {
-    say(`бот не обновлён: ${error.message}`);
+  // Новый адрес появляется в DNS не сразу: Telegram первые минуты может его не находить, поэтому повторяем.
+  for (let attempt = 1; attempt <= 30 && url === tunnelUrl; attempt++) {
+    try {
+      await registerBot(url);
+      say('вебхук и кнопка меню бота обновлены');
+      return;
+    } catch (error) {
+      say(`бот не обновлён (попытка ${attempt}): ${error.message}`);
+      await new Promise(resolve => setTimeout(resolve, 10000));
+    }
   }
 }
 
@@ -117,7 +123,7 @@ mkdirSync('.online', { recursive: true });
 const apiEnv = {};
 api = Object.assign(supervise('api', process.execPath, ['apps/api/dist/main.js'], { env: apiEnv }), { env: apiEnv });
 supervise('worker', process.execPath, ['apps/api/dist/worker.js']);
-supervise('web', process.execPath, ['../../node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', WEB_PORT, '--strictPort'], { cwd: 'apps/web' });
+supervise('web', process.execPath, ['../../node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', WEB_PORT, '--strictPort'], { cwd: 'apps/web', env: { __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: '.trycloudflare.com' } });
 const tunnel = supervise('tunnel', 'cloudflared', ['tunnel', '--url', `http://127.0.0.1:${WEB_PORT}`, '--no-autoupdate'], {
   onLine(line) {
     const match = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/.exec(line);
@@ -133,7 +139,8 @@ if (process.platform === 'darwin') {
 }
 
 async function healthy() {
-  if (!tunnelUrl) {
+  // Новому адресу нужно время, пока он появится в DNS: первые 4 минуты его не проверяем.
+  if (!tunnelUrl || Date.now() - tunnelSince < 240000) {
     return true;
   }
   try {
