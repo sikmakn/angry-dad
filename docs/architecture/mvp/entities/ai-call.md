@@ -17,11 +17,15 @@ status: подтверждено
 | `purpose` | enum(specificity, judge, actor, summary, paraphrase) | да | вычисляется | ai | нигде |
 | `provider`, `model` | string | да | настройка | ai | нигде |
 | `userId`, `turnId` | ref | нет | вычисляется | ai | нигде |
-| `inputTokens`, `outputTokens`, `costMicros` | int | да | внешний сервис / вычисляется | ai | нигде |
-| `outcome` | enum(ok, invalid, timeout, refusal, error) | да | вычисляется | ai | нигде |
+| `inputTokens`, `outputTokens` | int | нет, если usage неизвестен | внешний сервис | ai | нигде |
+| `costMicros` | number | нет, если стоимость неизвестна | шлюз / тарифная оценка, micro-USD | ai | нигде |
+| `costSource` | enum(provider, estimate, mock, unknown) | для новых записей | вычисляется | ai | нигде |
+| `inputUsdPerMillion`, `outputUsdPerMillion` | number | для новых записей | снимок тарифов конфигурации | ai | нигде |
+| `outcome` | enum(pending, ok, invalid, timeout, refusal, error) | да | вычисляется | ai | нигде |
 | `latencyMs`, `at` | int, date | да | вычисляется | ai | нигде |
 
 «В API»: владельцу — хозяину записи; админу — владельцу продукта.
 
 ## Инварианты
 - текстов запроса и ответа не хранит (N-17)
+- Валюта USD, одна единица `costMicros` — миллионная доля доллара. Запись создаётся до вызова; каждая попытка и её валидация связаны по точному id записи. Отсутствие usage/стоимости не означает ноль. Индекс `{turnId, at}`. Формулы, временные тарифы и ограничения таймаута — [аналитика](../analytics.md).

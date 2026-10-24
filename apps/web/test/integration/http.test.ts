@@ -63,8 +63,8 @@ describe('typed HTTP transport with MSW', () => {
     expect(calls).toBe(1);
   });
 
-  it('handles malformed error bodies and empty 204 without JSON parsing', async () => {
-    server.use(http.get(`${base}/me`, () => new HttpResponse('offline', { status: 502 })));
+  it.each(['offline', '{}', 'null', '[]', '{"type":123}', '{"type":"urn:angry-dad:problem:internal_error","status":502,"title":"Bad gateway","errors":{}}'])('handles malformed error body %s and empty 204 without JSON parsing', async (body) => {
+    server.use(http.get(`${base}/me`, () => new HttpResponse(body, { status: 502 })));
     await expect(request('getMe')).rejects.toMatchObject({ status: 502, problem: undefined });
     server.use(http.delete(`${base}/me`, () => new HttpResponse(null, { status: 204 })));
     await expect(request('deleteMe')).resolves.toBeUndefined();

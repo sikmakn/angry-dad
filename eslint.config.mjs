@@ -19,6 +19,15 @@ const styleRules = {
   '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
 };
 
+const backendStyleRules = {
+  ...styleRules,
+  '@stylistic/object-curly-newline': ['error', {
+    ObjectExpression: { multiline: true, minProperties: 2, consistent: true },
+    ObjectPattern: { multiline: true, consistent: true },
+  }],
+  '@stylistic/object-property-newline': ['error', { allowAllPropertiesOnSameLine: false }],
+};
+
 export default defineConfig([
   globalIgnores([
     '**/dist/**',
@@ -44,7 +53,7 @@ export default defineConfig([
         ...globals.jest,
       },
     },
-    rules: styleRules,
+    rules: backendStyleRules,
   },
   {
     files: ['apps/web/**/*.{ts,tsx}'],

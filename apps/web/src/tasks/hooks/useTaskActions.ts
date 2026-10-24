@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Me, Schema, Task } from '../../api/contract';
+import type { Me, Schema, Task, CheckInAnswer } from '../../api/contract';
 import { useWrite } from '../../hooks/useApi';
 
 export function useTaskActions(me: Me) {
@@ -37,7 +37,7 @@ export function useTaskActions(me: Me) {
       return false;
     }
   }
-  async function checkAnswer(feedMessageId: string, value: Schema<'CheckInAnswer'>) {
+  async function checkAnswer(feedMessageId: string, value: CheckInAnswer) {
     setError(undefined);
     try {
       const response = await answer.run({ path: { feedMessageId }, body: { answer: value } });

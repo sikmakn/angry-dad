@@ -22,7 +22,7 @@ export function telegram(): TelegramApp | undefined {
 
 export const config = {
   mocks: import.meta.env.VITE_USE_MOCKS === 'true',
-  apiBase: (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api',
+  apiBase: ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api').replace(/\/+$/, ''),
   // TODO Q-CONFIG: owner must supply the real bot username and published legal URL.
   botUsername: import.meta.env.VITE_BOT_USERNAME as string | undefined,
   termsUrl: import.meta.env.VITE_TERMS_URL as string | undefined,

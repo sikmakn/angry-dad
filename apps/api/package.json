@@ -7,8 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "prestart": "npm --prefix ../.. run generate:openapi",
     "start": "nest start",
+    "prestart:dev": "npm --prefix ../.. run generate:openapi",
     "start:dev": "nest start --watch",
+    "prestart:debug": "npm --prefix ../.. run generate:openapi",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "npm --prefix ../.. run lint",
@@ -16,20 +19,24 @@
     "test": "node ../../scripts/testing/with-test-mongo.mjs -- node ../../node_modules/jest/bin/jest.js",
     "test:watch": "node ../../scripts/testing/with-test-mongo.mjs -- node ../../node_modules/jest/bin/jest.js --watch",
     "test:cov": "node ../../scripts/testing/with-test-mongo.mjs -- node ../../node_modules/jest/bin/jest.js --coverage",
-    "test:debug": "node ../../scripts/testing/with-test-mongo.mjs -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register ../../node_modules/jest/bin/jest.js --runInBand"
+    "test:debug": "node ../../scripts/testing/with-test-mongo.mjs -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register ../../node_modules/jest/bin/jest.js --runInBand",
+    "start:worker": "node dist/worker"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/event-emitter": "^12.0.1",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.4.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "grammy": "^1.46.0",
     "mongoose": "^8.24.6",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -55,13 +62,28 @@
     "rootDir": ".",
     "testRegex": "test/.*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": [
+      "^.+\\.ts$": [
         "ts-jest",
         {
           "tsconfig": "<rootDir>/tsconfig.spec.json"
         }
+      ],
+      "node_modules/@nestjs/event-emitter/.+\\.js$": [
+        "ts-jest",
+        {
+          "useESM": false,
+          "tsconfig": {
+            "allowJs": true,
+            "module": "CommonJS",
+            "moduleResolution": "Node10",
+            "resolvePackageJsonExports": false
+          }
+        }
       ]
     },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@nestjs/event-emitter/)"
+    ],
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"
     ],

@@ -13,6 +13,18 @@ export class ApiError extends Error {
   }
 }
 
+// A proxy may return HTML or an unrelated JSON error. Do not expose it as a Problem.
+function isProblem(value: unknown): value is Problem {
+  if (!value || typeof value !== 'object' || !('type' in value) || typeof value.type !== 'string'
+    || !value.type.startsWith('urn:angry-dad:problem:') || !('status' in value) || typeof value.status !== 'number'
+    || !('title' in value) || typeof value.title !== 'string') {
+    return false;
+  }
+  return (!('reply' in value) || typeof value.reply === 'string')
+    && (!('errors' in value) || (Array.isArray(value.errors) && value.errors.every(item => item && typeof item === 'object'
+      && typeof item.field === 'string' && typeof item.message === 'string')));
+}
+
 export interface RequestOptions<K extends ClientOperation> {
   body?: Body<K>;
   path?: Record<string, string>;
@@ -51,8 +63,8 @@ export async function request<K extends ClientOperation>(operation: K, options: 
   const signal = AbortSignal.any([AbortSignal.timeout(40000), ...(options.signal ? [options.signal] : [])]);
   const response = await fetch(url, { method, headers, signal, body: options.body === undefined ? undefined : JSON.stringify(options.body) });
   if (!response.ok) {
-    const problem = await response.json().catch(() => undefined) as Problem | undefined;
-    throw new ApiError(response.status, problem);
+    const problem: unknown = await response.json().catch(() => undefined);
+    throw new ApiError(response.status, isProblem(problem) ? problem : undefined);
   }
   return response.status === 204 ? undefined as Result<K> : response.json() as Promise<Result<K>>;
 }

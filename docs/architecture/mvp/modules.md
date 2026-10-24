@@ -1,6 +1,6 @@
 # Модули · [← сводка](00-overview.md)
 
-Раскладка папок по `api-layout.md`. Маршруты даны в общих чертах, точный контракт — шаг contract. «Владелец» — контроллеры с guard'ом по Telegram ID владельца ([Q1](decisions.md#q1)).
+Раскладка папок по `api-layout.md`. Маршруты ниже даны в общих чертах; фактический контракт по D9 [генерируется из NestJS-кода](api-contract.md) в `docs/openapi.yaml`/`json`. «Владелец» — контроллеры с guard'ом по Telegram ID владельца ([Q1](decisions.md#q1)).
 
 Порядок зависимостей (сверху никто не зависит от нижних): `ai`, `analytics` → `users` → `phrases`, `respect`, `strikes` → `tasks`, `battle`, `payments` → `pressure`, `delivery`, `sharing`, `leaderboard` → `bot`.
 
@@ -9,15 +9,17 @@
 **Сущности:** [User](entities/user.md), [DeletedUser](entities/deleted-user.md)
 **Контроллеры:** пользователь — профиль, старт, настройки, удаление; владелец — поиск пользователя по Telegram ID.
 **Зависит от:** analytics. Удаление вызывает очистку в tasks, battle, delivery, phrases, strikes через события модулей.
-**Сервисы:** `users.service` (профиль, старт, настройки); `services/account-deletion.service` (удаление: рассылает событие, стирает данные); `services/telegram-auth.service` (проверка `initData`).
+**Сервисы:** `users.service` (профиль, старт, настройки, синхронный `observeActivity` и публикация события статистики); `services/account-deletion.service` (удаление данных); `services/telegram-auth.service` (проверка `initData`).
 **Маршруты:** пользователь `GET/PATCH /me`, `POST /me/onboarding`, `DELETE /me`; владелец `GET /owner/users/{telegramId}`.
 **Guards:** `guards/telegram-auth.guard.ts` (все пользовательские маршруты), `guards/owner.guard.ts` (общий для всех owner-контроллеров), `guards/onboarded.guard.ts`.
+**Interceptor:** `interceptors/user-activity.interceptor.ts` наблюдает допустимую активность HTTP после guard; сам guard статистику не записывает. Схема — [D8](analytics.md#доставка-событий-по-d8).
 ```
 modules/users/
   users.module.ts  users.service.ts  users.errors.ts  users.types.ts
   controllers/ me.controller.ts  owner-users.controller.ts
   services/ account-deletion.service.ts  telegram-auth.service.ts
   guards/ telegram-auth.guard.ts  owner.guard.ts  onboarded.guard.ts
+  interceptors/ user-activity.interceptor.ts
   dto/
 ```
 **Сценарии:** UC-1…UC-12
@@ -44,6 +46,7 @@ modules/bot/
 **Контроллеры:** пользователь — задачи, периоды, действия над текущим периодом.
 **Зависит от:** ai, respect, phrases (ответные фразы), users.
 **Сервисы:** `tasks.service` (постановка, список, удаление); `services/periods.service.ts` (создание и закрытие периодов, переходы); `services/deadline-sweeper.service.ts` (воркер: провал по сроку, открытие периодов); `services/recurrence.service.ts` (расчёт периодов и сроков по пяти периодичностям); `services/mood.service.ts`.
+После успешного коммита создания задачи `TasksService` публикует типизированное `task.created`; прямой зависимости от моделей статистики нет. Другие переходы и финансовые гарантии не меняются.
 **Маршруты:** пользователь `GET/POST /tasks`, `PATCH/DELETE /tasks/{id}`, `POST /tasks/{id}/stop`, `GET /tasks/{id}/periods`, действия текущего периода `POST /periods/{id}/done|extend|give-up|retry`, `POST /periods/{id}/check-in-answer`.
 ```
 modules/tasks/
@@ -56,22 +59,20 @@ modules/tasks/
 **Сценарии:** UC-13…UC-31
 
 ## pressure
-**Отвечает за:** планирование сообщений: случайное расписание проверок (R-48, R-49, R-55), серии (R-50), напоминания (R-57, R-58), onFail (R-59), onAbsent (R-60); отмену по смене статуса (R-63); штраф за неответ (R-52). Пишет записи `OutboxMessage`, сам не отправляет.
-**Сущности:** [OutboxMessage](entities/outbox-message.md) (пишет план)
-**Контроллеры:** нет; ответы на проверки приходят из bot и из Mini App через tasks.
-**Зависит от:** tasks, respect, battle (уровень побеждённости для растяжения интервалов), users.
-**Сервисы:** `pressure.service` (точка входа: «пересчитай план по периоду»); `services/check-in-planner.service.ts` (случайные интервалы, минимум за сутки, растяжение по уровню побеждённости); `services/series.service.ts`; `services/reminder-planner.service.ts` (напоминания и onFail); `services/absence-planner.service.ts`; `services/missed-check-in.service.ts` (воркер: 15 минут без ответа).
-**Маршруты:** нет.
-```
-modules/pressure/
-  pressure.module.ts  pressure.service.ts  pressure.types.ts
-  services/ check-in-planner.service.ts  series.service.ts  reminder-planner.service.ts  absence-planner.service.ts  missed-check-in.service.ts
-  helpers/ interval-sampler.ts
-```
-**Сценарии:** UC-32…UC-43, UC-31
+Тонкий совместимый фасад `PressureService` для существующего вызова серии из delivery. Независимое планирование задач отключено решением D6; состояние и политика перенесены в `task-notifications`.
+
+## task-notifications
+
+**Отвечает за:** единое адаптивное расписание обращений пользователя, контекст задач, выбор основной/вторичной задачи, частоту и плотность, общую короткую серию, неответ и подтверждение доставки. Подробности и приоритет над прежними требованиями: [единое расписание](task-notifications.md).
+
+**Сущности:** [TaskNotificationState](entities/task-notification-state.md), [OutboxMessage](entities/outbox-message.md), [FeedMessage](entities/feed-message.md); читает User, Task, Period, BattleDialog.
+
+**Сервисы:** `task-notifications.service.ts` — планирование, актуальность и результат; `services/notification-state.service.ts` — сигналы изменений; `services/notification-context.service.ts` — контекст, история и ротация; `task-notifications.policy.ts` — параметры и выбор времени.
+
+**Подключение:** существующий worker вызывает `plan`/`missed`; tasks и users сообщают об изменениях в своих транзакциях; bot сигналит блокировку/разблокировку; delivery проверяет план до сетевого вызова и фиксирует результат. Модуль не зависит от сервисов tasks/delivery, чтобы не образовать цикл импортов. REST-контроллеров нет.
 
 ## delivery
-**Отвечает за:** диспетчер отправки на пользователя: тихие часы (отмена проверок, перенос и слияние остального), минимум 3 минуты и приоритеты (R-62), отброс опоздавших (N-4), лимиты Telegram (N-7), блокировка бота (R-65); выбор и подстановку фразы в момент отправки; ленту «История» и «Ответить».
+**Отвечает за:** техническую отправку единственного актуального сообщения пользователя, аренду outbox и пользователя, лимиты Telegram, обработку сетевого исхода, подготовку фразы и кнопок, ленту и ответы. Политика тихих часов, частоты и актуальности применяется через task-notifications; старые независимые очереди отменяются. Подготовленные черновики скрыты до подтверждения отправки.
 **Сущности:** [OutboxMessage](entities/outbox-message.md) (исполняет), [FeedMessage](entities/feed-message.md)
 **Контроллеры:** пользователь — «История».
 **Зависит от:** phrases, users, tasks (настроение и статус на момент отправки), battle (побеждённость).
@@ -217,17 +218,19 @@ modules/leaderboard/
 **Сценарии:** UC-83…UC-88
 
 ## analytics
-**Отвечает за:** события метрик без текстов (N-17), расчёт метрик за период, журнал действий владельца, настройки игры.
-**Сущности:** [AnalyticsEvent](entities/analytics-event.md), [OwnerAction](entities/owner-action.md), [GameSettings](entities/game-settings.md)
+**Отвечает за:** события метрик без текстов (N-17), первые события и активность по дням, расчёт метрик за период, журнал действий владельца, настройки игры. Формулы и денежный учёт по D7: [аналитика](analytics.md).
+**Сущности:** [AnalyticsEvent](entities/analytics-event.md), [UserStatistics](entities/user-statistics.md), [UserActivityDay](entities/user-activity-day.md), [OwnerAction](entities/owner-action.md), [GameSettings](entities/game-settings.md)
 **Контроллеры:** владелец — метрики, журнал, настройки игры.
 **Зависит от:** ничего.
-**Сервисы:** `analytics.service` (`track(event)`); `services/metrics.service.ts` (расчёт метрик за период); `services/owner-journal.service.ts`; `services/game-settings.service.ts`.
+**Сервисы:** `analytics.service` (события, журнал, настройки, сборка метрик); `services/user-statistics.service.ts` (первые события и активность, используется внутри analytics); `services/engagement-metrics.service.ts` (D7, медиана, активные, ответы); `services/turn-economics.service.ts` (расходы и выручка платных ударов); `listeners/analytics-events.listener.ts` (асинхронные `task.created` и `user.activity.observed`). Общий `common/events/` содержит типы, `EventPublisher` и `EventsModule`, подключённый в API и worker; внешнего транспорта нет.
+По D10 этот же listener принимает `phrase.paraphrases.generated` и `support.ticket.status.changed` для журнала владельца. Они публикуются после успешного сохранения, сохраняют исходное время и записываются без новых транзакций; сбой журнала не отменяет действие. Прежние финансовые записи журнала не переводились на эти события.
 **Маршруты:** владелец `GET /owner/metrics`, `GET /owner/journal`, `GET/PUT /owner/game-settings`.
 ```
 modules/analytics/
   analytics.module.ts  analytics.service.ts  analytics.types.ts
   controllers/ owner-analytics.controller.ts
-  services/ metrics.service.ts  owner-journal.service.ts  game-settings.service.ts
+  services/ user-statistics.service.ts  engagement-metrics.service.ts  turn-economics.service.ts
+  listeners/ analytics-events.listener.ts
   dto/
 ```
 **Сценарии:** UC-90, UC-93

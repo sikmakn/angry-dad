@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import type { Me, Schema } from '../../api/contract';
+import type { Me, OwnerActionType } from '../../api/contract';
 import { usePages } from '../../hooks/useApi';
 import { Feedback } from '../../components/Feedback';
 import { formatDate } from '../../format/date';
 
-const labels = { phrase_add: 'Добавлена фраза', phrase_toggle: 'Изменена фраза', paraphrase_review: 'Проверен перефраз', role_card_edit: 'Изменена карточка роли', package_edit: 'Изменён пакет', strikes_grant: 'Начислены удары', strikes_revoke: 'Списаны удары', stars_refund: 'Возвращены Stars', settings_edit: 'Изменены настройки' };
+const labels = { phrase_add: 'Добавлена фраза', phrase_toggle: 'Изменена фраза', paraphrase_generate: 'Созданы перефразы', paraphrase_review: 'Проверен перефраз', support_ticket_status_changed: 'Изменён статус обращения', role_card_edit: 'Изменена карточка роли', package_edit: 'Изменён пакет', strikes_grant: 'Начислены удары', strikes_revoke: 'Списаны удары', stars_refund: 'Возвращены Stars', settings_edit: 'Изменены настройки' };
 
 export function OwnerJournal({ me }: { me: Me }) {
-  const [action, setAction] = useState<Schema<'OwnerActionType'> | ''>('');
+  const [action, setAction] = useState<OwnerActionType | ''>('');
   const journal = usePages(me.id, 'listOwnerJournal', { query: { ...(action ? { action } : {}) } });
   return (
     <>
@@ -16,7 +16,7 @@ export function OwnerJournal({ me }: { me: Me }) {
         <label htmlFor="journal-action">Действие</label>
         <select id="journal-action" value={action} onChange={event => setAction(event.target.value as typeof action)}>
           <option value="">Все действия</option>
-          {(Object.keys(labels) as Schema<'OwnerActionType'>[]).map(value => <option key={value} value={value}>{labels[value]}</option>)}
+          {(Object.keys(labels) as OwnerActionType[]).map(value => <option key={value} value={value}>{labels[value]}</option>)}
         </select>
       </div>
       <Feedback pending={journal.isPending} error={journal.error} />

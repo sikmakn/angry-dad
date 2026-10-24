@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FeedMessage, Me, Schema } from '../api/contract';
+import type { FeedMessage, Me, Rating } from '../api/contract';
 import { usePages, useWrite } from '../hooks/useApi';
 import { Feedback } from '../components/Feedback';
 import { Sheet } from '../components/Sheet';
@@ -10,7 +10,7 @@ export function HistoryScreen({ me, go }: { me: Me; go: (route: string) => void 
   const feed = usePages(me.id, 'listFeed');
   const rating = useWrite(me.id, 'rateFeedMessage');
   const quote = useWrite(me.id, 'createBattleQuote');
-  const [choice, setChoice] = useState<{ message: FeedMessage; score: Schema<'Rating'> }>();
+  const [choice, setChoice] = useState<{ message: FeedMessage; score: Rating }>();
   const labels = ['Слабо', 'Неприятно', 'В самое больное'];
   const items = feed.data?.pages.flatMap(page => page.items) ?? [];
   return (
@@ -30,7 +30,7 @@ export function HistoryScreen({ me, go }: { me: Me; go: (route: string) => void 
             {message.rating !== undefined && <p className="small">{`Уже оценено: ${labels[message.rating]}. Изменить её нельзя.`}</p>}
             {message.rating === undefined && message.rateable && (
               <div className="btns" role="group" aria-label="Насколько задело?">
-                {labels.map((label, score) => <button className="btn ghost" key={label} disabled={rating.isPending} onClick={() => setChoice({ message, score: score as Schema<'Rating'> })}>{label}</button>)}
+                {labels.map((label, score) => <button className="btn ghost" key={label} disabled={rating.isPending} onClick={() => setChoice({ message, score: score as Rating })}>{label}</button>)}
               </div>
             )}
             <button className="btn ghost" disabled={quote.isPending} onClick={() => void quote.run({ path: { role: me.role! }, body: { feedMessageId: message.id }, key: crypto.randomUUID() }).then(response => response && go('battle')).catch(() => {})}>Ответить</button>

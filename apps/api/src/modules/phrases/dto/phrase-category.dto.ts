@@ -1,0 +1,1 @@
+export type PhraseCategoryDto = 'on_greeting' | 'on_task_set' | 'on_delete' | 'on_vague' | 'on_reminder' | 'on_check_in' | 'on_check_in_reply' | 'on_check_in_missed' | 'on_fail' | 'on_excuse' | 'on_excuse_denied' | 'on_retry' | 'on_success' | 'on_absent' | 'on_battle_start' | 'on_break' | 'on_recovery';
