@@ -7,12 +7,14 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
-    "check": "npm run check:api && npm run check:database-safety && npm run lint && npm run typecheck",
+    "check": "npm run check:openapi && npm run check:api && npm run check:database-safety && npm run lint && npm run typecheck",
     "generate:api": "openapi-typescript docs/openapi.yaml -o apps/web/src/api/generated/openapi.ts",
     "check:api": "npm run generate:api -- --check",
     "build": "npm run build --workspaces --if-present",
     "check:database-safety": "node scripts/testing/check-database-safety.mjs",
-    "docs:api": "node scripts/docs/serve-api.mjs"
+    "docs:api": "node scripts/docs/serve-api.mjs",
+    "generate:openapi": "node scripts/docs/generate-openapi.mjs",
+    "check:openapi": "npm run generate:openapi -- --check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -23,7 +25,8 @@
     "globals": "^17.13.0",
     "openapi-typescript": "7.13.0",
     "swagger-ui-dist": "5.32.13",
-    "typescript-eslint": "^8.71.2"
+    "typescript-eslint": "^8.71.2",
+    "yaml": "^2.9.1"
   },
   "msw": {
     "workerDirectory": [

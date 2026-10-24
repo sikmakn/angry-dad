@@ -1,10 +1,10 @@
-import type { Me, Schema } from '../../api/contract';
+import type { Me, PhraseCategory, PhraseCombo, PhraseRole, PhraseDefeatLevel } from '../../api/contract';
 import { Feedback } from '../../components/Feedback';
 import { Sheet } from '../../components/Sheet';
 import { useOwnerPhrases } from '../hooks/useOwnerPhrases';
 
-const categories: Schema<'PhraseCategory'>[] = ['on_greeting', 'on_task_set', 'on_delete', 'on_vague', 'on_reminder', 'on_check_in', 'on_check_in_reply', 'on_check_in_missed', 'on_fail', 'on_excuse', 'on_excuse_denied', 'on_retry', 'on_success', 'on_absent', 'on_battle_start', 'on_break', 'on_recovery'];
-const combos: Schema<'PhraseCombo'>[] = ['any', 'father_son', 'father_daughter', 'mother_son', 'mother_daughter'];
+const categories: PhraseCategory[] = ['on_greeting', 'on_task_set', 'on_delete', 'on_vague', 'on_reminder', 'on_check_in', 'on_check_in_reply', 'on_check_in_missed', 'on_fail', 'on_excuse', 'on_excuse_denied', 'on_retry', 'on_success', 'on_absent', 'on_battle_start', 'on_break', 'on_recovery'];
+const combos: PhraseCombo[] = ['any', 'father_son', 'father_daughter', 'mother_son', 'mother_daughter'];
 const comboLabels = { any: 'Любое', father_son: 'Отец × сын', father_daughter: 'Отец × дочь', mother_son: 'Мать × сын', mother_daughter: 'Мать × дочь' };
 
 export function OwnerPhrases({ me }: { me: Me }) {
@@ -22,7 +22,7 @@ export function OwnerPhrases({ me }: { me: Me }) {
       >
         <div className="field">
           <label htmlFor="phrase-role">Роль</label>
-          <select id="phrase-role" value={draft.role} onChange={event => setDraft({ ...draft, role: event.target.value as Schema<'PhraseRole'> })}>
+          <select id="phrase-role" value={draft.role} onChange={event => setDraft({ ...draft, role: event.target.value as PhraseRole })}>
             <option value="father">Отец</option>
             <option value="mother">Мать</option>
             <option value="any">Любая</option>
@@ -30,7 +30,7 @@ export function OwnerPhrases({ me }: { me: Me }) {
         </div>
         <div className="field">
           <label htmlFor="phrase-category">Категория</label>
-          <select id="phrase-category" value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value as Schema<'PhraseCategory'> })}>
+          <select id="phrase-category" value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value as PhraseCategory })}>
             {categories.map(value => <option key={value}>{value}</option>)}
           </select>
         </div>
@@ -43,14 +43,14 @@ export function OwnerPhrases({ me }: { me: Me }) {
         </div>
         <div className="field">
           <label htmlFor="phrase-defeat">Уровень побеждённости</label>
-          <select id="phrase-defeat" value={draft.defeatLevel} onChange={event => setDraft({ ...draft, defeatLevel: event.target.value as Schema<'PhraseDefeatLevel'> })}>
+          <select id="phrase-defeat" value={draft.defeatLevel} onChange={event => setDraft({ ...draft, defeatLevel: event.target.value as PhraseDefeatLevel })}>
             <option value="any">Любой</option>
             {['1', '2', '3', '4'].map(value => <option key={value}>{value}</option>)}
           </select>
         </div>
         <div className="field">
           <label htmlFor="phrase-combo">Сочетание роли и пола</label>
-          <select id="phrase-combo" value={draft.combo} onChange={event => setDraft({ ...draft, combo: event.target.value as Schema<'PhraseCombo'> })}>
+          <select id="phrase-combo" value={draft.combo} onChange={event => setDraft({ ...draft, combo: event.target.value as PhraseCombo })}>
             {combos.map(value => <option value={value} key={value}>{comboLabels[value]}</option>)}
           </select>
         </div>

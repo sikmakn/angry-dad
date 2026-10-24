@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { Me, Schema } from '../../api/contract';
+import type { Me, Schema, PhraseStatus } from '../../api/contract';
 import { usePages, useRead, useWrite } from '../../hooks/useApi';
 
 export function useOwnerPhrases(me: Me) {
-  const [filter, setFilter] = useState<Schema<'PhraseStatus'> | 'below'>('pending_review');
+  const [filter, setFilter] = useState<PhraseStatus | 'below'>('pending_review');
   const query = filter === 'below' ? { belowThreshold: true } : { status: filter };
   const list = usePages(me.id, 'listOwnerPhrases', { query });
   const coverage = useRead(me.id, 'getOwnerPhraseCoverage');

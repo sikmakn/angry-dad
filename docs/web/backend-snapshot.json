@@ -1,0 +1,1300 @@
+{
+  "at": "2026-10-23T23:39:08.203277+00:00",
+  "source": "/Users/nikitakolchanov/programs/angry-dad/.claude/worktrees/feat-mvp-api",
+  "files": [
+    {
+      "path": "apps/api/nest-cli.json",
+      "sha256": "558215442417bc2cddee026e80468e0f94f10ddb5958db7c2da7f1399ca38a2a"
+    },
+    {
+      "path": "apps/api/package.json",
+      "sha256": "ffaf1122cab615edbe9116e0d98e46160ca9b54234308a9f574da5f432a9de1c"
+    },
+    {
+      "path": "apps/api/tsconfig.build.json",
+      "sha256": "3a016b4ee9713cd16295128bad42e6077e5ecd8c2ed225caa7d1e0e3f1c7f03f"
+    },
+    {
+      "path": "apps/api/tsconfig.json",
+      "sha256": "e842d82e49eb9d08d26f9afd42f47cf56f916d6348ccfec37c11ce4c6642cb1e"
+    },
+    {
+      "path": "apps/api/tsconfig.spec.json",
+      "sha256": "f0ef419ebdc157e0c392adc8bd589f2c51bf7bee64b1aaccd2d5f8c96d00fb42"
+    },
+    {
+      "path": "apps/api/test/unit/modules/tasks/recurrence.spec.ts",
+      "sha256": "1c9c7787bd905349a9b6e4209f380488c99c619451a2ff8fe278b66e07b457e9"
+    },
+    {
+      "path": "apps/api/test/unit/modules/phrases/render.spec.ts",
+      "sha256": "6c08f540a35fed784a1cb1516e46ecef507bd7db49deacaf97560d20ea82d350"
+    },
+    {
+      "path": "apps/api/test/unit/modules/users/telegram-auth.spec.ts",
+      "sha256": "44bb77ba13f9c9b67984a601f69c03dccc0010572b533f0f7be609b6325eacbc"
+    },
+    {
+      "path": "apps/api/test/unit/modules/task-notifications/policy.spec.ts",
+      "sha256": "c7898d287ebcf02696a1d535f200c63dd713e5ef5461b115d3891db043763804"
+    },
+    {
+      "path": "apps/api/test/integration/social.spec.ts",
+      "sha256": "66032a49c0665d28446496542aaa01f69ff9870ead73b312433e7f3f3548b114"
+    },
+    {
+      "path": "apps/api/test/integration/transactions.spec.ts",
+      "sha256": "0ccccff5f35d8cc33fb8e6738eed2dd90b7120974ea0236538d81e09b95b9722"
+    },
+    {
+      "path": "apps/api/test/integration/notifications.spec.ts",
+      "sha256": "a403982a9ecdcabe90f730a3f34616bcf6e3242a3ba7fa1af60248b0de65b1f8"
+    },
+    {
+      "path": "apps/api/test/integration/http.spec.ts",
+      "sha256": "29b2110a14cb8e2344b110aab1c7080219190fffb451c6fd926674baf8ad0573"
+    },
+    {
+      "path": "apps/api/test/integration/phrases.spec.ts",
+      "sha256": "4694609871af50aacfc924c40c0b19d5eccf6f4dd41d8c0b281499c4726cb5b7"
+    },
+    {
+      "path": "apps/api/test/integration/battle.spec.ts",
+      "sha256": "3051f0a56ff5db09ae02efc624c3d737a1c6c2f9a08cf7cb79671db9577a32f6"
+    },
+    {
+      "path": "apps/api/test/integration/analytics.spec.ts",
+      "sha256": "a220c51d668a7bc3db48e30d0cf6bbc1c8bcbfd3f2faa97a0a4fddab90750617"
+    },
+    {
+      "path": "apps/api/test/integration/tasks.spec.ts",
+      "sha256": "4acb680bb76f2788fb3407fffb411cb5de7d870dff8e8deeab57d833d075dc2f"
+    },
+    {
+      "path": "apps/api/test/integration/telegram.spec.ts",
+      "sha256": "a89263bf3be0501e28a5534c809eda94dba97bf348e1f036f6f0cbdd72a06eef"
+    },
+    {
+      "path": "apps/api/test/integration/payments.spec.ts",
+      "sha256": "3fa9108cd896cee499da28342a1184ca15375858d4a37f42329bc1d142635241"
+    },
+    {
+      "path": "apps/api/test/integration/ai.spec.ts",
+      "sha256": "85486d753cea846a7c2c064fdcbd0b99a02069cdf8e975c5f635b12b38d40058"
+    },
+    {
+      "path": "apps/api/test/helpers/env.setup.ts",
+      "sha256": "a9cf0491bd2ce199db9cdbca62fdda38dae40f48ba0e3fe67b93d859ae21880c"
+    },
+    {
+      "path": "apps/api/test/helpers/backend.ts",
+      "sha256": "a805688cc090d792560f0707e7286005021231af0c5a833caa386feba1f91210"
+    },
+    {
+      "path": "apps/api/src/worker.module.ts",
+      "sha256": "0d0396527baf622cfb5abb2e2eb7f3923cfdca816db3de7ced1238f56b67aba2"
+    },
+    {
+      "path": "apps/api/src/main.ts",
+      "sha256": "dbd633433880a76e2514df276cc818ae99d49ed1abae39e1a80bd37b34489a42"
+    },
+    {
+      "path": "apps/api/src/app.module.ts",
+      "sha256": "025d12e5972d5afa3d4c8f7ab8094658a5fc8a0f902b3a1a362d232795f0768c"
+    },
+    {
+      "path": "apps/api/src/worker.ts",
+      "sha256": "c3f5e8ebd6bab50e8be039704d7ef7db82db955069dc914feb57263e4c77c994"
+    },
+    {
+      "path": "apps/api/src/database/database.service.ts",
+      "sha256": "9b353cd3ca41ef0c901b6d2f86a2cb1e1874255a12fba641b67edf965a9d9f2f"
+    },
+    {
+      "path": "apps/api/src/database/task-notification-database.module.ts",
+      "sha256": "f004ca2890463b8172a5df46775f40ea0e9f5f0fe3fed193c6b8a20cad5a0c65"
+    },
+    {
+      "path": "apps/api/src/database/database.module.ts",
+      "sha256": "8a8d8a25253b644d5e2bbbe6181b3b1dc9360782530c5a2b6a0c4f2d17bc4904"
+    },
+    {
+      "path": "apps/api/src/database/seed.service.ts",
+      "sha256": "ee5a338a0c7271d2ffe05f4a870601dc06f2e698dfd6c1cc7a6ff41358f6eba2"
+    },
+    {
+      "path": "apps/api/src/database/schemas/package.schema.ts",
+      "sha256": "4840d2ea765ce5d16ec9d95f918c69f6240ccdad67241204b05c29b955952b5e"
+    },
+    {
+      "path": "apps/api/src/database/schemas/telegram-update-receipt.schema.ts",
+      "sha256": "6ef637c93e7f50e7bf1ac155bcd30b3777fd0fb8e414d1e8147b59c458a216a7"
+    },
+    {
+      "path": "apps/api/src/database/schemas/user.schema.ts",
+      "sha256": "54cb1c8cf81be174b4df2513611625f332781eb29d77121f5900fd5d535c8ef4"
+    },
+    {
+      "path": "apps/api/src/database/schemas/owner-action.schema.ts",
+      "sha256": "df3d50ab3e785c7ea4abd64a44934e433281b55f02a2ceb54b88ec50b92f2edf"
+    },
+    {
+      "path": "apps/api/src/database/schemas/feed-message.schema.ts",
+      "sha256": "cd236eeef85a6d25b754a7a786b20131b00a2bb64de5d518d4570e9c0eca0167"
+    },
+    {
+      "path": "apps/api/src/database/schemas/period.schema.ts",
+      "sha256": "4f5761705f3bfcc3ec233382b8c714bc6ad8a75dcc8b7c7988bcd8332a2118b5"
+    },
+    {
+      "path": "apps/api/src/database/schemas/ai-call.schema.ts",
+      "sha256": "d8767c579af24c71c1395faeffd82cb3a0ef2864d7eef408f9d92636162fa245"
+    },
+    {
+      "path": "apps/api/src/database/schemas/task-notification-state.schema.ts",
+      "sha256": "1398a86b42827522f24d6f4401c80abcc00d346a3f0d84291fd16255ce8aac78"
+    },
+    {
+      "path": "apps/api/src/database/schemas/battle-message.schema.ts",
+      "sha256": "4eacce9a2ceb80c9d61c67566fa12390f02fd14679bd1a175fc11af92ba36253"
+    },
+    {
+      "path": "apps/api/src/database/schemas/turn.schema.ts",
+      "sha256": "a0eb37bb6a254acf19dabe6ca0c78a1f4d50c9bc6986a8e6ed14bf560500a951"
+    },
+    {
+      "path": "apps/api/src/database/schemas/phrase-vote.schema.ts",
+      "sha256": "4fd914126ae188432a39dfe8d6dad93339a7d76c031122a80953944b727c0a7f"
+    },
+    {
+      "path": "apps/api/src/database/schemas/deleted-user.schema.ts",
+      "sha256": "965c9412b745b64240d7aa4c5d25ae50b1953c66a2932ac8422ce7400ea7ae75"
+    },
+    {
+      "path": "apps/api/src/database/schemas/respect-change.schema.ts",
+      "sha256": "319df0ee4ddadb01c940340f3261774fe1882908da4cfc16c4394113cf21cb0b"
+    },
+    {
+      "path": "apps/api/src/database/schemas/daily-counter.schema.ts",
+      "sha256": "59ccd4fe071fa54ec516b442aca57376d14ba4cdedbdd1341dc2e81dd894bf37"
+    },
+    {
+      "path": "apps/api/src/database/schemas/stars-payment.schema.ts",
+      "sha256": "23429f29447e80ef4741699baabab7b67a47003d403c1d769b1761d566bc937f"
+    },
+    {
+      "path": "apps/api/src/database/schemas/phrase.schema.ts",
+      "sha256": "4e5c588c38416ca3f3ce2eb1b08af98ee00260769ed0df68b331046f3bd7344f"
+    },
+    {
+      "path": "apps/api/src/database/schemas/game-settings.schema.ts",
+      "sha256": "cb9e5a05ad5d5902b20a1f8cda0f3da05307e131faa1602d6217016c55d47f64"
+    },
+    {
+      "path": "apps/api/src/database/schemas/battle-dialog.schema.ts",
+      "sha256": "98e9521c335200fba8f6822087499c818623dae0183b1d0132aa5f1cdd0f0e17"
+    },
+    {
+      "path": "apps/api/src/database/schemas/strike-operation.schema.ts",
+      "sha256": "ac0bca7ead12ddc798751fcdd80d2944795490deae5f561139b6243301b08eff"
+    },
+    {
+      "path": "apps/api/src/database/schemas/role-card.schema.ts",
+      "sha256": "f0c6c7528347e90662b7a942ab128d24c4df79c56d4585147c8a6cb5add9fd43"
+    },
+    {
+      "path": "apps/api/src/database/schemas/user-activity-day.schema.ts",
+      "sha256": "e5c6b187eb9d8c706f7ae9fba1aadfe5cae9e7d18a971233dad77e81a06d8f1c"
+    },
+    {
+      "path": "apps/api/src/database/schemas/outbox-message.schema.ts",
+      "sha256": "fd5811c16e5e492de05a86f6ed0e6c3d589d6e837f4e9cbac232098692f048b6"
+    },
+    {
+      "path": "apps/api/src/database/schemas/payment-incident.schema.ts",
+      "sha256": "a9c51369f0b44db14bf35620ed56a02f5e8d6f58dfcf6a2db732d9e00a5e15b8"
+    },
+    {
+      "path": "apps/api/src/database/schemas/strike-lot.schema.ts",
+      "sha256": "e2d89a684edaeb2d87a01137691acc4e423b6feeab91fec6642ce734d2e72ad7"
+    },
+    {
+      "path": "apps/api/src/database/schemas/phrase-show-state.schema.ts",
+      "sha256": "afc2fde75f368da8ce300e9a46c3ce449676fa9107124e061de3080292ea23b9"
+    },
+    {
+      "path": "apps/api/src/database/schemas/task.schema.ts",
+      "sha256": "d417217e9530cc431c0a0f9d91ab190f0443a3fd97d916d380eca31af3129ed4"
+    },
+    {
+      "path": "apps/api/src/database/schemas/user-statistics.schema.ts",
+      "sha256": "85782a5db5ed0fc0eb49b8e872305da3b1c3df72df433d6c39379ef5b349db2c"
+    },
+    {
+      "path": "apps/api/src/database/schemas/analytics-event.schema.ts",
+      "sha256": "a05ccae8da14814d28eeaa77dd2b6ce4b27dc66b2208bd9a4a43ea5765036620"
+    },
+    {
+      "path": "apps/api/src/database/schemas/support-ticket.schema.ts",
+      "sha256": "cbc1aac72734cc16c90a82be76c42997415a1661b70a2c75b3925d44b2f19137"
+    },
+    {
+      "path": "apps/api/src/config/config.module.ts",
+      "sha256": "0568c5d16cd69f85b7cc6ff28cea53a4cbe52206caaa5898d49e60a4784027d3"
+    },
+    {
+      "path": "apps/api/src/config/app-config.service.ts",
+      "sha256": "3c1917b8020f2ed7d7e17d2523bbfadc5a13f74c27117a164aa784167c4f9642"
+    },
+    {
+      "path": "apps/api/src/openapi/operation-descriptions.ts",
+      "sha256": "904d7743f61021732c12282b3d52c26d05dbac275d30a015176e90ba90048ee3"
+    },
+    {
+      "path": "apps/api/src/openapi/response-metadata.ts",
+      "sha256": "40b66096e27c8e326d1105ea3c07d179bcb880f14df8d53de7311ec49e374749"
+    },
+    {
+      "path": "apps/api/src/openapi/problem.dto.ts",
+      "sha256": "63885f8c292f64ed8c49962ae21c29420f0210ce8b7f8c229689b70d4a2b4b5d"
+    },
+    {
+      "path": "apps/api/src/openapi/create-openapi-document.ts",
+      "sha256": "9e4399e8621c90d695b9276a06fbdc22330140f002436381b6e7822c89ce093b"
+    },
+    {
+      "path": "apps/api/src/common/filters/all-exceptions.filter.ts",
+      "sha256": "3c8288867068882c008892987e098a522bd0b236da89a114bc7ea761460f9ccb"
+    },
+    {
+      "path": "apps/api/src/common/utils/pagination.ts",
+      "sha256": "2faf32b5e04bf26247d1f03fbb7eb0bdaa173c159546d47b59404349151580bb"
+    },
+    {
+      "path": "apps/api/src/common/utils/idempotency-header.ts",
+      "sha256": "7bc0e46b1a76d8096e72ed71335c193d0d609b7c12d8162c04205c665897be36"
+    },
+    {
+      "path": "apps/api/src/common/utils/presentation.ts",
+      "sha256": "a286f76a7a74c4bd31422a6a82367f425070d5c7cbdd9c1dcc874275c75b1710"
+    },
+    {
+      "path": "apps/api/src/common/utils/mongo-error.ts",
+      "sha256": "8ed20d0a3404c2b481547798adaadb3878fe2358b69dcf915f04a1a7d9038520"
+    },
+    {
+      "path": "apps/api/src/common/utils/id.ts",
+      "sha256": "1c68eeac2edfad51272045910c3606d5613b40d01d6b93ca2b0a7798aa2a8eaf"
+    },
+    {
+      "path": "apps/api/src/common/utils/idempotency-result.ts",
+      "sha256": "d1a4eedb85df35d88d416cfc7f768b85b17d39061b5a3512259880217da871de"
+    },
+    {
+      "path": "apps/api/src/common/utils/time.ts",
+      "sha256": "a87b19184c6d88f71f9d34555b78116ad5cb4c0383fa573c794acb220e3ee015"
+    },
+    {
+      "path": "apps/api/src/common/errors/api-error.ts",
+      "sha256": "7b3f3f1b5c9df0848942a2354ddc357df6389cfd2673e086fd7ed2dd1116d00f"
+    },
+    {
+      "path": "apps/api/src/common/events/application-events.ts",
+      "sha256": "8d81170e4a2d2433882bd3343e5edcd682abf1bd52d2609aaa1fb8b8fca7766e"
+    },
+    {
+      "path": "apps/api/src/common/events/events.module.ts",
+      "sha256": "bcadad91f5ed28e7aff80d2614f31bd16bfa4408c11e8b2dbc794b48e1aae37e"
+    },
+    {
+      "path": "apps/api/src/common/events/event-publisher.service.ts",
+      "sha256": "fb4f1f3f207c6ec470d0f8aed7ced056f50d35d47ac6b18d498fa7dab5421696"
+    },
+    {
+      "path": "apps/api/src/modules/battle/battle.service.ts",
+      "sha256": "3c2e5754f3645b5954f8af5baf3b4afa6feb0dd086ad10f6dbcd10a38c86b1cd"
+    },
+    {
+      "path": "apps/api/src/modules/battle/battle.errors.ts",
+      "sha256": "07e0fd5782c436397490e5f72f5f6adae8be0f6d4d0d6480a30d1d89b9cd15d1"
+    },
+    {
+      "path": "apps/api/src/modules/battle/battle.module.ts",
+      "sha256": "dfbb59316878089b60cf71fb52dc5da1adbaf1d4f37d6fc1ebd7de2e448492ce"
+    },
+    {
+      "path": "apps/api/src/modules/battle/battle.types.ts",
+      "sha256": "c909a2dbad8551a362f60b58863cbae43ca94c6e951d4e99959c2b0a8de851ae"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-quote-headers.dto.ts",
+      "sha256": "d3bf73b7be109e466de82f90afa82fd1be1d6bc82a45ccfb02b5e3bc9cd71af5"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-message-response.dto.ts",
+      "sha256": "53dc698c69d182573eb5fc336a10d80f88b5f1532bfd6b9c483b5d283108a973"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/replace-role-card-request.dto.ts",
+      "sha256": "23020095213f01be7710f3d3453b6a067135d20d2cecb0e7acebc59b358222b9"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/list-battle-messages-params.dto.ts",
+      "sha256": "39b855102e4c8c6139b9c61f75f717f56233e098df8ccd6901de8ed6ac0ab73e"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/role-card-response.dto.ts",
+      "sha256": "3bc4207e12d167a5258ffbfb7adeed8c3480bf186f47b1c8d969d8cdf167d943"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/get-battle-dialog-params.dto.ts",
+      "sha256": "7fc7263c33326de5d69bf68b6c45e29da5e170bf3d2bf14bb5129ac67dad1d37"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/weak-spot.dto.ts",
+      "sha256": "c9b61b128e95d26f634fb2fc5a21b3a74c91ea3a08ebc40c36b507c9a633c74e"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-quote-request.dto.ts",
+      "sha256": "b9a7daf0241d3de9a7e254e93a8efc2d57d527478dd488100b12a3a8bc41f726"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/list-battle-messages-query.dto.ts",
+      "sha256": "7753d9d912bb3de9667dc61bd19eb25c5349c1193d2ef93063038444aa7c39b0"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-mode.dto.ts",
+      "sha256": "890d44a38e94a25f79ca4ad527e02e11140377dcf9b16dcbed745f7d0c58445c"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/turn-response.dto.ts",
+      "sha256": "262853e45be0d998436fe0f538b59f02140459e036a44842a89c7058029d0056"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-author.dto.ts",
+      "sha256": "afd31871f821b53ddfbaf0117f9189ca90c0246438299a74a82f179bb1cdbdba"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-message-headers.dto.ts",
+      "sha256": "312a828061aa9b5cd99a64db2f5d625fc7e4449935ca59887f746ecab5d53da5"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-message-list-response.dto.ts",
+      "sha256": "f2e0fd487b4fbf4bea31b38bfaf568674e67ce74828ce73973614709270e0f2f"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-dialog-response.dto.ts",
+      "sha256": "280b1675afdcd3ac2ab0f2ea18445d303a42acfba3250fb401c57eac2b619fa8"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-message-params.dto.ts",
+      "sha256": "fc60691dfa084322d561cee808d98e911cad1bc2a4b55c6780ae487e5b2239ab"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/replace-owner-role-card-params.dto.ts",
+      "sha256": "c0595e4b29e306bcb1975179d7c4f8455f4135f5684d56d21b00fd7fdf4b9110"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-quote-params.dto.ts",
+      "sha256": "2d24c4340238092d28dafa7a2593ad96a2e3d3fcede7442910bca1a0dc8cc3d1"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/create-battle-message-request.dto.ts",
+      "sha256": "82547e6e8c4608e9d53e9f13795d1ddd64565909d797d39cfcdd99fa469018d2"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/battle-origin.dto.ts",
+      "sha256": "1083b9ea8786764c0be615948be0d8e39f77d67e1f8700ea78e165b6facb0b5b"
+    },
+    {
+      "path": "apps/api/src/modules/battle/dto/get-owner-role-card-params.dto.ts",
+      "sha256": "9bb06f337d21bc8b000fa1e8d2bd99176fd3b67eea51323e2926ef169ab41054"
+    },
+    {
+      "path": "apps/api/src/modules/battle/controllers/user-battle.controller.ts",
+      "sha256": "43430cbe1ef32802c9e62b7e7653542ea593a99682337ce220539266bf1edac5"
+    },
+    {
+      "path": "apps/api/src/modules/battle/controllers/owner-battle.controller.ts",
+      "sha256": "540d416926c7ad3a3b933ff848983f7f1f2d184954eaf886789fda80c429758e"
+    },
+    {
+      "path": "apps/api/src/modules/battle/helpers/damage.ts",
+      "sha256": "6d24a1eb0452127febd4f35c871f61b0c67e5a93a269cb45e7fa321ca331d740"
+    },
+    {
+      "path": "apps/api/src/modules/battle/helpers/message-fields.ts",
+      "sha256": "1f27151a5122677a16a6b585e606ebf5cdd720d721fe25f351530df44316372f"
+    },
+    {
+      "path": "apps/api/src/modules/battle/services/battle-store.service.ts",
+      "sha256": "8824b6a79749c176676c0a7ec1c780152617f0dd692b4e3940e2df930e38cbb7"
+    },
+    {
+      "path": "apps/api/src/modules/battle/services/turn.service.ts",
+      "sha256": "92e112b1bc21db3573408493d0d401d36aa6c89d713b7de9c021ab4864809a40"
+    },
+    {
+      "path": "apps/api/src/modules/battle/services/turn-recovery.service.ts",
+      "sha256": "bdf57d45b725e255ad238a582d1adb093dd2cdad75c4df53e495f192b0258515"
+    },
+    {
+      "path": "apps/api/src/modules/payments/payments.types.ts",
+      "sha256": "24211627d11f3e2b67125db08234ef3b0face2ba3f34e53dc7904b773f5bec69"
+    },
+    {
+      "path": "apps/api/src/modules/payments/payments.module.ts",
+      "sha256": "54f2340ff0d226b393e18fa7592f8a8f9d7aea260321840d2fdb8cfdc2753ef0"
+    },
+    {
+      "path": "apps/api/src/modules/payments/payments.errors.ts",
+      "sha256": "5ef21d4796edcf4da0eb4982585bf15b93b7017652a3477591d0930db2e26cff"
+    },
+    {
+      "path": "apps/api/src/modules/payments/payments.service.ts",
+      "sha256": "943e2f921dff3027ec7c6907b91cbc91299590b676cf01c826287ab920142cdf"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/list-owner-support-tickets-query.dto.ts",
+      "sha256": "bdc0fb0ddc60c2ecfe2fee73f112a88385a4f90579af6f9f87c41b8376da7796"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/invoice-response.dto.ts",
+      "sha256": "c763de681bfe4cb25018619dca0364d1b3e26d157dd5e59e58a736b25d6f3c8e"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/payment-list-response.dto.ts",
+      "sha256": "5a4b9a6dbccc8a80bb4aab9e8debad28e57729a78b7675a78f8c548bf55230e9"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/list-owner-payments-query.dto.ts",
+      "sha256": "92e7b9f8200b5c9a752c15b13c4b7654733173f5cdf3428ce461b2e801db6f95"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/create-invoice-headers.dto.ts",
+      "sha256": "23841af8cd41162bba3af91523f046b1088903ecbc39ffc6276735bff0295a64"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/create-invoice-params.dto.ts",
+      "sha256": "22a50f9c97d9fab0bad1afe5a0053df8720afcef16c47bab118eb9fb6c55330a"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/payment-response.dto.ts",
+      "sha256": "df476b32b9879512b9dffdc8467f1f0e6e2e7b170803e79bfa8c8d0507a8548b"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/package-snapshot.dto.ts",
+      "sha256": "85596b9da971024fd411312fec3bafcf56f6dd3ea3d5b80e5f08acec77821423"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/owner-package-list-response.dto.ts",
+      "sha256": "53d156bb78e5ccb39fecc3f890de1a3bae4dace765f2a80620510dcadcd8d084"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/owner-package-response.dto.ts",
+      "sha256": "2cc8da39217430bf7f2a13b1ac18fd35c3ff4b606285d7f43dbf1a16aeed8b34"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/package-response.dto.ts",
+      "sha256": "2f6f2df053b4d0373968c0eb41a64468d35e44f866a6a9e5d3616fa227171500"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/replace-owner-package-params.dto.ts",
+      "sha256": "2a32d26ba67ea412f13c86987b701c31b1bdcbce6545fa53f214373b882c63bc"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/package-list-response.dto.ts",
+      "sha256": "0763f9c233c7c7326ea20d2f84b0713349e009e085c3127dc5af8d0dfea21f29"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/refund-request.dto.ts",
+      "sha256": "2aaaa88c06d0d6122d85df116724320ec8a7bbf719f4c78624238c3050903ff2"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/owner-package-request.dto.ts",
+      "sha256": "208cd9f39e273640114e0030599c13eb04527dbb15546deaa9f078600c8e6c7a"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/create-paraphrases-request.dto.ts",
+      "sha256": "a57b302c4d817d8a05bc734abf2177e1258716046f921bc15151cd6d76cdd6cf"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/update-support-ticket-request.dto.ts",
+      "sha256": "0e37254b8e03560816ee3d6a48e6a597e0383bcdf7eecd43474670b28d2337ba"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/support-ticket-status.dto.ts",
+      "sha256": "13bda32a5d7da785badec812674c02c4e68a85793e1364d6dd25f37db149a535"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/refund-owner-payment-params.dto.ts",
+      "sha256": "5dab97461c96e8871a04293953fe87c48bd9a88e5a6f16120fee34314ce36909"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/payment-status.dto.ts",
+      "sha256": "ee961e7ec93612e87a55695f548cd6444465653d79d0ea94f6758ad8fb57e71e"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/support-ticket-response.dto.ts",
+      "sha256": "80f1174b06c325eddc536e656d3d5f54acdae1eaa65073597b20c26db6250600"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/support-ticket-list-response.dto.ts",
+      "sha256": "55e30e203e2034b444fb186e9bcccd183c9989bc135eaecf16f5c8d3e7d71307"
+    },
+    {
+      "path": "apps/api/src/modules/payments/dto/update-owner-support-ticket-params.dto.ts",
+      "sha256": "b7790f2740d4073ce19a2247b54c1f34c5216658f38116ec436ff63a1bfb6b76"
+    },
+    {
+      "path": "apps/api/src/modules/payments/controllers/owner-payments.controller.ts",
+      "sha256": "a9bb03135c6aae9e72c6c4dd58ab391b2b9085aa3e98575374ed23d68311d5b9"
+    },
+    {
+      "path": "apps/api/src/modules/payments/controllers/user-payments.controller.ts",
+      "sha256": "66d4f8ba6a3734680cfe365732d0d0005ab87af968870dde8d5a88041ddf5533"
+    },
+    {
+      "path": "apps/api/src/modules/payments/helpers/payment-confirmation.ts",
+      "sha256": "b8ea0e0e5e7402c65548ebce2510b8509fa89946d5550884d3c8024087bc9c6f"
+    },
+    {
+      "path": "apps/api/src/modules/payments/services/payment-reconciliation.service.ts",
+      "sha256": "2e8679f9cfb9ff85a2511092888163a3f77001001e2158cf66321046c33f4b82"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/tasks.types.ts",
+      "sha256": "e6524c9112b5bfac686d3204cac6d0b9e810ac79fefa7f5bb0dc09e0aa5a0bb5"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/tasks.errors.ts",
+      "sha256": "1464c3bc10b4a8360a142b2af3d4993cab91e0e075b7fab96fee2ef8bbc903b1"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/tasks.module.ts",
+      "sha256": "36745427027e07ecedb02f6c1fd8c5b9ee3d972fad7f488623efe1cded158394"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/tasks.service.ts",
+      "sha256": "6c18b10f7e74b3a891d88db7d0dce912fda00e4a3c1da130a8f7f4a25bb3ebe0"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/surrender-period-params.dto.ts",
+      "sha256": "5a41c096f505d0feab5362fd5f7649a92001d2b957effe68546dfedc5fdd300f"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-action-response.dto.ts",
+      "sha256": "8203e83b2d9e56980d3162bb5b147b979658e5f271fe7613402d523d497ec506"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/retry-period-params.dto.ts",
+      "sha256": "82ca256a63343a912c0de86419b7dc576dd825bd213035277ee6acf89574678d"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/list-task-periods-params.dto.ts",
+      "sha256": "313e44b010b56e1ebcfb1ed3b445e3243f1a044989fddac6d5604aae6dfc9730"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/list-tasks-query.dto.ts",
+      "sha256": "32a77035e7a835e45d3ba0636c9f5f26602e1e454b7de3b423795292776548fd"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-list-response.dto.ts",
+      "sha256": "ff950c254100043b408f2767a571b69a83ac861c026085448094cf2d8e7a80ae"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/check-in-answer.dto.ts",
+      "sha256": "23ec28fc4be0c5bf9f42af5eb0419ce3f114110029baca040dce3109fdf3ebd5"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/delete-task-params.dto.ts",
+      "sha256": "2cc186366f4b0657badf69d056d6b486de3c34b6c53b23ac45f324f1f51ef80b"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/period-status.dto.ts",
+      "sha256": "7879bd81f1d08974e558546b6f65d63aca0f030526bb41782ee9770812853cf0"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/period-action-response.dto.ts",
+      "sha256": "bc19b84dde00adf0a8026ff31ed0a6c3029dd5c5ce99dd3ecda3ed0ff6e4cbc1"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-response.dto.ts",
+      "sha256": "42e36ff9418cf7a34d8ebb37b466f435464c5a26dba590449f23731abfa8ed87"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/recurrence.dto.ts",
+      "sha256": "d710f808edb7ea381c3abd3ea2861e8cdfe56c3259d7b77c103f65b4ec9807b1"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-status.dto.ts",
+      "sha256": "dff9a08c693d0c983dc573b7d0a9ef6fa1ba8be009af36870bef7a40c7d19be3"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-kind.dto.ts",
+      "sha256": "3c099b93a07f754c8eaf45e8c60e30aaeba510fa302dab520039c800bd6fdc1e"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/list-task-periods-query.dto.ts",
+      "sha256": "884bd1a9b6f28237dc95314cde3ec46943176d3b0c2a4954505c82d91c58c2e6"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/extend-period-params.dto.ts",
+      "sha256": "d5de5d7fabc46b5dc4662465968f61bf9b034290e57f395816ebcd39711af1e2"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/create-task-request.dto.ts",
+      "sha256": "9ddddf65da3e1c9b2d05871e67c9f6d0d99e3dce6ae8af77d0bb2f7988998cd4"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/period-closed-by.dto.ts",
+      "sha256": "83bbf17c73af7f858de3a2369cd1357cb4f3b0fb9eb305e9478a72fe037892ca"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/period-list-response.dto.ts",
+      "sha256": "2cba9b8d89cbf445a11aa71869ac1613d75da241e7082ff367bfba2a66e9dae5"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/complete-period-params.dto.ts",
+      "sha256": "6e5dec84fbbfa42c575b13f9381bfcb80956c5653e5b2e09c5d51b34b0e2e636"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/update-task-params.dto.ts",
+      "sha256": "56162768699ced7ca7a3dd976b0fd37d56ca8fc69713f4fdfbf801cc40431bb7"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/update-task-request.dto.ts",
+      "sha256": "b07b5bbda4e24284da095720cd026309d3c57f2f88727e5147fb4ce382849ffe"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/task-size.dto.ts",
+      "sha256": "a61943ac6e6ddcfd2d44172b6fba61c27dfac15c8a44ff693caca17e2c969654"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/check-in-answer-request.dto.ts",
+      "sha256": "c6b344ed5fa1e3b3dfcc46fefc77cb4cab3d5703343e735f0dbe4ba2dcda33a6"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/get-task-params.dto.ts",
+      "sha256": "df9a282f28707c873a2b1773c7004982a8e0e7d84bbc203cd4b8456a35004280"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/dto/period-response.dto.ts",
+      "sha256": "2156314efa8599863b732fa647c47d30d8e698a02caf6b9a3e369d1a7f719beb"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/controllers/user-tasks.controller.ts",
+      "sha256": "92334c767560f0ff41ce9fa2a22b387737fc85b72cefe292ca15da3f25dbab1a"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/services/deadline-sweeper.service.ts",
+      "sha256": "6eb1b30f591c65142bc2bb22b093b890b0a42d9a33742261cc3d61320c6836c4"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/services/recurrence.service.ts",
+      "sha256": "fd9e92aa935f1176cb637782b41c1293ee2ca971b34971c1c03ca183c8b68edd"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/services/task-reader.service.ts",
+      "sha256": "30795ba7f12cde73b9a3a5800b36b18f8220b53bcf1fd18f6d7a7923d85123e9"
+    },
+    {
+      "path": "apps/api/src/modules/tasks/services/periods.service.ts",
+      "sha256": "b1a370e35e0efeef21eaf36264a49f8c906b9650d71ec6a79e0846ec29d513bb"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/strikes.types.ts",
+      "sha256": "0f7be6187ec0412b6569a3f9168d64ad1fb0df945105f68840e97c18ea18362b"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/strikes.module.ts",
+      "sha256": "3d65def90159adac3090f22962cdcb22ffa8e84c9738d51cfa64efd695212c39"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/strikes.errors.ts",
+      "sha256": "141b8dcdd6a62e0496264e884d19ec3c872051e17bbfab5d4fb7430e97fe2f40"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/strikes.service.ts",
+      "sha256": "9ea54bdbd97ab3f28966463bb90d0d30ff0a50dc8997f3add3be360dbd5c93e8"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-operation-response.dto.ts",
+      "sha256": "232a52a21a62a71ee768776ef5fb9153a6f60dc744228ffaa02c886eab65768d"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-operation-list-response.dto.ts",
+      "sha256": "95af9bcd26515773fba2e1adfcfb6b887e0e849f151a86585cd6a56ba4e571cb"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/owner-strike-lot-response.dto.ts",
+      "sha256": "8bf4419ada5c7255964654a1289c13cd4d5ade5121b743ab0bc0958a3d21e749"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/create-strike-operation-request.dto.ts",
+      "sha256": "0f81e0323af2c094cdd520aa850e771932e96a62944f6ac2b2c618f5da34b3b7"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-operation-type.dto.ts",
+      "sha256": "bdb594263b692bb8896e99c62d7699765c32bdffeeb32c2e394bff583dea56f0"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/get-owner-user-strikes-params.dto.ts",
+      "sha256": "7e45d7b710e3081072d60dd4c4ea25899a490fb1b843674df03984afeeac1ce4"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/list-owner-user-strike-operations-params.dto.ts",
+      "sha256": "5200e7bf57e65228cbfe69e754f2121754ed2a7b605c24963050e1ac3eab89f1"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/list-my-strike-operations-query.dto.ts",
+      "sha256": "4511474a42d4db8c469cf11c10e3d0e2ef99725619e09341a7823d37e24187d6"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-balance-response.dto.ts",
+      "sha256": "6e1401bef6308e60fcab3416ce30313423b8438afa2a6513386759ddfd59e92c"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/create-owner-strike-operation-params.dto.ts",
+      "sha256": "f36f84d6862695bf2162c364e07f19d055412a02d62afe5aae65a0e65b81d5a0"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/create-owner-strike-operation-headers.dto.ts",
+      "sha256": "ebed6dfa454cdfcf8e09db5b2eee80868b287c0246c63dfef5b5d1eb465a8db0"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/list-owner-user-strike-operations-query.dto.ts",
+      "sha256": "847e2aa549c1ea780f63ba1e0a0a02369e8f070719ea29edaea08c2d86735a38"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/owner-strike-balance-response.dto.ts",
+      "sha256": "edd62659460c435c0b4cb599276bf4af9a28a3ea16a1f1daeb4a420628f0deec"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-lot-response.dto.ts",
+      "sha256": "89e3765bda30a237900d5593cbc9e71ffb362061aa73ff42aaea34c376fe2aec"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/dto/strike-lot-source.dto.ts",
+      "sha256": "a96a89f981cc98959f0a22b75ec00816fdac91048a2f5b16325fef6f2e2e07bd"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/controllers/owner-strikes.controller.ts",
+      "sha256": "5550606d0ca4a62c35ce47995d514a7f87910dbd6c38b72ced49f0d45f34e8e8"
+    },
+    {
+      "path": "apps/api/src/modules/strikes/controllers/user-strikes.controller.ts",
+      "sha256": "17e9a43f90f21a7d8f9e0528f4359a34f78798a7c826b5634e83f65411029715"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/sharing.service.ts",
+      "sha256": "247de26aeb59980c55252605f67361ce8dc4aff3edd1aa98f7dc79cdaaa18ed4"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/sharing.types.ts",
+      "sha256": "2e6ff356d54b7bfe1fd3ac72bbba2571eb1e1ae5bdb60f15a2889f1b6e7d9290"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/sharing.errors.ts",
+      "sha256": "db8344c8a0f99f43aa5777b2739decf45e17b99b881e5a351c0276cf75747796"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/sharing.module.ts",
+      "sha256": "e6933883e98d9be0964293b9359841229a1e310c0c0a4816d8645d32047d1041"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/dto/create-share-request.dto.ts",
+      "sha256": "844e9572d73f2558fd73e905676016695b5c77e0009f242887a3202d026f1f11"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/dto/share-kind.dto.ts",
+      "sha256": "5aeeaeb609760825b633d8de9d425d87a28f8a079e1c24cb38c69e4a39aa28dc"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/dto/share-response.dto.ts",
+      "sha256": "ec77c7720fd38a7ba7d270b94d587eb34eaa3a38210d2f412b6ba56422deb2ae"
+    },
+    {
+      "path": "apps/api/src/modules/sharing/controllers/user-sharing.controller.ts",
+      "sha256": "70a14b45000a6c747453ce5c9de7c738a655f26e0e76e439c42dc981a756f185"
+    },
+    {
+      "path": "apps/api/src/modules/respect/respect.service.ts",
+      "sha256": "d1c261fc4e3a110f02ccb3093661f48308f18bbe4a9ff6cdc8b4a1bd8a85dd44"
+    },
+    {
+      "path": "apps/api/src/modules/respect/respect.module.ts",
+      "sha256": "85815252c10d9e7150c3a151937155d35006bf738179c1d81de2c469c5935e0d"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/phrases.types.ts",
+      "sha256": "1f4522fa5d95443b466fb10c300d7572480c809b666b3f6e69237e4c05b0e871"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/phrases.errors.ts",
+      "sha256": "46dcd886e2970a464c23656ff19de21848aa095536a6aba5bddd2f4c5e9d1d01"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/phrases.module.ts",
+      "sha256": "755f9af42299d2e74884fb45208af11f6713970d277243e9d077c03f0e4b5063"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/phrases.service.ts",
+      "sha256": "318f078f410102abe25127c2b5d1506087cacc3a9bdecdb459f81f05e1196a21"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/rating.dto.ts",
+      "sha256": "29d29dced0c871a53844ff9948d95e507988a8e2b2fcc5a401c22552bc220a54"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/update-owner-phrase-params.dto.ts",
+      "sha256": "7e40c54349a19357835ea69d24fc7d10da34daea372a495349f40ff8b14465c4"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/list-owner-phrases-query.dto.ts",
+      "sha256": "f5c837fc25097dbbd3503a403f7c12ae7b972f2e4aa43b1e8f6c96d97d7e5c75"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-combo.dto.ts",
+      "sha256": "48924add72bcf8cd14304162172dfc332310cdeb0051f6b433be098de2bbf198"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-list-response.dto.ts",
+      "sha256": "6c3bc056f6faeb2798e5958e5ef0604e853ddad09a69bdf97f314459b3dc9145"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-defeat-level.dto.ts",
+      "sha256": "6b2f70efafc252d73b5d4abd94ec20e828e417d5a646e325ad0d2b16beec6b08"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-items-response.dto.ts",
+      "sha256": "9a2a20daa0baf685f6753db17868fad0dba97a6817728067ad29669128cedbdd"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/rate-feed-message-request.dto.ts",
+      "sha256": "b152d3a7c53de6cb7c26a7153080fd9d8d8cae591c482671fdea9bab4269a2d0"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/create-owner-paraphrases-params.dto.ts",
+      "sha256": "256f2548d4de0098c108e4cecb270c1c314fca231002e8698691f78004303eba"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/create-phrase-request.dto.ts",
+      "sha256": "f8026e53341dc4c27c9a92db9b088bdbae86ddeb2fc689c285f7dac06de11b76"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-category.dto.ts",
+      "sha256": "ce75c9705b4be9d1aea4d5d7bd29bc276548d20c28deff51521e047e17c0c267"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-status.dto.ts",
+      "sha256": "2547d1c9f102ab35d3f456910111b816405fd4394ac1e373f22db3a15d8a97e5"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-source.dto.ts",
+      "sha256": "cb4aea162d9b30189861940f9c87894e0866b3088424fd65de5e3a8eaa4e66b0"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/update-phrase-request.dto.ts",
+      "sha256": "04571b2c75df4f5e2bff05bbd6911c28a89a54374001273f964d952476955413"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-coverage-item.dto.ts",
+      "sha256": "2fd6507486fc5e44c52bee0dbbcbc17886b8364a3059999e5d0372423f5f954a"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-response.dto.ts",
+      "sha256": "5c97fc0b711deefdf74676033cff8a622fd956c42567e9cfcd63910bc86aaaa2"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-role.dto.ts",
+      "sha256": "ff02b07516640be01ec715a41c7ec8f6f55d6d35f08ba1e0a30dd9917cdb4f18"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/dto/phrase-coverage-response.dto.ts",
+      "sha256": "9d97ad638212db8ee659ac02447e155c2a013c5be42f9bb163ea3d613129105e"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/controllers/owner-phrases.controller.ts",
+      "sha256": "593ace8f0e8435b4284d1343bfedbdb3619a59a8b81735b14b3a4eaee4dd004c"
+    },
+    {
+      "path": "apps/api/src/modules/phrases/helpers/render.ts",
+      "sha256": "2bef8afaa175f712e3b499fda890b3ad2a23af11248d765caaf24c44c3d483df"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/leaderboard.module.ts",
+      "sha256": "495add46257cadfc79e557cf2b7ac6345d08f46a097091ad6356a766c3b233b8"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/leaderboard.types.ts",
+      "sha256": "244012df2296fb902e8b9c3cdb2a0f8cf62b23de54a53ee30e0e3154815b3918"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/leaderboard.service.ts",
+      "sha256": "ecc0ab88ddda7c5482314f6978100597eeecf7b6957ccf18b18cabcb5d62c1f3"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/dto/leaderboard-participation-request.dto.ts",
+      "sha256": "51e6c5245703a55556c2c690c7a2c248b5b62b9c54980d089f15e4516054b45c"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/dto/leaderboard-response.dto.ts",
+      "sha256": "78ed912c7c62a427c7e1bf79ba53ec57aca5240474b97b8606c13d44c514fbd4"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/dto/leaderboard-me.dto.ts",
+      "sha256": "bdf3d28e598aa1a3707825f26149a6c8c2e32e67f027e839470529812e53492e"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/dto/leaderboard-entry.dto.ts",
+      "sha256": "8fddc9024ec6a92fde43161130e1d0cf69b595c40130664f020cc67c65809cb6"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/dto/leaderboard-participation-response.dto.ts",
+      "sha256": "cabadf2f85d7c90fed25eef4e56bd43ff9ff0bd714f345d0f1301553a845e86f"
+    },
+    {
+      "path": "apps/api/src/modules/leaderboard/controllers/user-leaderboard.controller.ts",
+      "sha256": "7e24a9f69ef571ecacd4c1755655ef8a0ad1d5e33eababd9a44c6cbde681cb8f"
+    },
+    {
+      "path": "apps/api/src/modules/pressure/pressure.service.ts",
+      "sha256": "0fef6bf01eb6c7afdbbdefabacb13355f197d2ead0e14b7cba8cedd95e3bf116"
+    },
+    {
+      "path": "apps/api/src/modules/pressure/pressure.module.ts",
+      "sha256": "78f5f2e914279f0669010e6c29494b39ff516a2fdd34e2f043c2d28ceedc53f1"
+    },
+    {
+      "path": "apps/api/src/modules/ai/ai.service.ts",
+      "sha256": "2eed13585dda5c9d2ae2fdfbf43e5fbab06baf6f4e8d248c6cf15e1941d13482"
+    },
+    {
+      "path": "apps/api/src/modules/ai/ai.module.ts",
+      "sha256": "f23e452929d984f9120f4c7d7bad1aa40852c809b8891e01a64bf9a181240ea9"
+    },
+    {
+      "path": "apps/api/src/modules/ai/ai.errors.ts",
+      "sha256": "388c43b23d9708fb657937c9dc109c17dc03dc035c09acb82eb0fe7210b10c48"
+    },
+    {
+      "path": "apps/api/src/modules/ai/helpers/usage-cost.ts",
+      "sha256": "8942283dd546fb9cf8a6d1ff6b335f9ff2415d93ae3d3d9d239d59ec27f5b159"
+    },
+    {
+      "path": "apps/api/src/modules/ai/services/ai-provider.service.ts",
+      "sha256": "68d528483bbb40a7c968e2bb69152b871301beab70631d359c891d19bddd56c4"
+    },
+    {
+      "path": "apps/api/src/modules/users/users.service.ts",
+      "sha256": "6bc22bb7629f1ee9c975817c31fa4cff1203be1cbe6577f7dc509700d76c2b9e"
+    },
+    {
+      "path": "apps/api/src/modules/users/users.module.ts",
+      "sha256": "b7923ba5502ab540532aacbe321d8de69082f7756f872178f60be350c445de91"
+    },
+    {
+      "path": "apps/api/src/modules/users/users.errors.ts",
+      "sha256": "42f242e4b6cd31dbbbcbe1b7e074ff90f5c5421686a6cc934254dcd12fb02d27"
+    },
+    {
+      "path": "apps/api/src/modules/users/users.types.ts",
+      "sha256": "def59cb50262f1abcdd1f6aaa8f7bccfbc02d1db6de90715db46e8ab3a000062"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/role.dto.ts",
+      "sha256": "acd65d5def2f7ebf95fb10cb365a21c083ed4b8fe38f62aef927b4e45ab4ee46"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/onboarding-request.dto.ts",
+      "sha256": "484572b3cf3f85efd5111be96b45c75c1b291eadc70fe6b8c973a25866a7cd11"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/me-response.dto.ts",
+      "sha256": "89af844b95903b4a388c76aead72f0408abc22753a7cfaa09309c2f240f9995a"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/onboarding-state.dto.ts",
+      "sha256": "bdfeacaa638c1940311e45ed3ea87950d03fd4ee28e83e72ba608d89c74879a6"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/quiet-hours.dto.ts",
+      "sha256": "d1e1aa662b6ab8e827858b87e3e62ba2022da260e9459ece6028aba10ca220cf"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/reply-response.dto.ts",
+      "sha256": "6b06b7b2eb93ab5fbc12d8b1fc21f5daf8dea76091e0ea59c46b692467f67799"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/get-owner-user-params.dto.ts",
+      "sha256": "32702c13b45b4745361da2d7fb930b96ac102e7608ba667772b8aba01fcdb56e"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/onboarding-response.dto.ts",
+      "sha256": "051d60ccc0b6f567aa72e479622fa1960a959e57f53211c96dd315105cb838b1"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/update-me-request.dto.ts",
+      "sha256": "184cb7189ec604b348b1704a6261622d8cbbbb89fdb4bcd9b7bb34f3c3cf09a0"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/owner-user-response.dto.ts",
+      "sha256": "e37c6843b4357dba17c9df2dd126e3b10bc77b4ae7ad8e923e06a283af4a43ab"
+    },
+    {
+      "path": "apps/api/src/modules/users/dto/gender.dto.ts",
+      "sha256": "7443f33895160aa8cf5551dbe252e914edd17f5c6ab1598c329b49e999e0c89e"
+    },
+    {
+      "path": "apps/api/src/modules/users/interceptors/user-activity.interceptor.ts",
+      "sha256": "aeada9302d96d253fe5f66b329d03ae8d6d63e6a4ef3a606e54d3515d42fb2c9"
+    },
+    {
+      "path": "apps/api/src/modules/users/controllers/user-users.controller.ts",
+      "sha256": "f2144d72ab403d68323e09c3e2456f9367046b4af944baaccd87fcc37b6c8881"
+    },
+    {
+      "path": "apps/api/src/modules/users/controllers/owner-users.controller.ts",
+      "sha256": "e24d83eab4cfe0c84877cecc74d5b1ab6dee1f4c0d2198619f34dcc660864eff"
+    },
+    {
+      "path": "apps/api/src/modules/users/services/account-deletion.service.ts",
+      "sha256": "d4fd0e5d814440d3779fd8c7200a4ed9b84e67f66b215de0c0f57e9f3272738a"
+    },
+    {
+      "path": "apps/api/src/modules/users/services/telegram-auth.service.ts",
+      "sha256": "8e8975373fa950b69d2c9effec1e300540461cefa64fd14a4096341cf295f3f1"
+    },
+    {
+      "path": "apps/api/src/modules/users/guards/owner.guard.ts",
+      "sha256": "8b29c0634248c6cf63cc2090b396e09a1b611945fef0d8ed9571bb43f7e3759f"
+    },
+    {
+      "path": "apps/api/src/modules/users/guards/onboarded.guard.ts",
+      "sha256": "38451464eb0ce3c1570dfc01ea5821ac8cf759dc1612da8de0ec839e56072b7a"
+    },
+    {
+      "path": "apps/api/src/modules/users/guards/telegram-auth.guard.ts",
+      "sha256": "e3be34211523b441d102997cd050b9d5e342a1668a7e7ecbc0d33233a764fe0c"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/delivery.service.ts",
+      "sha256": "e7561686ecc40e39b91779b43ac501d9b1d00f1f528ec775f6176a2c5c5efdeb"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/delivery.types.ts",
+      "sha256": "73c6cc2f2cf0acff99318cf7f63c4cecf8b1760fe211d915b39fd8d0d3c7bf84"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/delivery.module.ts",
+      "sha256": "e3c2dd0f872cb5f309fac27e616931c5fe41354fee4eef3b08f6479fef58ed63"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/delivery.errors.ts",
+      "sha256": "a3deaa7b4ba432f2db923efab110a7b33ff742efbd259ba8af95cc268f4fa8e9"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/feed-message-response-check-in.dto.ts",
+      "sha256": "a6e6b3c41a9d44aad6a007aa228ec542f0bfe63ebfc9e1031ca2901faadbc854"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/answer-check-in-params.dto.ts",
+      "sha256": "60884d9d2a3caa3405128a02013fc47637f16fabc3c9bf8f89c36c9c07b16d1c"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/feed-message-response.dto.ts",
+      "sha256": "cb511669586422b8a80b72f0e657f11a63df2217c4da2e158894e450020e31a3"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/list-feed-query.dto.ts",
+      "sha256": "9ba6f330daa6e20bffe657633802ed8d6e9e2f7a88f2e4179c4e7493e589c634"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/feed-list-response.dto.ts",
+      "sha256": "425ffd5c75b0db4d49318554758bde12a870507503d52424c524a1ebeed515c9"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/dto/rate-feed-message-params.dto.ts",
+      "sha256": "c9e9dc1486c92a4eb41a9c99045e28ae3f1cd5b8f8be8c871f777bd5c8994e98"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/controllers/user-delivery.controller.ts",
+      "sha256": "f8ad9c5c0224659dbcfd67c5404478b9730e324e6d4e95bebe50da03ed4312be"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/services/feed.service.ts",
+      "sha256": "238597f396e0be96381556c7bad73e059158819d5d64819e1aa1ede35280ca07"
+    },
+    {
+      "path": "apps/api/src/modules/delivery/services/dispatcher.service.ts",
+      "sha256": "6554bc40dcf07ce3a6760f40818ee955a9b8f090d5953b22fb8084c6f2782207"
+    },
+    {
+      "path": "apps/api/src/modules/bot/bot.service.ts",
+      "sha256": "8ef250b39a9e8d7be2f75e97e3788107dfe19c656f52100cf5e8d84990797bd1"
+    },
+    {
+      "path": "apps/api/src/modules/bot/bot.errors.ts",
+      "sha256": "c18f36f4059267f1f29593fc398eb8bd9dea0a622c0b462aee1410d171e5787e"
+    },
+    {
+      "path": "apps/api/src/modules/bot/bot.module.ts",
+      "sha256": "db4932027747f5972bc20ff0cc88b2d395dd75608ee808dcde1c32cdaf8f9fee"
+    },
+    {
+      "path": "apps/api/src/modules/bot/bot.types.ts",
+      "sha256": "9482c783a3b84e126422a1a17466493ae4c2e5aec301bb3b996b64351e752e0a"
+    },
+    {
+      "path": "apps/api/src/modules/bot/dto/webhook-ack.dto.ts",
+      "sha256": "1121187fd253c32737cdbd2e457d7a0957cbea32af1a4451842550bab067bd97"
+    },
+    {
+      "path": "apps/api/src/modules/bot/dto/telegram-update.dto.ts",
+      "sha256": "9f8a659a2d1f9c69bc5ae52cb70d7795dd59bae14ba02afac680dbb4bd6828e6"
+    },
+    {
+      "path": "apps/api/src/modules/bot/controllers/webhook-bot.controller.ts",
+      "sha256": "241139be80becdfd21821a3fd55c531941bd68042c43128f2f5357966558bf4c"
+    },
+    {
+      "path": "apps/api/src/modules/bot/services/telegram-update-receiver.service.ts",
+      "sha256": "b7a080d3cb21b38344a89d7b93fd317dc3a2ad1c03724479c62ce9eb5c5d669d"
+    },
+    {
+      "path": "apps/api/src/modules/bot/services/telegram-client.service.ts",
+      "sha256": "b1cb1ed5d997390c6800ee9a7fcb9927b6011340f1e9ca205885a6f176758674"
+    },
+    {
+      "path": "apps/api/src/modules/bot/services/telegram-client.module.ts",
+      "sha256": "8ed5ba2dbb01fb7410721e43eca81873ca7e48c095db562d83e99463aa65a898"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/analytics.module.ts",
+      "sha256": "2a6e34f043f79354126397136461363a49a1a741ca90626664c762ed0c3ff547"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/analytics.service.ts",
+      "sha256": "af54fa56ab9540aeace5cf5f9538f20c424f0780cc5c83bfe940e16e7bea7631"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/analytics.types.ts",
+      "sha256": "ba06349ea258cc0775668a9550fd5586927def96f7432c6affee7d6c707d051f"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/game-settings-request-battle-coefficients.dto.ts",
+      "sha256": "47871fd12922cd308a99af2d5f77b83337784414af508f2f5874d7500b85e460"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/list-owner-journal-query.dto.ts",
+      "sha256": "b8deceac73e765b528aa033c759edc5f51bfa68958136679495009c64b1acf93"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/other-name.dto.ts",
+      "sha256": "cf77050fbce5a5012b14d1694c1c1604088969961c0f9c48a4c6e6f843707da0"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/metrics-response.dto.ts",
+      "sha256": "31430cf989acd307eed8b5b8de37ab4d80d0eb1627dc3befa4a34cd5999f0610"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/get-owner-metrics-query.dto.ts",
+      "sha256": "2828e83790445eada7fa81d96343daf7fd62f65e7963908f73fb9c3ed1a17ecc"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/owner-action-type.dto.ts",
+      "sha256": "2477d295f619607dea9d1c28b0d2ec072bb02a13daaa7cd3f81b3ea2b3c351b8"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/game-settings-request-bandit-params.dto.ts",
+      "sha256": "4c2c7eac1ef44647dd2b4e5e00386bf2ca2188d43c3377035ec650d9e9e03979"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/owner-journal-entry.dto.ts",
+      "sha256": "bc25132bcb76099dacf2e05fae297731db8c4265b5c06a9b64aee9fe11e4f367"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/owner-journal-list-response.dto.ts",
+      "sha256": "d0e8430c688a64180ce8f59cec0a196fbf1b9a09809f26b1f8075898e5b32bd0"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/game-settings-response.dto.ts",
+      "sha256": "f672d437e22a96359bc93003a540da9c23f99f8da474c131b8ae8915057b2d54"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/dto/game-settings-request.dto.ts",
+      "sha256": "d5ea13951b142975e55f10dd599030bffbc00b409f0928d005b2b9f8e93ab2d0"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/controllers/owner-analytics.controller.ts",
+      "sha256": "d601af1c8a0ce2f5d4febf6692a318504b16bc7f01252a0260091bccf79546c1"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/listeners/analytics-events.listener.ts",
+      "sha256": "322ce6ad0a6b641b619d439dbf73b12d2f61ca30f551b2001514cc34f8b065df"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/services/user-statistics.service.ts",
+      "sha256": "4c683028ab12ff0ff24d9cfeb251b66be706862c126c48ca6b66a76773b68d15"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/services/turn-economics.service.ts",
+      "sha256": "2bfcb3f11840821480895706c322dc4e5c583a48d37d848641da093bbb519221"
+    },
+    {
+      "path": "apps/api/src/modules/analytics/services/engagement-metrics.service.ts",
+      "sha256": "8d39224e15ccec01a53a25661c3b2c63c02acb3cd009c40ba481ce1bfe4c7874"
+    },
+    {
+      "path": "apps/api/src/modules/task-notifications/task-notifications.module.ts",
+      "sha256": "0b1a51476967e15a50911df1e521ee430c7019bc9cbcd71efa472c1da5dacd5f"
+    },
+    {
+      "path": "apps/api/src/modules/task-notifications/task-notifications.service.ts",
+      "sha256": "29ebeec04559ca55b401387b182f817af5ebf6d74fe4a1acc02865aed2015e5f"
+    },
+    {
+      "path": "apps/api/src/modules/task-notifications/task-notifications.policy.ts",
+      "sha256": "00df5e3501d8ead13c54b832119b9c06be22ddd40b0f244463254038539e9dfc"
+    },
+    {
+      "path": "apps/api/src/modules/task-notifications/services/notification-context.service.ts",
+      "sha256": "887260ee8300424ecda24fc668e57b8fb6f5bc63555a290e71f97d5eacff1bc1"
+    },
+    {
+      "path": "apps/api/src/modules/task-notifications/services/notification-state.service.ts",
+      "sha256": "4f2b3dd1755a48d2bff6652449ae89f54b2b632f4f565009f05fb4d9a1a9be31"
+    },
+    {
+      "path": "scripts/docs/generate-openapi.mjs",
+      "sha256": "f4c69728060b9b2570cf461bd785fa09c5aad02f9147186f6bfa43922a847bce"
+    },
+    {
+      "path": "docs/openapi.yaml",
+      "sha256": "25ea40fd669a88d9a3e8779d5ba0d117b3d5d511da57975d0f8e58f5959284ab"
+    },
+    {
+      "path": "docs/openapi.json",
+      "sha256": "6edc1a18648e41dd14ecfc800e6421de99c55e32b7cb8abc341a8460c69b3bf7"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "581232bfef59ef67af190608edbeb4df6f07249a02af50f7692f298f8709f10a"
+    }
+  ],
+  "merged": [
+    "package.json scripts and devDependencies; main MSW retained"
+  ],
+  "deletedToMatchSource": [
+    "apps/api/test/unit/app.module.spec.ts"
+  ],
+  "lastVerifiedAt": "2026-10-24T10:50:38.513975+00:00",
+  "sourceDriftAtVerification": [],
+  "refreshedAt": "2026-10-24T10:50:38.513975+00:00",
+  "refreshedFiles": [
+    "apps/api/test/integration/social.spec.ts",
+    "apps/api/test/integration/tasks.spec.ts",
+    "apps/api/test/integration/ai.spec.ts"
+  ]
+}

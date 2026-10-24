@@ -1,8 +1,8 @@
-import type { FeedMessage, Me, Schema } from '../../api/contract';
+import type { FeedMessage, Me, CheckInAnswer } from '../../api/contract';
 import { Quote } from '../../components/Quote';
 import { formatDate } from '../taskFormat';
 
-export function TaskChecks({ items, me, pending, closed, answer }: { items: FeedMessage[]; me: Me; pending: boolean; closed: boolean; answer: (id: string, value: Schema<'CheckInAnswer'>) => Promise<void> }) {
+export function TaskChecks({ items, me, pending, closed, answer }: { items: FeedMessage[]; me: Me; pending: boolean; closed: boolean; answer: (id: string, value: CheckInAnswer) => Promise<void> }) {
   return (
     <>
       {items.map(message => (

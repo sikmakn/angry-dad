@@ -8,9 +8,9 @@
 
 ## Интеграция и доказательства
 
-Frontend реализован в отдельном worktree от незавершённого backend. [Архитектурная карта](../architecture/mvp/contract-map.md) распределяет HTTP, webhook и фоновые обязанности; [web-клиент](../../apps/web/src/api/client.ts) работает с HTTP, но текущие успешные тесты используют управляемые двойники API/Telegram. Общая сборка и проверка совместного поведения впереди.
+Frontend состыкован с фактическим backend snapshot в отдельном worktree. [Архитектурная карта](../architecture/mvp/contract-map.md) распределяет HTTP, webhook и фоновые обязанности; [web-клиент](../../apps/web/src/api/client.ts) работает с HTTP, проверены общая сборка, frontend doubles и отдельный живой сценарий Chromium → Vite → Nest → изолированная MongoDB replica set. Подробности — [отчёт стыковки](../web/api-integration.md).
 
-Реальные бот `/start`, подпись/срок initData, Stars/invoice/webhook/возвраты, сообщения по расписанию и тихие часы, ИИ и рендер/обезличивание карточек не подтверждены этим этапом. Намерение интеграций описано в [F-1](../specs/mvp/functions/F-1-start.md), [F-7](../specs/mvp/functions/F-7-notifications.md), [F-12](../specs/mvp/functions/F-12-battle-turn.md), [F-13](../specs/mvp/functions/F-13-payments.md), [F-14](../specs/mvp/functions/F-14-sharing.md). Тестовый double показывает реакцию UI, а не работу внешних платформ.
+Подпись initData проверена на настоящем Nest guard с синтетическим тестовым токеном (валидный вход и отклонение неверной подписи). Реальные бот `/start`, Telegram launch/истечение реальной сессии, Stars/invoice/webhook/возвраты, сообщения по расписанию и тихие часы, ИИ и рендер/обезличивание карточек не подтверждены этим этапом. Намерение интеграций описано в [F-1](../specs/mvp/functions/F-1-start.md), [F-7](../specs/mvp/functions/F-7-notifications.md), [F-12](../specs/mvp/functions/F-12-battle-turn.md), [F-13](../specs/mvp/functions/F-13-payments.md), [F-14](../specs/mvp/functions/F-14-sharing.md). Тестовый double показывает реакцию UI, а не работу внешних платформ.
 
 Вне Telegram без initData реальный режим не даёт вход; покупка и шеринг требуют поддерживаемой версии/метода. В MSW они выключены, данные демонстрационные и сбрасываются после reload: [режимы](../web/setup.md).
 

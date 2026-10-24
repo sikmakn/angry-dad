@@ -10,6 +10,8 @@ Telegram-бот и Mini App: NestJS API и воркер в одной кодов
 
 Процессы: `api` (HTTP Mini App и вебхук бота) и `worker` (расписание, отправка, восстановление ходов и платежей) — [A1](decisions.md#a1).
 
+Фактический HTTP-контракт по D9 экспортируется из NestJS в прежние `docs/openapi.yaml` и `docs/openapi.json`. Команды и ответственность фронтенда: [контракт API](api-contract.md).
+
 ## Сценарии
 | id | кто | что делает | модули |
 |---|---|---|---|
@@ -38,7 +40,7 @@ Telegram-бот и Mini App: NestJS API и воркер в одной кодов
 | [payments](modules.md#payments) | пакеты, счета Stars, ровно одно начисление, /paysupport | StarsPayment, Package, SupportTicket | пользователь, владелец |
 | [sharing](modules.md#sharing) | карточка-изображение, отправка в чат | — | пользователь |
 | [leaderboard](modules.md#leaderboard) | топ-100, своё место, участие | поля User | пользователь |
-| [analytics](modules.md#analytics) | события, метрики, журнал владельца, настройки игры | AnalyticsEvent, OwnerAction, GameSettings | владелец |
+| [analytics](modules.md#analytics) | события, первые события и активность по дням, метрики, журнал владельца, настройки игры | AnalyticsEvent, UserStatistics, UserActivityDay, OwnerAction, GameSettings | владелец |
 
 Логика и база расходятся: разовая задача хранится как Task с одним Period ([A4](decisions.md#a4)); уважение — поле User плюс журнал RespectChange; баланс — сумма остатков StrikeLot.
 
@@ -57,6 +59,7 @@ Telegram-бот и Mini App: NestJS API и воркер в одной кодов
 | [StarsPayment](entities/stars-payment.md), [Package](entities/package.md), [SupportTicket](entities/support-ticket.md) | платёж Stars, пакет, обращение | Payment → Package, User | владельцу, админу |
 | [AiCall](entities/ai-call.md), [DailyCounter](entities/daily-counter.md) | вызов ИИ с токенами; суточный счётчик | → User, Turn | нигде |
 | [AnalyticsEvent](entities/analytics-event.md), [OwnerAction](entities/owner-action.md) | событие метрик; действие владельца | → User | админу |
+| [UserStatistics](entities/user-statistics.md), [UserActivityDay](entities/user-activity-day.md) | первый запуск/задача; факт активности за UTC-день | → User | нигде; агрегаты владельцу |
 
 ## Внешние сервисы
 | сервис | зачем | риск |

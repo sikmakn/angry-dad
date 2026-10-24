@@ -1,7 +1,7 @@
-import type { Schema } from '../../api/contract';
+import type { Schema, Role } from '../../api/contract';
 import { Quote } from '../../components/Quote';
 
-export function BattleLog({ messages, role, busy }: { messages: Schema<'BattleMessageResponse'>[]; role: Schema<'Role'>; busy: boolean }) {
+export function BattleLog({ messages, role, busy }: { messages: Schema<'BattleMessageResponse'>[]; role: Role; busy: boolean }) {
   return (
     <div className="stack" role="log" aria-label={role === 'mother' ? 'Диалог с мамой' : 'Диалог с Батей'}>
       {messages.map(message => (

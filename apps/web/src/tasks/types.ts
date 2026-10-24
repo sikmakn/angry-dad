@@ -1,7 +1,7 @@
-import type { Schema } from '../api/contract';
+import type { Schema, TaskKind } from '../api/contract';
 
 export interface TaskScheduleDraft {
-  kind: Schema<'TaskKind'>;
+  kind: TaskKind;
   day: string;
   time: string;
   recurrence: Schema<'Recurrence'>;
