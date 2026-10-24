@@ -22,18 +22,18 @@
 ## Подставные клиенты и AI
 
 - `EXTERNAL_CLIENTS_MODE` — при значении `test` используются подставные внешние клиенты. Это не sandbox самого Telegram/Stars и не подтверждение готовности реальных интеграций.
-- `AI_API_URL`, `AI_API_KEY` — endpoint и ключ настроенного AI gateway.
-- `AI_SMART_MODEL`, `AI_FAST_MODEL` — модели групп задач: judge/actor и specificity/summary/paraphrase соответственно.
+- `AI_API_URL`, `AI_API_KEY` — полный endpoint Chat Completions и ключ OpenAI-совместимого API; по умолчанию используется Groq. Ключ нужен для реальных вызовов.
 - `AI_MODEL` — общее переопределение модели.
-- `AI_MODEL_SPECIFICITY`, `AI_MODEL_JUDGE`, `AI_MODEL_ACTOR`, `AI_MODEL_SUMMARY`, `AI_MODEL_PARAPHRASE` — переопределение отдельной задачи; приоритет выше общего и группового.
+- `AI_MODEL_SPECIFICITY`, `AI_MODEL_JUDGE`, `AI_MODEL_ACTOR`, `AI_MODEL_SUMMARY`, `AI_MODEL_PARAPHRASE` — переопределение отдельной цели; приоритет выше общего. Без переопределений используется `openai/gpt-oss-120b`. Старые `AI_SMART_MODEL` / `AI_FAST_MODEL` код не читает.
 
 ## Денежная оценка
 
 - `STARS_USD_PER_STAR` — оценка Star в USD.
-- `AI_SMART_INPUT_USD_PER_MILLION`, `AI_SMART_OUTPUT_USD_PER_MILLION` — тарифы входа/выхода SMART.
-- `AI_FAST_INPUT_USD_PER_MILLION`, `AI_FAST_OUTPUT_USD_PER_MILLION` — тарифы FAST.
+- `AI_<ЦЕЛЬ>_INPUT_USD_PER_MILLION`, `AI_<ЦЕЛЬ>_OUTPUT_USD_PER_MILLION` — цена миллиона входных/выходных токенов; цели: `SPECIFICITY`, `JUDGE`, `ACTOR`, `SUMMARY`, `PARAPHRASE`.
+- `AI_GROK_4_7_INPUT_USD_PER_MILLION`, `AI_GROK_4_7_OUTPUT_USD_PER_MILLION` — резервные тарифы ветки grok-4.7 (кодовые значения по умолчанию 2 / 6 USD).
+- `AI_GROK_4_3_INPUT_USD_PER_MILLION`, `AI_GROK_4_3_OUTPUT_USD_PER_MILLION` — резерв для остальных моделей (для имён `grok-` по умолчанию 1.25 / 2.5 USD, для прочих - 0 / 0). Это кодовые резервы, не проверенные цены провайдера. Старые `AI_SMART_*` / `AI_FAST_*` не читаются.
 
-При смене модели нужно согласовать тарифы её группы. Денежные параметры проверяются при использовании: конечное неотрицательное число, курс Stars строго положительный. Снимки курса и тарифов сохраняют историю; неизвестные расходы не заменяются нулём. Подробности: [денежная аналитика](../architecture/mvp/analytics.md#деньги-и-тарифы).
+При смене модели нужно согласовать тарифы её цели. Для модели по умолчанию нулевые резервы нужно заменить тарифами провайдера для корректного учёта. Денежные параметры проверяются при использовании: конечное неотрицательное число, курс Stars строго положительный. Снимки курса и тарифов сохраняют историю; неизвестные расходы не заменяются нулём. Подробности: [денежная аналитика](../architecture/mvp/analytics.md#деньги-и-тарифы), [реальный ИИ](integrations/ai.md).
 
 Коэффициенты боя, суточный лимит проверки задач и параметры выбора фраз — данные `GameSettings`, изменяемые owner API, а не переменные окружения. Политика уведомлений задаётся [кодом политики](../../apps/api/src/modules/task-notifications/task-notifications.policy.ts), отдельного HTTP API её настройки нет.
 

@@ -9,3 +9,5 @@
 При пустом списке есть объяснение постановки задачи, при ошибке чтения — повтор. Расписание уведомлений и реальные проверки выполняет сервер, не главная страница.
 
 Источники: [F-4](../../specs/mvp/functions/F-4-one-time-task.md), [F-6](../../specs/mvp/functions/F-6-check-ins.md), [F-8](../../specs/mvp/functions/F-8-respect.md), [макет](../../design/mvp/screens/home.html), [HomeScreen](../../../apps/web/src/tasks/HomeScreen.tsx).
+
+Таймер считает время **до ответа на уже доставленную проверку**, а не до отправки следующего уведомления. Число проверок считает сообщения, а не уникальные задачи. Источники: [NotificationCountdown](../../../apps/web/src/tasks/components/NotificationCountdown.tsx), [счётчики](../../../apps/api/src/modules/delivery/services/feed-status.service.ts).
