@@ -40,7 +40,7 @@
 | StarsPayment | Финансовые снимки и инциденты | [Payment](data/stars-payment.md) |
 | Telegram | Bot API и ограничения доставки | [Telegram](integrations/telegram.md) |
 | Stars | Внешняя оплата и возврат | [Stars](integrations/stars.md) |
-| AI gateway | Формат адаптера и пределы проверки | [AI](integrations/ai.md) |
+| OpenAI-совместимый ИИ | Провайдер, пять промптов, usage и eval | [AI](integrations/ai.md) |
 
 ## Первоисточники
 
