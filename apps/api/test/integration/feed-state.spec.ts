@@ -1,4 +1,5 @@
 import { backend, checkIn, taskPeriod, user } from '../helpers/backend';
+import { rolePhrases } from '../../src/database/role-phrases';
 import { DeliveryService } from '../../src/modules/delivery/delivery.service';
 import { TaskNotificationsService } from '../../src/modules/task-notifications/task-notifications.service';
 import { TasksService } from '../../src/modules/tasks/tasks.service';
@@ -130,7 +131,9 @@ describe('Notification read state and active counters', () => {
       expect((await delivery.get(owner._id, future._id)).needsAnswer).toBe(true);
     }
     if (answer === 'not_started') {
-      expect(result.reply).toMatch(/Даже не начал|Ноль сделано|Сборы уже|Прекрасное распределение|репетировать начало/);
+      // Ответ берётся из общего набора или из набора роли; у фраз с переменными сверяем начало до переменной.
+      const starts = [...rolePhrases.father.on_check_in_reply_not_started, ...rolePhrases.mother.on_check_in_reply_not_started].map(t => t.split('{')[0].slice(0, 10).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      expect(result.reply).toMatch(new RegExp(`Даже не начал|Ноль сделано|Сборы уже|Прекрасное распределение|репетировать начало|${starts.join('|')}`));
     }
   });
 
