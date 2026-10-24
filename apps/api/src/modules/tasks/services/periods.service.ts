@@ -102,6 +102,8 @@ export class PeriodsService {
           category,
           ...reply,
           sentAt: at,
+          // Ответ на действие самого человека он уже видел в ответе; непрочитанным остаётся только то, что пришло само (срок вышел).
+          ...(action === 'deadline' ? {} : { readAt: at }),
         }], { session });
         if (period.status === 'failed') {
           period.failMessageId = feed._id;
