@@ -24,7 +24,7 @@ export function usePurchase(me: Me) {
       return;
     }
     const timer = window.setTimeout(() => {
-      setStatus('Оплата прошла, удары ещё не пришли. Подожди и обнови баланс. Если не появились — /paysupport в боте.');
+      setStatus('Оплата прошла, но огрызнуться пока не получается. Подожди и обнови баланс. Если не появились — /paysupport в боте.');
     }, 60000);
     return () => window.clearTimeout(timer);
   }, [waiting, credited, before]);
@@ -45,7 +45,7 @@ export function usePurchase(me: Me) {
         return;
       }
       setBefore(balance.data?.balance ?? 0);
-      setStatus('Оплата в процессе. Окно оплаты Telegram открыто. Закончи платёж там, удары начислятся сами.');
+      setStatus('Оплата в процессе. Окно оплаты Telegram открыто. Закончи платёж там — возможность огрызнуться появится сама.');
       setWaiting(true);
       app.openInvoice(response.invoiceUrl, (result) => {
         if (!mounted.current) {
@@ -53,13 +53,13 @@ export function usePurchase(me: Me) {
         }
         if (result === 'cancelled' || result === 'failed') {
           setWaiting(false);
-          setStatus('Оплата не прошла. Удары не начислены, баланс прежний. Можно попробовать ещё раз.');
+          setStatus('Оплата не прошла. Попытки не добавлены, баланс прежний. Можно попробовать ещё раз.');
         } else {
-          setStatus('Платёж принят, удары в пути. Начислим в течение минуты. Второй раз платить не нужно.');
+          setStatus('Платёж принят. Огрызнуться можно будет в течение минуты. Второй раз платить не нужно.');
           void balance.refetch();
         }
       });
     } catch { /* No automatic invoice retries. */ }
   }
-  return { invoice, balance, buy, available, waiting: waiting && !credited, status: credited ? 'Удары зачислены. Можно продолжать бой.' : status };
+  return { invoice, balance, buy, available, waiting: waiting && !credited, status: credited ? `Теперь можно огрызнуться. ${me.role === 'mother' ? 'Мама' : 'Батя'} уже ждёт.` : status };
 }

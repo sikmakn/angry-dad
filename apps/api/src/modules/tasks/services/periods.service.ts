@@ -15,7 +15,7 @@ import { TaskReaderService } from './task-reader.service';
 @Injectable()
 export class PeriodsService {
   constructor(private readonly db: DatabaseService, private readonly respect: RespectService, private readonly phrases: PhrasesService, private readonly analytics: AnalyticsService, private readonly recurrence: RecurrenceService, private readonly reader: TaskReaderService, private readonly notifications: NotificationStateService) { }
-  async action(user: User, id: string, action: 'done' | 'extend' | 'surrender' | 'retry' | 'deadline', closedBy: 'done_button' | 'check_in' = 'done_button', existingSession?: ClientSession): Promise<PeriodActionResponseView> {
+  async action(user: User, id: string, action: 'done' | 'extend' | 'surrender' | 'retry' | 'deadline', closedBy: 'done_button' | 'check_in' = 'done_button', existingSession?: ClientSession, extensionDeadline?: string): Promise<PeriodActionResponseView> {
     const transition = async (session: ClientSession): Promise<PeriodActionResponseView> => {
       const period = await this.db.model('Period').findOne({
         _id: id,
@@ -48,6 +48,7 @@ export class PeriodsService {
       const at = action === 'deadline' ? period.deadline : now;
       const nextStart = task.kind === 'recurring' ? this.recurrence.nextStart(task, user, period.startsAt) : undefined;
       let category: string, delta = 0;
+      let phraseLevel: number | undefined;
       if (action === 'retry') {
         if (period.status !== 'failed' || period.retryUsed || (nextStart && (nextStart <= at || nextStart.getTime() < at.getTime() + 3600000))) {
           throw new TasksError(409, 'retry_unavailable');
@@ -59,10 +60,16 @@ export class PeriodsService {
         category = 'on_retry';
       } else if (action === 'extend') {
         const day = localDate(at, user.timeZone);
-        if (period.lastExtendedOn === day || (nextStart && period.deadline.getTime() + 3600000 > nextStart.getTime())) {
-          throw new TasksError(409, 'extension_denied', { reply: (await this.phrases.pick(user, 'on_excuse_denied', undefined, task.title, period.deadline, session)).text });
+        const newDeadline = extensionDeadline === undefined ? new Date(period.deadline.getTime() + 3600000) : new Date(extensionDeadline);
+        const extraTime = newDeadline.getTime() - period.deadline.getTime();
+        if (!Number.isFinite(newDeadline.getTime()) || extraTime <= 0 || newDeadline.getTime() > now.getTime() + 365 * 86400000) {
+          throw new TasksError(400, 'deadline_out_of_range', { reply: 'Выбери срок позже текущего, не дальше чем через 365 дней.' });
         }
-        period.deadline = new Date(period.deadline.getTime() + 3600000);
+        if (nextStart && newDeadline > nextStart) {
+          throw new TasksError(409, 'extension_denied', { reply: 'Этот период нельзя продлить дальше начала следующего. Выбери более ранний срок.' });
+        }
+        phraseLevel = extraTime <= 3600000 ? 1 : extraTime <= 86400000 ? 2 : 3;
+        period.deadline = newDeadline;
         period.lastExtendedOn = day;
         period.lastExtendedAt = at;
         category = 'on_excuse';
@@ -86,7 +93,7 @@ export class PeriodsService {
       if (period.status !== 'active') {
         period.respectDelta = result.applied;
       }
-      const reply = await this.phrases.pick(user, category, undefined, task.title, period.deadline, session);
+      const reply = await this.phrases.pick(user, category, phraseLevel, task.title, period.deadline, session);
       if (reply.text) {
         const [feed] = await this.db.model('FeedMessage').create([{
           userId: user._id,

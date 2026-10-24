@@ -15,7 +15,7 @@ export function useRead<K extends ClientOperation>(scope: string, operation: K, 
   });
 }
 
-export function usePages<K extends ClientOperation>(scope: string, operation: K, options: RequestOptions<K> = {}, enabled = true) {
+export function usePages<K extends ClientOperation>(scope: string, operation: K, options: RequestOptions<K> = {}, enabled = true, poll = false) {
   return useInfiniteQuery({
     queryKey: [scope, operation, options.path, options.query],
     queryFn: ({ signal, pageParam }) => request(operation, { ...options, signal, query: { ...(options.query as Record<string, unknown> | undefined), cursor: pageParam, limit: 100 } as Query<K> }),
@@ -24,6 +24,7 @@ export function usePages<K extends ClientOperation>(scope: string, operation: K,
     enabled,
     retry: false,
     staleTime: 10000,
+    refetchInterval: poll ? 5000 : false,
   });
 }
 

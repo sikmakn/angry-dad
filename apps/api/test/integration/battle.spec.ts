@@ -4,6 +4,7 @@ import { TurnService } from '../../src/modules/battle/services/turn.service';
 import { TurnRecoveryService } from '../../src/modules/battle/services/turn-recovery.service';
 import { StrikesService } from '../../src/modules/strikes/strikes.service';
 import { AiProvider, AiProviderFailure } from '../../src/modules/ai/services/ai-provider.service';
+import { AnalyticsService } from '../../src/modules/analytics/analytics.service';
 import { AiService } from '../../src/modules/ai/ai.service';
 
 describe('Battle reservation, context and recovery', () => {
@@ -40,6 +41,89 @@ describe('Battle reservation, context and recovery', () => {
       code: 'idempotency_key_reused',
     });
   });
+  it('awards five authority milestones plus a separate 12-point victory bonus exactly once', async () => {
+    const u = await user(h.db), battle = h.app.get(BattleService);
+    await h.app.get(StrikesService).manual(u._id, 'manual_grant', 5, 'Synthetic', uid());
+    jest.spyOn(h.app.get(AiService), 'judge').mockResolvedValue({
+      hit: 10,
+      logic: 10,
+      originality: 10,
+      corner: true,
+      weakSpotHit: null,
+    });
+    jest.spyOn(h.app.get(AiService), 'act').mockResolvedValue('Услышал.');
+    const deltas = [];
+    const keys = Array.from({ length: 5 }, uid);
+    for (const key of keys) {
+      deltas.push((await battle.turn(u, 'father', 'Аргумент', key)).result.respectDelta);
+    }
+    expect(deltas).toEqual([1, 1, 1, 1, 13]);
+    expect((await h.db.model('User').findById(u._id).lean())?.respect).toBe(29);
+    const replay = await battle.turn(u, 'father', 'Аргумент', keys[4]);
+    expect(replay.repeated).toBe(true);
+    expect((await h.db.model('User').findById(u._id).lean())?.respect).toBe(29);
+    expect((await h.db.model('BattleDialog').findOne({ userId: u._id }).lean())?.rewardedSteps).toBe(5);
+    const awards = await h.db.model('RespectChange').find({ userId: u._id }).lean();
+    expect(awards.filter(row => row.reason === 'battle_hit').reduce((sum, row) => sum + row.applied, 0)).toBe(5);
+    expect(awards.filter(row => row.reason === 'break').map(row => row.applied)).toEqual([12]);
+  });
+
+  it('pays multiple crossed milestones in one turn and cannot farm them after recovery', async () => {
+    const u = await user(h.db), battle = h.app.get(BattleService);
+    await h.app.get(StrikesService).manual(u._id, 'manual_grant', 3, 'Synthetic', uid());
+    const settings = await h.app.get(AnalyticsService).settings();
+    jest.spyOn(h.app.get(AnalyticsService), 'settings').mockResolvedValue({
+      ...settings,
+      battleCoefficients: {
+        ...settings.battleCoefficients,
+        damage: 2.8,
+      },
+    });
+    jest.spyOn(h.app.get(AiService), 'judge').mockResolvedValue({
+      hit: 10,
+      logic: 10,
+      originality: 10,
+      corner: true,
+      weakSpotHit: null,
+    });
+    jest.spyOn(h.app.get(AiService), 'act').mockResolvedValue('Услышал.');
+    const first = await battle.turn(u, 'father', 'Аргумент', uid());
+    expect(first.result.respectDelta).toBe(2);
+    await h.db.model('BattleDialog').updateOne({ userId: u._id }, {
+      $set: {
+        defeat: 0,
+        defeatAt: new Date(),
+      },
+    });
+    const repeatedProgress = await battle.turn(u, 'father', 'Другой аргумент', uid());
+    expect(repeatedProgress.result.respectDelta).toBe(0);
+    const newProgress = await battle.turn(u, 'father', 'Ещё один аргумент', uid());
+    expect(newProgress.result.respectDelta).toBe(2);
+  });
+
+  it('does not retroactively reward progress in existing dialogs without the milestone field', async () => {
+    const u = await user(h.db), battle = h.app.get(BattleService);
+    const dialog = await battle.dialog(u, 'father');
+    await h.db.model('BattleDialog').updateOne({ _id: dialog._id }, {
+      $set: {
+        defeat: 40,
+        defeatAt: new Date(),
+        defeatAtLastTurn: 40,
+      },
+      $unset: { rewardedSteps: 1 },
+    });
+    await h.app.get(StrikesService).manual(u._id, 'manual_grant', 1, 'Synthetic', uid());
+    jest.spyOn(h.app.get(AiService), 'judge').mockResolvedValue({
+      hit: 10,
+      logic: 10,
+      originality: 10,
+      corner: true,
+      weakSpotHit: null,
+    });
+    jest.spyOn(h.app.get(AiService), 'act').mockResolvedValue('Услышал.');
+    expect((await battle.turn(u, 'father', 'Аргумент', uid())).result.respectDelta).toBe(1);
+  });
+
   it('invalid AI output fails turn and refunds once; no fabricated messages', async () => {
     const u = await user(h.db), strikes = h.app.get(StrikesService), battle = h.app.get(BattleService), key = uid();
     await strikes.manual(u._id, 'manual_grant', 1, 'Synthetic', uid());

@@ -127,7 +127,11 @@ export class TurnService {
         if (!current || !exists) {
           throw new Error('Turn cancelled');
         }
-        const hit = await this.respect.apply(user._id, 'battle_hit', `${turnId}:hit`, calculation.respect, session);
+        // Milestones are paid once per dialog, even after authority recovers.
+        // Existing dialogs start from their saved progress without retroactive rewards.
+        const rewardedBefore = dialog.rewardedSteps ?? Math.floor(Math.max(dialog.defeat, dialog.defeatAtLastTurn) / 20);
+        const rewardedAfter = Math.max(rewardedBefore, Math.floor(defeatAfter / 20));
+        const hit = await this.respect.apply(user._id, 'battle_hit', `${turnId}:hit`, rewardedAfter - rewardedBefore, session);
         let respect = hit.respect, respectDelta = hit.applied;
         const broken = dialog.defeat < 100 && defeatAfter === 100 && dialog.brokenArmed;
         const newMessages: Omit<BattleMessage, '_id' | 'seq' | 'dialogId' | 'userId'>[] = [{
@@ -173,6 +177,7 @@ export class TurnService {
             defeat: defeatAfter,
             defeatAt: new Date(),
             defeatAtLastTurn: defeatAfter,
+            rewardedSteps: rewardedAfter,
             brokenArmed: broken ? false : dialog.brokenArmed,
           },
           $unset: { activeTurnId: 1 },

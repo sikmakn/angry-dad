@@ -6,7 +6,6 @@ export function battleMode(defeat: number): 'aggression' | 'defense' | 'confusio
 export function battleDamage(judge: Judge, coefficients: GameSettings['battleCoefficients']): {
   base: number;
   damage: number;
-  respect: number;
 } {
   const base = (judge.hit * 0.5 + judge.logic * 0.3 + judge.originality * 0.2) * coefficients.base;
   let damage = Math.round(base * coefficients.damage);
@@ -19,6 +18,5 @@ export function battleDamage(judge: Judge, coefficients: GameSettings['battleCoe
   return {
     base,
     damage: Math.max(0, Math.round(damage)),
-    respect: base >= 6 ? Math.floor((0.5 + 1.5 * (base - 6) / 4) * 2) / 2 : 0,
   };
 }

@@ -29,7 +29,7 @@ export function SettingsScreen({ me, deleted }: { me: Me; deleted: () => void })
               </label>
             ))}
           </div>
-          <p className="hint">Задачи и уважение останутся. Бой с каждым родителем свой: побеждённость не переносится.</p>
+          <p className="hint">Задачи и уважение останутся. Перепалка с каждым родителем своя: авторитет не переносится.</p>
         </fieldset>
         <fieldset>
           <legend>Твой пол</legend>
@@ -64,8 +64,8 @@ export function SettingsScreen({ me, deleted }: { me: Me; deleted: () => void })
       <button className="btn danger" onClick={() => setConfirm(1)}>Удалить аккаунт</button>
       {confirm > 0 && (
         <Sheet title={confirm === 1 ? 'Удалить аккаунт?' : 'Это насовсем'} close={() => setConfirm(0)}>
-          <p>{confirm === 1 ? 'Пропадут задачи, лента сообщений, бои, уважение и место в рейтинге. Батя даже не попрощается.' : 'Профиль, задачи, бои и место в рейтинге исчезнут. Вернуть их нельзя. Записи о платежах останутся.'}</p>
-          {confirm === 2 && !!balance.data?.balance && <p>{`${balance.data.balance} ударов сгорят без возврата Stars.`}</p>}
+          <p>{confirm === 1 ? 'Пропадут задачи, лента сообщений, перепалки, уважение и место в рейтинге. Батя даже не попрощается.' : 'Профиль, задачи, перепалки и место в рейтинге исчезнут. Вернуть их нельзя. Записи о платежах останутся.'}</p>
+          {confirm === 2 && !!balance.data?.balance && <p>{`Оставшиеся попытки (${balance.data.balance}) сгорят без возврата Stars.`}</p>}
           <Feedback pending={balance.isPending} error={remove.error ?? balance.error} />
           {unknown && <p role="alert" className="banner">Не удалось узнать результат удаления. Проверь интернет и обнови статус. До ответа сервера нельзя утверждать, что аккаунт сохранился.</p>}
           <button className="btn danger" disabled={remove.isPending || (confirm === 2 && !balance.data)} onClick={() => confirm === 1 ? setConfirm(2) : void deleteAccount()}>{confirm === 1 ? 'Продолжить удаление' : unknown ? 'Завершить удаление' : 'Удалить окончательно'}</button>

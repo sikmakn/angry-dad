@@ -1,4 +1,4 @@
-import { authorization, backend, eventually, taskPeriod, uid, user } from '../helpers/backend';
+import { authorization, backend, checkIn, eventually, taskPeriod, uid, user } from '../helpers/backend';
 import { StrikesService } from '../../src/modules/strikes/strikes.service';
 
 describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => {
@@ -22,6 +22,18 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   }
+  it('accepts an explicit extension deadline and rejects malformed deadlines over HTTP', async () => {
+    const u = await user(h.db), { period } = await taskPeriod(h.db, u);
+    const deadline = new Date(+period.deadline + 86400000).toISOString();
+    const result = await request(`/periods/${period._id}/extension`, u.telegramId, 'POST', { deadline });
+    expect(result.status).toBe(200);
+    expect((await result.json()).task.currentPeriod.deadline).toBe(deadline);
+    expect((await request(`/periods/${period._id}/extension`, u.telegramId, 'POST', { deadline: 'invalid' })).status).toBe(400);
+    expect((await request(`/periods/${period._id}/extension`, u.telegramId, 'POST', { deadline: '2027-02-31T12:00:00Z' })).status).toBe(400);
+    const again = await request(`/periods/${period._id}/extension`, u.telegramId, 'POST');
+    expect(again.status).toBe(200);
+    expect((await again.json()).task.currentPeriod.deadline).toBe(new Date(Date.parse(deadline) + 3600000).toISOString());
+  });
   it('unauthorized response is Problem JSON without internal details', async () => {
     const r = await request('/me');
     expect(r.status).toBe(401);
@@ -30,6 +42,27 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       type: 'urn:angry-dad:problem:unauthorized',
       title: 'unauthorized',
       status: 401,
+    });
+  });
+  it('persists read state over HTTP without treating reading as answering', async () => {
+    const owner = await user(h.db), other = await user(h.db), { period } = await taskPeriod(h.db, owner);
+    const feed = await checkIn(h.db, owner, period._id);
+    const path = `/feed/${feed._id}/read`;
+    expect((await request(path, undefined, 'PUT')).status).toBe(401);
+    expect((await request(path, other.telegramId, 'PUT')).status).toBe(404);
+    const result = await request(path, owner.telegramId, 'PUT');
+    expect(result.status).toBe(200);
+    const body = await result.json();
+    expect(body).toMatchObject({
+      readAt: expect.any(String),
+      needsAnswer: true,
+    });
+    expect((await (await request(path, owner.telegramId, 'PUT')).json()).readAt).toBe(body.readAt);
+    const list = await request('/feed?limit=1', owner.telegramId);
+    expect(await list.json()).toMatchObject({
+      unreadCount: 0,
+      unansweredCount: 1,
+      activeCount: 1,
     });
   });
   it('guest may open profile, cannot access tasks or owner endpoints; onboarding is once only', async () => {

@@ -17,7 +17,7 @@ export function RoleEditor({ me, role, card }: { me: Me; role: Role; card: Schem
         <textarea id="role-character" required value={draft.character} onChange={event => setDraft({ ...draft, character: event.target.value })} />
       </div>
       <h3>Больные места</h3>
-      <p className="hint">Больных мест не меньше 5. Изменение действует на новые ходы боя.</p>
+      <p className="hint">Больных мест не меньше 5. Изменение действует на новые ходы перепалки.</p>
       {draft.weakSpots.map((spot, index) => (
         <div className="stack" key={index}>
           <div className="field">

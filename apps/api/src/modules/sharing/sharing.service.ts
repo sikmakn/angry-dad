@@ -71,7 +71,7 @@ export class SharingService {
       if (line) {
         lines.push(line);
       }
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650"><rect width="1000" height="650" fill="#17151c"/><g fill="#f4dfb5" font-family="sans-serif"><text x="70" y="90" font-size="38">${user.role === 'mother' ? 'МАМА' : 'БАТЯ'} · ${input.kind === 'battle' ? `Побеждённость ${Math.floor(defeat!)}%` : input.kind === 'done' ? 'ЗАДАЧА СДЕЛАНА' : 'ЗАДАЧА ПРОВАЛЕНА'}</text>${lines.slice(0, 8).map((line, index) => `<text x="70" y="${170 + index * 44}" font-size="32">${escapeXml(line)}</text>`).join('')}<text x="70" y="600" font-size="24">${escapeXml(this.config.botUrl)}</text></g></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650"><rect width="1000" height="650" fill="#17151c"/><g fill="#f4dfb5" font-family="sans-serif"><text x="70" y="90" font-size="38">${user.role === 'mother' ? 'МАМА' : 'БАТЯ'} · ${input.kind === 'battle' ? `Авторитет ${Math.floor(Math.max(0, Math.min(100, 100 - defeat!)))}%` : input.kind === 'done' ? 'ЗАДАЧА СДЕЛАНА' : 'ЗАДАЧА ПРОВАЛЕНА'}</text>${lines.slice(0, 8).map((line, index) => `<text x="70" y="${170 + index * 44}" font-size="32">${escapeXml(line)}</text>`).join('')}<text x="70" y="600" font-size="24">${escapeXml(this.config.botUrl)}</text></g></svg>`;
       const png = await sharp(Buffer.from(svg)).png().toBuffer();
       const preparedMessageId = await this.telegram.prepare(user.telegramId, png);
       await this.analytics.event('share', user._id, { kind: input.kind });

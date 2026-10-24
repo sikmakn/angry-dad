@@ -14,7 +14,7 @@ export function PackageEditor({ me, pack }: { me: Me; pack: Schema<'OwnerPackage
       }}
     >
       <h3>{`Пакет ${pack.id}`}</h3>
-      {([['strikes', 'Удары'], ['priceStars', 'Цена в Stars'], ['order', 'Порядок']] as const).map(([key, label]) => (
+      {([['strikes', 'Попытки'], ['priceStars', 'Цена в Stars'], ['order', 'Порядок']] as const).map(([key, label]) => (
         <div className="field" key={key}>
           <label htmlFor={`${pack.id}-${key}`}>{label}</label>
           <input id={`${pack.id}-${key}`} type="number" min={key === 'order' ? undefined : 1} step={1} required value={draft[key]} onChange={event => setDraft({ ...draft, [key]: Number(event.target.value) })} />
@@ -28,7 +28,7 @@ export function PackageEditor({ me, pack }: { me: Me; pack: Schema<'OwnerPackage
       <button className="btn" disabled={save.isPending}>Сохранить пакет</button>
       {confirm && (
         <Sheet title="Изменить пакет?" close={() => setConfirm(false)}>
-          <p>{`${draft.strikes} ударов · ${draft.priceStars} Stars. Уже созданные счета сохранят прежнюю цену.`}</p>
+          <p>{`${draft.strikes} попыток · ${draft.priceStars} Stars. Уже созданные счета сохранят прежнюю цену.`}</p>
           <Feedback error={save.error} />
           <button type="button" className="btn danger" disabled={save.isPending} onClick={() => void submit()}>Подтвердить</button>
         </Sheet>

@@ -23,7 +23,7 @@ export function OwnerScreen({ me }: { me: Me }) {
       <div className="eyebrow">Раздел владельца</div>
       <h1 tabIndex={-1}>Кабинет</h1>
       <nav className="tabs" aria-label="Разделы владельца">
-        {([['phrases', 'Фразы'], ['roles', 'Роли и цены'], ['strikes', 'Удары'], ['metrics', 'Метрики'], ['log', 'Журнал']] as const).map(([value, label]) => (
+        {([['phrases', 'Фразы'], ['roles', 'Роли и цены'], ['strikes', 'Попытки'], ['metrics', 'Метрики'], ['log', 'Журнал']] as const).map(([value, label]) => (
           <button className={`btn small ${tab === value ? '' : 'ghost'}`} aria-current={tab === value ? 'page' : undefined} key={value} onClick={() => setTab(value)}>{label}</button>
         ))}
       </nav>

@@ -42,10 +42,13 @@ export function OwnerPhrases({ me }: { me: Me }) {
           </select>
         </div>
         <div className="field">
-          <label htmlFor="phrase-defeat">Уровень побеждённости</label>
+          <label htmlFor="phrase-defeat">Уровень авторитета</label>
           <select id="phrase-defeat" value={draft.defeatLevel} onChange={event => setDraft({ ...draft, defeatLevel: event.target.value as PhraseDefeatLevel })}>
             <option value="any">Любой</option>
-            {['1', '2', '3', '4'].map(value => <option key={value}>{value}</option>)}
+            <option value="1">Высокий</option>
+            <option value="2">Снижается</option>
+            <option value="3">Пошатнулся</option>
+            <option value="4">Почти сломлен</option>
           </select>
         </div>
         <div className="field">

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { Me } from '../api/contract';
-import { usePages, useRead } from '../hooks/useApi';
+import { usePages } from '../hooks/useApi';
+import { useNotificationCounts } from '../hooks/useNotificationCounts';
 import { useClock } from '../hooks/useClock';
 import { Feedback } from '../components/Feedback';
 import { Meter } from '../components/Meter';
+import { NotificationCountdown } from './components/NotificationCountdown';
 import { TaskSummary } from './components/TaskSummary';
 
 export function HomeScreen({ me }: { me: Me }) {
@@ -11,7 +13,7 @@ export function HomeScreen({ me }: { me: Me }) {
   const tasks = usePages(me.id, 'listTasks', { query: { status: 'active', sort: 'deadline' } });
   const closed = usePages(me.id, 'listTasks', { query: { status: 'closed' } }, showFinished);
   const stopped = usePages(me.id, 'listTasks', { query: { status: 'stopped' } }, showFinished);
-  const checks = useRead(me.id, 'listFeed', { query: { category: 'on_check_in', limit: 100 } }, true, true);
+  const notifications = useNotificationCounts(me.id);
   const now = useClock();
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } = tasks;
   useEffect(() => {
@@ -20,9 +22,7 @@ export function HomeScreen({ me }: { me: Me }) {
     }
   }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
   const items = tasks.data?.pages.flatMap(page => page.items) ?? [];
-  const latestChecks = checks.data?.items.filter((message, index, messages) => messages.findIndex(item => item.periodId === message.periodId) === index) ?? [];
-  const waiting = latestChecks.find(message => !message.checkIn?.answer && items.some(task => task.currentPeriod?.status === 'active' && task.currentPeriod.id === message.periodId));
-  const waitingTask = items.find(task => task.currentPeriod?.id === waiting?.periodId);
+  const unanswered = notifications.data?.unansweredCount ?? 0;
   const finished = [...(closed.data?.pages.flatMap(page => page.items) ?? []), ...(stopped.data?.pages.flatMap(page => page.items) ?? [])];
   return (
     <>
@@ -32,17 +32,10 @@ export function HomeScreen({ me }: { me: Me }) {
         <div className="grade ok" aria-hidden="true">{Math.floor(me.respect)}</div>
         <div className="stack">
           <Meter label="Уважение" value={me.respect} />
-          <p className="small muted">{`Выше 94 — только если сломать ${me.role === 'mother' ? 'Маму' : 'Батю'} в бою.`}</p>
+          <p className="small muted">{`Выше 94 — только если сломать ${me.role === 'mother' ? 'Маму' : 'Батю'} в перепалке.`}</p>
         </div>
       </div>
-      {waiting && waitingTask && (
-        <section className="card stack">
-          <h2>Проверка ждёт ответа</h2>
-          <p>{waiting.text}</p>
-          {waiting.checkIn?.missedAt && <p>За 15 минут ответа не было: −1 к уважению. Ответить ещё можно, снятое уважение не вернётся.</p>}
-          <a className="btn" href={`#task/${encodeURIComponent(waitingTask.id)}`}>Ответить на проверку</a>
-        </section>
-      )}
+      {unanswered > 0 && <NotificationCountdown count={unanswered} dueAt={notifications.data?.nextAnswerDueAt} />}
       <a className="btn" href="#task-new">Новая задача</a>
       <h2>{`Активные задачи · ${items.length}`}</h2>
       <Feedback pending={tasks.isPending} error={tasks.error} />

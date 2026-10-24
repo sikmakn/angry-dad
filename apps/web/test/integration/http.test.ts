@@ -38,7 +38,12 @@ describe('typed HTTP transport with MSW', () => {
     expect(called).not.toHaveBeenCalled();
   });
 
-  it.each([401, 403, 409, 429, 503])('preserves server problem and does not retry HTTP %i', async (status) => {
+  it.each([undefined, 'unauthorized', 'init_data_expired'] as const)('asks to press the bot menu button for an expired or missing login: %s', (code) => {
+    const error = new ApiError(401, code ? { status: 401, type: `urn:angry-dad:problem:${code}`, title: 'Unauthorized' } : undefined);
+    expect(errorText(error)).toContain('нажми кнопку «Открыть Батю»');
+  });
+
+  it.each([403, 409, 429, 503])('preserves server problem and does not retry HTTP %i', async (status) => {
     let calls = 0;
     server.use(http.post(`${base}/tasks`, () => {
       calls++;

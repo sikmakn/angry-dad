@@ -4,7 +4,7 @@ import { usePages } from '../../hooks/useApi';
 import { Feedback } from '../../components/Feedback';
 import { formatDate } from '../../format/date';
 
-const labels = { phrase_add: 'Добавлена фраза', phrase_toggle: 'Изменена фраза', paraphrase_generate: 'Созданы перефразы', paraphrase_review: 'Проверен перефраз', support_ticket_status_changed: 'Изменён статус обращения', role_card_edit: 'Изменена карточка роли', package_edit: 'Изменён пакет', strikes_grant: 'Начислены удары', strikes_revoke: 'Списаны удары', stars_refund: 'Возвращены Stars', settings_edit: 'Изменены настройки' };
+const labels = { phrase_add: 'Добавлена фраза', phrase_toggle: 'Изменена фраза', paraphrase_generate: 'Созданы перефразы', paraphrase_review: 'Проверен перефраз', support_ticket_status_changed: 'Изменён статус обращения', role_card_edit: 'Изменена карточка роли', package_edit: 'Изменён пакет', strikes_grant: 'Начислены попытки', strikes_revoke: 'Списаны попытки', stars_refund: 'Возвращены Stars', settings_edit: 'Изменены настройки' };
 
 export function OwnerJournal({ me }: { me: Me }) {
   const [action, setAction] = useState<OwnerActionType | ''>('');

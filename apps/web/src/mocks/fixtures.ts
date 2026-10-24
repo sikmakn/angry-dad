@@ -47,6 +47,6 @@ export const roleCards: Record<Role, Schema<'RoleCardResponse'>> = {
   mother: { role: 'mother', character: 'Давит виной', weakSpots: ['unfinished_things', 'fairness', 'fear', 'promises', 'control'].map(key => ({ key, description: 'Больное место персонажа' })) },
 };
 export const payments: Schema<'PaymentResponse'>[] = scenario === 'empty' ? [] : [{ id: 'pay_01', telegramId: 123456789, refundable: true, status: 'credited', packageSnapshot: { strikes: 3, priceStars: 39 }, paidAt: now, creditedAt: now }];
-export const tickets: Schema<'SupportTicketResponse'>[] = scenario === 'empty' ? [] : [{ id: 'st_01', telegramId: 123456789, text: 'Оплатил, ударов нет', status: 'open', at: now }];
+export const tickets: Schema<'SupportTicketResponse'>[] = scenario === 'empty' ? [] : [{ id: 'st_01', telegramId: 123456789, text: 'Оплатил, огрызнуться не могу', status: 'open', at: now }];
 export const journal: Schema<'OwnerJournalEntry'>[] = scenario === 'empty' ? [] : [{ action: 'strikes_grant', targetTelegramId: 123456789, details: { amount: 2, reason: 'Возврат по жалобе' }, at: now }];
 export const gameSettings: Schema<'GameSettingsResponse'> = { battleCoefficients: { base: 1, damage: 1, weakSpot: 1.5, crit: 1.2 }, aiDailyLimit: 50, otherNames: [], banditParams: { trialShows: 50, disableAvg: 0.4, disableVotes: 100 } };

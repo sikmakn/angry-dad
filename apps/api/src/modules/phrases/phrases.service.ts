@@ -207,23 +207,29 @@ export class PhrasesService {
         userId,
         phraseId: feed.phraseId,
       }).session(session).lean();
-      if (previous) {
-        if (previous.score !== score) {
-          throw new PhrasesError(409, 'already_rated');
-        }
+      if (previous?.score === score) {
         await this.db.model('FeedMessage').updateOne({ _id: feedId }, { $set: { rating: score } }, { session });
         return;
       }
-      await this.db.model('PhraseVote').create([{
-        userId,
-        phraseId: feed.phraseId,
-        score,
-        at: new Date(),
-      }], { session });
+      if (previous) {
+        await this.db.model('PhraseVote').updateOne({ _id: previous._id }, {
+          $set: {
+            score,
+            at: new Date(),
+          },
+        }, { session });
+      } else {
+        await this.db.model('PhraseVote').create([{
+          userId,
+          phraseId: feed.phraseId,
+          score,
+          at: new Date(),
+        }], { session });
+      }
       const phrase = await this.db.model('Phrase').findByIdAndUpdate(feed.phraseId, {
         $inc: {
-          votes: 1,
-          scoreSum: score,
+          votes: previous ? 0 : 1,
+          scoreSum: score - (previous?.score ?? 0),
         },
       }, {
         new: true,
@@ -271,7 +277,7 @@ export class PhrasesService {
     const items: PhraseCoverageResponseView['items'] = [];
     for (const role of ['father', 'mother'] as const) {
       for (const [category, minimum] of Object.entries(minimums)) {
-        const levels = ['on_reminder', 'on_check_in', 'on_absent'].includes(category) ? [1, 2, 3] : category === 'on_check_in_reply' ? [1, 2] : [undefined];
+        const levels = ['on_reminder', 'on_check_in', 'on_absent', 'on_excuse'].includes(category) ? [1, 2, 3] : category === 'on_check_in_reply' ? [1, 2] : [undefined];
         for (const level of levels) {
           for (const defeatLevel of ['any', '1', '2', '3', '4'] as const) {
             for (const combo of ['any', 'father_son', 'father_daughter', 'mother_son', 'mother_daughter'] as const) {

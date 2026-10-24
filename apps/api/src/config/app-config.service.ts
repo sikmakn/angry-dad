@@ -44,7 +44,7 @@ export class AppConfigService {
   }
 
   get aiUrl(): string {
-    return this.config.getOrThrow<string>('AI_API_URL');
+    return this.config.get<string>('AI_API_URL')?.trim() || 'https://api.groq.com/openai/v1/chat/completions';
   }
 
   get aiKey(): string {
@@ -52,17 +52,20 @@ export class AppConfigService {
   }
 
   aiModel(purpose: string): string {
-    return this.config.get<string>(`AI_MODEL_${purpose.toUpperCase()}`)?.trim() || this.config.get<string>('AI_MODEL')?.trim() || this.config.get<string>(`AI_${this.aiTier(purpose)}_MODEL`)?.trim() || (this.aiTier(purpose) === 'SMART' ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001');
+    return this.config.get<string>(`AI_MODEL_${purpose.toUpperCase()}`)?.trim() || this.config.get<string>('AI_MODEL')?.trim() || 'openai/gpt-oss-120b';
   }
 
   aiRates(purpose: string): {
     input: number;
     output: number;
   } {
-    const tier = this.aiTier(purpose);
+    const model = this.aiModel(purpose);
+    const grok = /^grok-/.test(model);
+    const expensive = /^grok-4\.7(?:$|-)/.test(model);
+    const modelKey = expensive ? 'GROK_4_7' : 'GROK_4_3';
     return {
-      input: this.money(`AI_${tier}_INPUT_USD_PER_MILLION`, tier === 'SMART' ? 3 : 1),
-      output: this.money(`AI_${tier}_OUTPUT_USD_PER_MILLION`, tier === 'SMART' ? 15 : 5),
+      input: this.money(`AI_${purpose.toUpperCase()}_INPUT_USD_PER_MILLION`, this.money(`AI_${modelKey}_INPUT_USD_PER_MILLION`, grok ? expensive ? 2 : 1.25 : 0)),
+      output: this.money(`AI_${purpose.toUpperCase()}_OUTPUT_USD_PER_MILLION`, this.money(`AI_${modelKey}_OUTPUT_USD_PER_MILLION`, grok ? expensive ? 6 : 2.5 : 0)),
     };
   }
 
@@ -70,14 +73,10 @@ export class AppConfigService {
     return this.money('STARS_USD_PER_STAR', 0.013, true);
   }
 
-  private aiTier(purpose: string): 'SMART' | 'FAST' {
-    return ['judge', 'actor'].includes(purpose) ? 'SMART' : 'FAST';
-  }
-
   private money(key: string, fallback: number, positive = false): number {
     const raw = this.config.get<string>(key);
-    const value = raw === undefined ? fallback : Number(raw);
-    if ((raw !== undefined && !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) || !Number.isFinite(value) || (positive ? value <= 0 : value < 0)) {
+    const value = raw === undefined || raw === '' ? fallback : Number(raw);
+    if ((raw !== undefined && raw !== '' && !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) || !Number.isFinite(value) || (positive ? value <= 0 : value < 0)) {
       throw new Error(`Invalid monetary configuration: ${key}`);
     }
     return value;

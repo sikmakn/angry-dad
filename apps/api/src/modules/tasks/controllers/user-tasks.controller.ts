@@ -21,6 +21,7 @@ import { PeriodListResponseDto } from '../../tasks/dto/period-list-response.dto'
 import { CompletePeriodParamsDto } from '../dto/complete-period-params.dto';
 import { PeriodActionResponseDto } from '../../tasks/dto/period-action-response.dto';
 import { ExtendPeriodParamsDto } from '../dto/extend-period-params.dto';
+import { ExtendPeriodRequestDto } from '../dto/extend-period-request.dto';
 import { SurrenderPeriodParamsDto } from '../dto/surrender-period-params.dto';
 import { RetryPeriodParamsDto } from '../dto/retry-period-params.dto';
 import { locationHeaders } from '../../../openapi/response-metadata';
@@ -317,7 +318,11 @@ export class UserTasksController {
   @HttpCode(200)
   @ApiOperation({
     operationId: 'extendPeriod',
-    summary: '«Мне нужно больше времени…»',
+    summary: 'Попросить больше времени',
+  })
+  @ApiBody({
+    type: ExtendPeriodRequestDto,
+    required: false,
   })
   @UseGuards(TelegramAuthGuard, OnboardedGuard)
   @ApiResponse({
@@ -344,9 +349,11 @@ export class UserTasksController {
   async extendPeriod(
     @Req()
     request: AuthRequest,
+    @Body()
+    body: ExtendPeriodRequestDto,
     @Param()
     params: ExtendPeriodParamsDto): Promise<PeriodActionResponseDto> {
-    return this.tasks.action(request.user, params.periodId, 'extend');
+    return this.tasks.action(request.user, params.periodId, 'extend', 'done_button', undefined, body?.deadline);
   }
 
   @Post('periods/:periodId/surrender')

@@ -18,7 +18,7 @@ function containTab(event: KeyboardEvent<HTMLDialogElement>) {
   }
 }
 
-export function Sheet({ title, close, children }: { title: string; close: () => void; children: ReactNode }) {
+export function Sheet({ title, close, children, closeLabel = 'Отмена' }: { title: string; close: () => void; children: ReactNode; closeLabel?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
   useTelegram(close);
@@ -47,7 +47,7 @@ export function Sheet({ title, close, children }: { title: string; close: () => 
     >
       <h2 id={id}>{title}</h2>
       {children}
-      <button type="button" className="btn ghost" onClick={close}>Отмена</button>
+      <button type="button" className="btn ghost" onClick={close}>{closeLabel}</button>
     </dialog>
   );
 }

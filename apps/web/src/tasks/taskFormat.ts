@@ -38,10 +38,26 @@ export function zonedDeadline(day: string, time: string, zone: string) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const parts = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(value));
     const part = (type: string) => parts.find(item => item.type === type)?.value;
-    const represented = Date.parse(`${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:00Z`);
+    const represented = Date.parse(`${part('year')?.padStart(4, '0')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:00Z`);
     value += target - represented;
   }
   return new Date(value).toISOString();
+}
+
+// Date fields may emit incomplete values while the user edits a year or time.
+export function safeZonedDeadline(day: string, time: string, zone: string): string | undefined {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+    return undefined;
+  }
+  try {
+    const calendar = new Date(`${day}T${time}:00Z`);
+    if (!Number.isFinite(calendar.getTime()) || calendar.toISOString().slice(0, 10) !== day) {
+      return undefined;
+    }
+    return zonedDeadline(day, time, zone);
+  } catch {
+    return undefined;
+  }
 }
 
 export function calendarDay(zone: string, tomorrow = false) {

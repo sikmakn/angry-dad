@@ -88,13 +88,50 @@ describe('Tasks and periods with real transactions', () => {
     });
     expect(await h.db.model('RespectChange').countDocuments({ userId: u._id })).toBe(1);
   });
-  it('extend grants exactly an hour once per local day and stale deadline cannot fail it', async () => {
+  it('legacy extension adds an hour repeatedly without a daily limit; stale deadline cannot fail it', async () => {
     const u = await user(h.db), { period } = await taskPeriod(h.db, u);
     await h.app.get(TasksService).action(u, period._id, 'extend');
     expect((await h.db.model('Period').findById(period._id).lean())?.deadline).toEqual(new Date(+period.deadline + 3600000));
-    await expect(h.app.get(TasksService).action(u, period._id, 'extend')).rejects.toMatchObject({ status: 409 });
+    await h.app.get(TasksService).action(u, period._id, 'extend');
+    expect((await h.db.model('Period').findById(period._id).lean())?.deadline).toEqual(new Date(+period.deadline + 7200000));
     await expect(h.app.get(TasksService).action(u, period._id, 'deadline')).rejects.toMatchObject({ status: 409 });
     expect((await h.db.model('User').findById(u._id).lean())?.respect).toBe(12);
+  });
+  it('explicit deadlines select sharper phrase levels and keep respect unchanged', async () => {
+    const u = await user(h.db);
+    const { period } = await taskPeriod(h.db, u);
+    let deadline = +period.deadline;
+    for (const [added, level] of [[3600000, 1], [86400000, 2], [3 * 86400000, 3]]) {
+      deadline += added;
+      const result = await h.app.get(TasksService).action(u, period._id, 'extend', 'done_button', undefined, new Date(deadline).toISOString());
+      expect(result.task.currentPeriod?.deadline).toEqual(new Date(deadline).toISOString());
+      expect(result.respectDelta).toBe(0);
+      const phrase = await h.db.model('Phrase').findOne({
+        category: 'on_excuse',
+        level,
+        template: { $exists: true },
+      }).lean();
+      expect(phrase).not.toBeNull();
+      const ids = (await h.db.model('Phrase').find({
+        category: 'on_excuse',
+        level,
+      }).lean()).map(row => row._id);
+      expect(await h.db.model('FeedMessage').exists({
+        periodId: period._id,
+        text: result.reply,
+        phraseId: { $in: ids },
+      })).not.toBeNull();
+      expect(result.reply).not.toMatch(/\[\[|\(а\)|Больше сегодня|Последний час/);
+    }
+    expect((await h.db.model('User').findById(u._id).lean())?.respect).toBe(12);
+  });
+  it('rejects invalid or non-increasing extension deadlines without changing the period', async () => {
+    const u = await user(h.db), { period } = await taskPeriod(h.db, u);
+    for (const deadline of ['invalid', period.deadline.toISOString(), new Date(+period.deadline - 1).toISOString(), new Date(Date.now() + 366 * 86400000).toISOString()]) {
+      await expect(h.app.get(TasksService).action(u, period._id, 'extend', 'done_button', undefined, deadline)).rejects.toMatchObject({ status: 400 });
+    }
+    expect((await h.db.model('Period').findById(period._id).lean())?.deadline).toEqual(period.deadline);
+    expect(await h.db.model('FeedMessage').countDocuments({ periodId: period._id })).toBe(0);
   });
   it('retry clears closure fields, retains penalty, and is available only once', async () => {
     const u = await user(h.db), { period } = await taskPeriod(h.db, u, { deadline: new Date(Date.now() - 1000) });

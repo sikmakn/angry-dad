@@ -73,13 +73,16 @@ export function errorText(error: unknown): string {
   if (!(error instanceof ApiError)) {
     return 'Связь оборвалась. Результат неизвестен. Обнови данные перед новой попыткой.';
   }
+  if (error.status === 401) {
+    return 'Чтобы войти заново, открой чат с ботом и нажми кнопку «Открыть Батю» под полем ввода сообщения.';
+  }
   if (error.problem?.reply) {
     return error.problem.reply;
   }
   const code = error.problem?.type.split(':').at(-1);
   const messages: Record<string, string> = {
-    unauthorized: 'Открой приложение заново через Telegram.',
-    init_data_expired: 'Вход устарел. Открой приложение заново через Telegram.',
+    unauthorized: 'Открой чат с ботом и нажми кнопку «Открыть Батю» под полем ввода сообщения.',
+    init_data_expired: 'Вход устарел. Открой чат с ботом и нажми кнопку «Открыть Батю» под полем ввода сообщения.',
     owner_only: 'Сюда только владельцу.',
     not_found: 'Задачи нет. Возможно, она удалена.',
     period_not_active: error.problem?.periodStatus === 'done' ? 'Задача уже закрыта' : 'Задача уже провалена',
@@ -87,12 +90,12 @@ export function errorText(error: unknown): string {
     deadline_out_of_range: 'Срок — от 15 минут до 365 дней.',
     ai_unavailable: 'Батя сейчас не может прочитать название. Попробуй позже.',
     already_rated: 'Уже оценено',
-    insufficient_strikes: 'Удары закончились. Чтобы ответить, купи ещё.',
+    insufficient_strikes: 'Всё? А столько возражений было. Купи возможность огрызнуться ещё.',
     turn_in_progress: 'Ход ещё в обработке. Подожди.',
-    turn_failed: 'Ход не засчитан. Удар возвращён, шкалы не изменились.',
+    turn_failed: 'Попытка не засчитана и не потрачена. Шкалы не изменились.',
     last_enabled_phrase: 'В ячейке не останется фраз',
-    refund_not_allowed: 'Возврат невозможен: из партии уже потрачены удары или пользователь удалён.',
-    revoke_exceeds_balance: 'Недостаточно ударов для списания.',
+    refund_not_allowed: 'Возврат невозможен: из пакета уже потрачены попытки или пользователь удалён.',
+    revoke_exceeds_balance: 'Недостаточно попыток для списания.',
     share_failed: 'Не получилось, ещё раз?',
     payment_gateway_unavailable: 'Оплата сейчас недоступна. Попробуй позже.',
     role_mismatch: 'Родитель изменился. Обнови страницу.',

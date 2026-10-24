@@ -118,9 +118,26 @@ export interface paths {
         get?: never;
         /**
          * Оценить фразу
-         * @description score: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один голос на пару пользователь/фраза: тот же score повторно даёт 200 с текущим состоянием, другой — 409 already_rated, даже под повторным показом фразы. В ответе поле rating. Неоцениваемая категория: 400. Требует завершённый старт.
+         * @description score: 0 «слабо», 1 «неприятно», 2 «в самое больное». Один изменяемый голос на пару пользователь/фраза: тот же score повторно даёт 200 без повторного учёта; другой заменяет предыдущий, обновляет сумму оценок без увеличения числа голосов. Поле rating обновляется у всех показов этой фразы пользователю. В ответе поле rating. Неоцениваемая категория: 400. Требует завершённый старт.
          */
         put: operations["rateFeedMessage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feed/{feedMessageId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Отметить уведомление прочитанным */
+        put: operations["markFeedMessageRead"];
         post?: never;
         delete?: never;
         options?: never;
@@ -708,8 +725,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * «Мне нужно больше времени…»
-         * @description Бесплатно продлевает на час не больше раза в календарные сутки пользователя на задачу, возвращает onExcuse. Новый срок повторяющейся задачи не позже начала следующего периода. Повтор в те же сутки или выход за следующий период: 409 extension_denied с reply onExcuseDenied. Требует завершённый старт.
+         * Попросить больше времени
+         * @description Попросить больше времени без суточного лимита. Необязательный deadline задаёт новый срок; без него добавляется час для совместимости с кнопками бота. Срок строго позже текущего и не дальше 365 дней от сейчас. Для повторяющейся задачи не позже начала следующего периода (иначе 409 extension_denied). Ответ onExcuse выбирается по добавленному времени: до часа — уровень 1, до суток — 2, больше суток — 3. Требует завершённый старт.
          */
         post: operations["extendPeriod"];
         delete?: never;
@@ -968,9 +985,27 @@ export interface components {
             /** @description После обрезки пробелов по краям */
             title: string;
         };
+        ExtendPeriodRequest: {
+            /**
+             * Format: date-time
+             * @description Новый срок позже текущего. Без поля — плюс один час к текущему сроку.
+             */
+            deadline?: string;
+        };
         FeedListResponse: {
+            /** @description Непрочитанные уведомления и проверки, ожидающие ответа, без двойного счёта */
+            activeCount?: number;
             items: components["schemas"]["FeedMessageResponse"][];
+            /**
+             * Format: date-time
+             * @description Ближайший общий срок ответа: 15 минут от первой проверки без ответа. Чтение и новые сообщения его не сдвигают.
+             */
+            nextAnswerDueAt?: string;
             nextCursor: string | null;
+            /** @description Все проверки активных задач, на которые ещё можно ответить */
+            unansweredCount?: number;
+            /** @description Непрочитанные уведомления пользователя (напоминания, проверки, пропуски, провалы и отсутствие), без ограничения страницей */
+            unreadCount?: number;
         };
         FeedMessageResponse: {
             /** @enum {string} */
@@ -978,6 +1013,8 @@ export interface components {
             /** @description Только у проверок. Без `answer` и `missedAt` проверка ждёт ответа. */
             checkIn?: components["schemas"]["FeedMessageResponseCheckIn"];
             id: string;
+            /** @description Проверка ещё ждёт ответа и относится к активному периоду задачи */
+            needsAnswer?: boolean;
             periodId?: string;
             /** @description Категория оценивается; кнопки оценки показывать, пока нет rating */
             rateable: boolean;
@@ -986,8 +1023,15 @@ export interface components {
              * @enum {number}
              */
             rating?: 0 | 1 | 2;
+            /**
+             * Format: date-time
+             * @description Когда пользователь открыл уведомление в приложении
+             */
+            readAt?: string;
             /** Format: date-time */
             sentAt: string;
+            /** @enum {string} */
+            taskOutcome?: "done" | "give_up" | "failed";
             /** @description Снимок названия задачи для «Ответить» */
             taskTitle?: string;
             text: string;
@@ -996,9 +1040,21 @@ export interface components {
             /** @enum {string} */
             answer?: "done" | "partial" | "not_started";
             /** Format: date-time */
+            answerDueAt?: string;
+            /** Format: date-time */
             answeredAt?: string;
+            expired?: boolean;
+            /** @description Списание всей группы, только на верхней карточке. */
+            groupRespectDelta?: number;
             /** Format: date-time */
             missedAt?: string;
+            /**
+             * Format: date-time
+             * @description Закрыто без оценки: пользователь ответил на другую проверку этой задачи.
+             */
+            resolvedAt?: string;
+            /** @description Фактическое изменение уважения за молчание 15 минут. Ноль означает отсутствие списания. */
+            respectDelta?: number;
         };
         GameSettingsRequest: {
             /** @description Проверок конкретности на пользователя в сутки */
@@ -2096,6 +2152,54 @@ export interface operations {
             };
             /** @description Conflict. Конфликт состояния: period_not_active, extension_denied, retry_unavailable, already_rated, already_onboarded, last_enabled_phrase, insufficient_strikes, revoke_exceeds_balance, refund_not_allowed, role_mismatch, turn_in_progress, idempotency_key_reused. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description internal_error: внутренняя ошибка без раскрытия подробностей. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    markFeedMessageRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedMessageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedMessageResponse"];
+                };
+            };
+            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Сообщение не найдено. Ресурс не найден, включая чужой ресурс. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4217,7 +4321,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ExtendPeriodRequest"];
+            };
+        };
         responses: {
             /** @description Срок продлён */
             200: {

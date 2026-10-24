@@ -16,17 +16,16 @@ export function TaskNewScreen({ me, go }: { me: Me; go: (route: string) => void 
       <>
         <h1 className="sr-only" tabIndex={-1}>Новая задача поставлена</h1>
         <div className="eyebrow">{`Дневник · ${new Intl.DateTimeFormat('ru', { timeZone: me.timeZone, weekday: 'long', day: 'numeric', month: 'long' }).format(now)}`}</div>
-        {form.saved.reply && <Quote text={form.saved.reply} role={me.role} />}
         <div className="card stack">
-          <p>{task.title}</p>
+          <h2 className="task-saved-title">{task.title}</h2>
           <span className="tag">{recurrenceText(task)}</span>
-          <span className="tag">{sizeLabels[task.size]}</span>
+          <span className="tag" data-size={task.size}>{sizeLabels[task.size]}</span>
           {task.currentPeriod && <p>{`Срок${task.kind === 'recurring' ? ' текущего периода' : ''}: ${formatDate(task.currentPeriod.deadline, me.timeZone)}`}</p>}
           {task.kind === 'one_time'
             ? <p className="small muted">{`Размер определён при постановке, поменять его нельзя. За закрытие: +${rewards[task.size]} к уважению.`}</p>
             : <p className="small muted">{`Ориентир: ${task.anchorTime ?? 'без ориентира'}. Размер один на все периоды. За каждый закрытый период: +${rewards[task.size]} к уважению.`}</p>}
         </div>
-        <p className="small muted">{`Проверки начнутся не раньше чем через 3 минуты. Когда — ${me.role === 'mother' ? 'Мама не скажет' : 'Батя не скажет'}.`}</p>
+        {form.saved.reply && <Quote text={form.saved.reply} role={me.role} />}
         <button className="btn" onClick={() => go('home')}>К задачам</button>
         <button className="btn ghost" onClick={form.reset}>Поставить ещё одну</button>
       </>
