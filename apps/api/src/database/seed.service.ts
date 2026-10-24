@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { extensionPhrases } from './extension-phrases';
+import { rolePhrases } from './role-phrases';
 const notStartedReplies = [
   'Даже не начал(а)? Зато кнопку нажать силы нашлись. Начинай.',
   'Ноль сделано, зато планы были грандиозные. Удиви меня: начни.',
@@ -125,6 +126,41 @@ export class SeedService implements OnModuleInit {
               });
             }
           }
+        }
+      }
+    }
+    // Фразы отдельно для отца и матери: ключ с суффиксом _1.._3 задаёт уровень, ответы на проверку делятся на два вида.
+    const special: Record<string, [string, number]> = {
+      on_check_in_reply_partial: ['on_check_in_reply', 1],
+      on_check_in_reply_not_started: ['on_check_in_reply', 2],
+    };
+    for (const role of ['father', 'mother'] as const) {
+      for (const [key, templates] of Object.entries(rolePhrases[role])) {
+        const leveled = /^(.*)_([123])$/.exec(key);
+        const [category, level] = special[key] ?? (leveled ? [leveled[1], Number(leveled[2])] : [key, undefined]);
+        for (const [index, template] of templates.entries()) {
+          operations.push({
+            updateOne: {
+              filter: { _id: `seed2-${role}-${key}-${index}` },
+              update: {
+                $setOnInsert: {
+                  role,
+                  category,
+                  level,
+                  defeatLevel: 'any',
+                  combo: 'any',
+                  template,
+                  source: 'owner',
+                  status: 'enabled',
+                  shows: 0,
+                  votes: 0,
+                  scoreSum: 0,
+                  belowThreshold: false,
+                },
+              },
+              upsert: true,
+            },
+          });
         }
       }
     }
