@@ -45,7 +45,7 @@ export class RecurrenceService {
         day = addDays(day, duration);
         continue;
       }
-      const morning = user.quietHours.start === user.quietHours.end ? 480 : user.quietHours.end;
+      const morning = user.quietHours.start === user.quietHours.end ? 540 : user.quietHours.end;
       const moodFrom = new Date(Math.max(zonedTime(day, morning, user.timeZone).getTime(), first ? task.createdAt.getTime() : startsAt.getTime()));
       const anchorAt = anchorMinute !== undefined ? zonedTime(lastDay, anchorMinute, user.timeZone) : undefined;
       return {

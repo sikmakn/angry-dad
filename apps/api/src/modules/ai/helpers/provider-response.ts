@@ -1,4 +1,5 @@
 import { record } from './prompt-data';
+import { unsafeReply } from './injection';
 import type { ProviderUsage } from '../services/ai-provider.service';
 
 export function responseUsage(value: unknown, rates: { input: number;
@@ -24,7 +25,8 @@ function tokens(value: unknown): number | undefined {
 export function validValue(purpose: string, value: unknown): boolean {
   const row = record(value);
   if (purpose === 'specificity') {
-    return Object.keys(row).sort().join(',') === 'size,specific' && typeof row.specific === 'boolean' && ['micro', 'medium', 'large'].includes(String(row.size));
+    const keys = Object.keys(row).sort().join(',');
+    return (keys === 'size,specific' || keys === 'reply,size,specific') && typeof row.specific === 'boolean' && ['micro', 'medium', 'large'].includes(String(row.size));
   }
   if (purpose === 'judge') {
     return Object.keys(row).sort().join(',') === 'corner,hit,logic,originality,weakSpotHit'
@@ -37,7 +39,7 @@ export function validValue(purpose: string, value: unknown): boolean {
   if (typeof value !== 'string' || !value.trim()) {
     return false;
   }
-  return purpose === 'summary' ? value.length <= 8000 : purpose === 'actor' && value.length <= 2000 && (value.match(/[.!?]+(?:\s|$)/g)?.length ?? 1) <= 3;
+  return purpose === 'summary' ? value.length <= 8000 : purpose === 'actor' && value.length <= 2000 && !unsafeReply(value) && (value.match(/[.!?]+(?:\s|$)/g)?.length ?? 1) <= 3;
 }
 
 // Bound the body while reading, including error bodies; never include it in errors.

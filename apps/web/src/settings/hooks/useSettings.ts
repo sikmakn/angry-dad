@@ -2,9 +2,7 @@ import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Me } from '../../api/contract';
 import { useRead, useWrite } from '../../hooks/useApi';
-
-const timeString = (value: number) => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
-const minutes = (value: string) => Number(value.split(':')[0]) * 60 + Number(value.split(':')[1]);
+import { minutes, quietInvalid, timeString } from '../quietTime';
 
 export function useSettings(me: Me, deleted: () => void) {
   const [role, setRole] = useState(me.role!);
@@ -24,7 +22,7 @@ export function useSettings(me: Me, deleted: () => void) {
   const client = useQueryClient();
   const duration = (minutes(end) - minutes(start) + 1440) % 1440;
   async function submit() {
-    if (saving.current || duration > 720) {
+    if (saving.current || quietInvalid(duration)) {
       return;
     }
     saving.current = true;

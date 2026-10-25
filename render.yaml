@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: angry-dad
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - { key: MONGODB_URI, sync: false }
+      - { key: TELEGRAM_BOT_TOKEN, sync: false }
+      - { key: TELEGRAM_WEBHOOK_SECRET, sync: false }
+      - { key: OWNER_TELEGRAM_ID, sync: false }
+      - { key: DELETION_HASH_SALT, sync: false }
+      - { key: AI_API_KEY, sync: false }
+      - { key: AI_API_URL, sync: false }
+      - { key: BOT_URL, sync: false }
+      - { key: TELEGRAM_AUTH_MAX_AGE_SECONDS, value: "86400" }
+      - { key: EXTERNAL_CLIENTS_MODE, value: "live" }

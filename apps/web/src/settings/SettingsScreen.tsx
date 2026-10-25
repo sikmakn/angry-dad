@@ -3,6 +3,7 @@ import { Feedback } from '../components/Feedback';
 import { Sheet } from '../components/Sheet';
 import { useSettings } from './hooks/useSettings';
 import { QuietHours } from './components/QuietHours';
+import { quietInvalid } from './quietTime';
 
 const zones = ['Europe/Kaliningrad', 'Europe/Minsk', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yekaterinburg', 'Asia/Omsk', 'Asia/Novosibirsk', 'Asia/Irkutsk', 'Asia/Yakutsk', 'Asia/Vladivostok'];
 
@@ -59,7 +60,7 @@ export function SettingsScreen({ me, deleted }: { me: Me; deleted: () => void })
           </span>
         </label>
         <Feedback error={save.error ?? participation.error}>{status}</Feedback>
-        <button className="btn" disabled={save.isPending || participation.isPending || duration > 720}>Сохранить</button>
+        <button className="btn" disabled={save.isPending || participation.isPending || quietInvalid(duration)}>Сохранить</button>
       </form>
       <button className="btn danger" onClick={() => setConfirm(1)}>Удалить аккаунт</button>
       {confirm > 0 && (

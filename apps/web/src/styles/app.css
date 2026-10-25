@@ -99,6 +99,9 @@ legend { margin-bottom: var(--space-3); font-weight: 700; }
 .task-delete { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); }
 .task-delete-note { color: var(--muted); font: 500 var(--hand-m)/1.1 var(--font-hand); transform: rotate(-2deg); }
 .task-delete-note span { display: block; }
+.quiet-row { display: flex; align-items: center; gap: var(--space-2); }
+.quiet-row label { font-weight: 700; font-size: var(--text-s); }
+.quiet-row input { flex: 1; min-width: 0; min-height: var(--target); padding: var(--space-2) var(--space-3); border: 1.5px solid var(--edge); border-radius: var(--radius); background: var(--surface); color: var(--fg); }
 .field { display: grid; gap: var(--space-1); }
 .field label { font-weight: 700; font-size: var(--text-s); }
 .field input, .field textarea, .field select { width: 100%; min-height: var(--target); padding: var(--space-2) var(--space-3); border: 1.5px solid var(--edge); border-radius: var(--radius); background: var(--surface); color: var(--fg); }

@@ -523,13 +523,11 @@
 | settings.quiet.legend | Тихие часы | [Настройки](screens/settings.html) · группа полей |
 | settings.quiet.from | С | [Настройки](screens/settings.html) · подпись поля времени |
 | settings.quiet.to | До | [Настройки](screens/settings.html) · подпись поля времени |
-| settings.quiet.hint | Бот молчит {hours} ч: с {from} до {to}. Шаг 30 минут, не длиннее 12 часов. Если «с» и «до» совпадают, тихих часов нет. | [Настройки](screens/settings.html) · подсказка под полями |
+| settings.quiet.hint | Бот молчит {hours} ч: с {from} до {to}. Если «с» и «до» совпадают, тихих часов нет. | [Настройки](screens/settings.html) · подсказка под полями |
 | settings.quiet.off | Без тихих часов | [Настройки](screens/settings.html) · текстовая кнопка |
 | settings.quiet.off.title | Тихих часов нет (0 ч). | [Настройки](screens/settings.html) · подсказка, состояние «Без тихих часов», жирное начало |
 | settings.quiet.off.body | Бот может написать в любое время, даже ночью. Утром после провала считаем 08:00. | [Настройки](screens/settings.html) · подсказка, состояние «Без тихих часов» |
 | settings.quiet.restore | Вернуть 23:00–08:00 | [Настройки](screens/settings.html) · текстовая кнопка, состояние «Без тихих часов» |
-| settings.quiet.err.title | Тихие часы не длиннее 12 часов. | [Настройки](screens/settings.html) · ошибка поля, жирное начало |
-| settings.quiet.err.body | Сейчас {hours} ч. Сдвинь начало позже или конец раньше. Сохранены прежние {from}–{to}. | [Настройки](screens/settings.html) · ошибка поля |
 | settings.rating.label | Участвую в общем рейтинге | [Настройки](screens/settings.html) · флажок |
 | settings.rating.hint | Другие видят только твой username и число закрытых задач. Сейчас ты в рейтинге. | [Настройки](screens/settings.html) · подсказка к флажку |
 | settings.rating.hint.out | Другие видят только твой username и число закрытых задач. Сейчас ты не участвуешь. | [Настройки](screens/settings.html) · подсказка к флажку, если вышел |

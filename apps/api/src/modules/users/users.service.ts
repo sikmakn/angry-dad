@@ -1,6 +1,6 @@
 import { UsersError } from './users.errors';
 import { NotificationStateService } from '../task-notifications/services/notification-state.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createHmac } from 'node:crypto';
 import { DatabaseService } from '../../database/database.service';
 import { AppConfigService } from '../../config/app-config.service';
@@ -9,11 +9,13 @@ import { present } from '../../common/utils/presentation';
 import type { User } from '../../database/schemas/user.schema';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { EventPublisher } from '../../common/events/event-publisher.service';
+import { TelegramClient } from '../bot/services/telegram-client.service';
 import type { TelegramIdentity } from './services/telegram-auth.service';
 import type { MeResponseView, OnboardingResponseView, OnboardingRequestView, UpdateMeRequestView, OwnerUserResponseView } from './users.types';
 @Injectable()
 export class UsersService {
-  constructor(private readonly db: DatabaseService, private readonly config: AppConfigService, private readonly analytics: AnalyticsService, private readonly notifications: NotificationStateService, private readonly events: EventPublisher) { }
+  private readonly logger = new Logger(UsersService.name);
+  constructor(private readonly db: DatabaseService, private readonly config: AppConfigService, private readonly analytics: AnalyticsService, private readonly notifications: NotificationStateService, private readonly events: EventPublisher, private readonly telegram: TelegramClient) { }
   async observeActivity(userId: string, starts: boolean, at = new Date()): Promise<void> {
     const observedAt = new Date(at);
     const user = await this.db.model('User').updateOne({
@@ -30,7 +32,7 @@ export class UsersService {
   }
 
   async authenticate(identity: TelegramIdentity): Promise<User> {
-    const user = await this.db.model('User').findOneAndUpdate({ telegramId: identity.id }, {
+    const result = await this.db.model('User').findOneAndUpdate({ telegramId: identity.id }, {
       $set: {
         ...(identity.username !== undefined ? { username: identity.username } : {}),
         ...(identity.first_name !== undefined ? { firstName: identity.first_name } : {}),
@@ -40,8 +42,8 @@ export class UsersService {
         onboarding: 'guest',
         timeZone: 'Europe/Moscow',
         quietHours: {
-          start: 1380,
-          end: 480,
+          start: 1320,
+          end: 540,
         },
         respect: 12,
         respectFromBreak: false,
@@ -53,11 +55,41 @@ export class UsersService {
     }, {
       upsert: true,
       new: true,
-    }).lean();
+      includeResultMetadata: true,
+    }).lean() as unknown as {
+      value: User | null;
+      lastErrorObject?: { updatedExisting?: boolean };
+    };
+    const user = result.value;
     if (!user || user.deleting) {
       throw ApiError.unauthorized();
     }
+    if (!result.lastErrorObject?.updatedExisting) {
+      void this.notifyOwnerAboutNewUser(user);
+    }
     return user;
+  }
+
+  // Upsert атомарен: вставка происходит ровно один раз, поэтому уведомление не дублируется.
+  // Ошибка отправки не должна ломать вход пользователя.
+  private async notifyOwnerAboutNewUser(user: User): Promise<void> {
+    try {
+      if (user.telegramId === this.config.ownerId) {
+        return;
+      }
+      const total = await this.db.model('User').countDocuments({ deleting: { $ne: true } });
+      const name = user.firstName?.trim() || 'без имени';
+      const lines = [
+        'Новый пользователь в боте',
+        `Имя: ${name}`,
+        ...(user.username ? [`Username: @${user.username}`] : []),
+        `Telegram ID: ${user.telegramId}`,
+        `Всего пользователей: ${total}`,
+      ];
+      await this.telegram.send(this.config.ownerId, lines.join('\n'));
+    } catch (error) {
+      this.logger.warn(`Не удалось уведомить владельца о новом пользователе: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async me(user: User): Promise<MeResponseView> {
@@ -70,6 +102,10 @@ export class UsersService {
   }
 
   async onboarding(user: User, input: OnboardingRequestView): Promise<OnboardingResponseView> {
+    // Тихие часы при старте обязательны.
+    if (!input.quietHours) {
+      throw ApiError.invalidRequest();
+    }
     this.validateSettings(input);
     const updated = await this.db.transaction(async (session) => {
       const row = await this.db.model('User').findOneAndUpdate({
@@ -143,15 +179,18 @@ export class UsersService {
   }
 
   private validateSettings(input: UpdateMeRequestView): void {
+    if (input.quietHours) {
+      const { start, end } = input.quietHours;
+      if (![start, end].every(value => Number.isInteger(value) && value >= 0 && value <= 1439)) {
+        throw ApiError.invalidRequest();
+      }
+    }
     if (input.timeZone !== undefined) {
       try {
         new Intl.DateTimeFormat('en', { timeZone: input.timeZone }).format();
       } catch {
         throw ApiError.invalidRequest();
       }
-    }
-    if (input.quietHours && (input.quietHours.end - input.quietHours.start + 1440) % 1440 > 720) {
-      throw ApiError.invalidRequest();
     }
   }
 }

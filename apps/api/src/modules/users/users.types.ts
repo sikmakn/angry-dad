@@ -34,6 +34,7 @@ export type OnboardingRequestView = {
   role: RoleView;
   gender: GenderView;
   timeZone?: string;
+  quietHours: QuietHoursView;
 };
 export type OnboardingResponseView = {
   user: MeResponseView;

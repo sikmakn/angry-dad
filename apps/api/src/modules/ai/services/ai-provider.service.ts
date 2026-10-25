@@ -35,6 +35,7 @@ export class ConfiguredAiProvider extends AiProvider {
         ? {
             specific: true,
             size: 'medium',
+            reply: 'Срок вижу. Посмотрим, как ты с ним справишься.',
           }
         : purpose === 'judge'
           ? {
@@ -122,6 +123,14 @@ export class ConfiguredAiProvider extends AiProvider {
       if (['specificity', 'judge', 'paraphrase'].includes(purpose)) {
         try {
           value = JSON.parse(content);
+          if (purpose === 'specificity' && 'reply' in record(value)) {
+            // Реплика только строка до 300 символов; иначе её нет, а оценка остаётся.
+            const raw = record(value).reply;
+            value = {
+              ...record(value),
+              reply: typeof raw === 'string' && raw.length <= 300 ? dashless(raw) : '',
+            };
+          }
           if (purpose === 'paraphrase' && Array.isArray(value)) {
             value = value.map(item => typeof item === 'string' ? dashless(item) : item);
           }
