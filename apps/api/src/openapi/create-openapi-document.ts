@@ -126,8 +126,8 @@ const problemExamples: Record<string, Record<string, { value: Record<string, unk
   400: {
     validation: problemExample('validation_failed', 400, {
       errors: [{
-        field: 'quietHours',
-        message: 'Quiet hours must not exceed 12 hours',
+        field: 'timeZone',
+        message: 'timeZone must be a valid IANA time zone',
       }],
     }),
     vague: problemExample('task_vague', 400, { reply: 'Это что за задача? Конкретно.' }),

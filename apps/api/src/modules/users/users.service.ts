@@ -42,8 +42,8 @@ export class UsersService {
         onboarding: 'guest',
         timeZone: 'Europe/Moscow',
         quietHours: {
-          start: 1380,
-          end: 480,
+          start: 1320,
+          end: 540,
         },
         respect: 12,
         respectFromBreak: false,
@@ -102,6 +102,10 @@ export class UsersService {
   }
 
   async onboarding(user: User, input: OnboardingRequestView): Promise<OnboardingResponseView> {
+    // Тихие часы при старте обязательны.
+    if (!input.quietHours) {
+      throw ApiError.invalidRequest();
+    }
     this.validateSettings(input);
     const updated = await this.db.transaction(async (session) => {
       const row = await this.db.model('User').findOneAndUpdate({
@@ -175,15 +179,18 @@ export class UsersService {
   }
 
   private validateSettings(input: UpdateMeRequestView): void {
+    if (input.quietHours) {
+      const { start, end } = input.quietHours;
+      if (![start, end].every(value => Number.isInteger(value) && value >= 0 && value <= 1410 && value % 30 === 0)) {
+        throw ApiError.invalidRequest();
+      }
+    }
     if (input.timeZone !== undefined) {
       try {
         new Intl.DateTimeFormat('en', { timeZone: input.timeZone }).format();
       } catch {
         throw ApiError.invalidRequest();
       }
-    }
-    if (input.quietHours && (input.quietHours.end - input.quietHours.start + 1440) % 1440 > 720) {
-      throw ApiError.invalidRequest();
     }
   }
 }

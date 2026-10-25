@@ -34,9 +34,9 @@ export class TasksService {
     if (!title) {
       throw ApiError.invalidRequest();
     }
-    const assessment = await this.ai.checkTask(user._id, user.timeZone, title);
+    const assessment = await this.ai.checkTask(user, title, { deadline });
     if (!assessment.specific) {
-      throw new TasksError(400, 'task_vague', { reply: (await this.phrases.pick(user, 'on_vague')).text });
+      throw new TasksError(400, 'task_vague', { reply: assessment.reply ?? (await this.phrases.pick(user, 'on_vague')).text });
     }
     const committed = await this.db.transaction(async (session) => {
       const exists = await this.db.model('User').findOneAndUpdate({
@@ -76,7 +76,8 @@ export class TasksService {
         await this.db.model('Task').updateOne({ _id: task._id }, { $set: { currentPeriodId: period._id } }, { session });
       }
       await this.notifications.signal(user._id, session);
-      const phrase = await this.phrases.pick(user, 'on_task_set', undefined, title, window.deadline, session);
+      const phrase: { text: string;
+        phraseId?: string; } = assessment.reply ? { text: assessment.reply } : await this.phrases.pick(user, 'on_task_set', undefined, title, window.deadline, session);
       const response = {
         task: await this.view(task, session),
         reply: phrase.text || null,
@@ -114,7 +115,7 @@ export class TasksService {
       throw new TasksError(409, 'period_not_active', { periodStatus: task.status === 'stopped' ? 'stopped' : 'done' });
     }
     if (input.title) {
-      const result = await this.ai.checkTask(user._id, user.timeZone, input.title.trim());
+      const result = await this.ai.checkTask(user, input.title.trim());
       if (!result.specific) {
         throw new TasksError(400, 'task_vague', { reply: (await this.phrases.pick(user, 'on_vague')).text });
       }

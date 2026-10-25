@@ -8,6 +8,8 @@ import { AnalyticsService } from '../analytics/analytics.service';
 import { AiProvider, AiProviderFailure } from './services/ai-provider.service';
 import type { ProviderUsage } from './services/ai-provider.service';
 import { usageCost } from './helpers/usage-cost';
+import { unsafeReply } from './helpers/injection';
+import type { User } from '../../database/schemas/user.schema';
 export interface Judge {
   hit: number;
   logic: number;
@@ -15,13 +17,27 @@ export interface Judge {
   corner: boolean;
   weakSpotHit: string | null;
 }
+function validZone(zone: string): string {
+  try {
+    new Intl.DateTimeFormat('ru', { timeZone: zone });
+    return zone;
+  } catch {
+    return 'UTC';
+  }
+}
 @Injectable()
 export class AiService {
   constructor(private readonly db: DatabaseService, private readonly config: AppConfigService, private readonly analytics: AnalyticsService, private readonly provider: AiProvider) { }
-  async checkTask(userId: string, zone: string, title: string): Promise<{
+  // Один вызов модели: конкретность, размер и едкая реплика на задачу. Нет реплики: вызывающий берёт заготовленную фразу.
+  async checkTask(user: User, title: string, reply?: { deadline?: Date }): Promise<{
     specific: boolean;
     size: 'micro' | 'medium' | 'large';
+    reply: string | null;
   }> {
+    const userId = user._id;
+    // Неверная зона в профиле не должна ломать создание задачи: считаем по UTC.
+    const zone = validZone(user.timeZone);
+    const deadline = reply?.deadline;
     const settings = await this.analytics.settings();
     const day = localDate(new Date(), zone);
     await this.db.model('DailyCounter').updateOne({
@@ -48,18 +64,52 @@ export class AiService {
       throw new AiError(429, 'daily_limit_reached');
     }
     try {
-      const call = await this.call('specificity', { title }, userId, undefined, 3000);
+      const now = new Date();
+      let context: Record<string, unknown> = {};
+      if (reply) {
+        const format = (timeZone: string) => new Intl.DateTimeFormat('ru', {
+          timeZone,
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        const formatter = format(zone);
+        context = {
+          role: user.role,
+          gender: user.gender,
+          now: formatter.format(now),
+          deadline: deadline ? formatter.format(deadline) : undefined,
+          leftMinutes: deadline ? Math.max(0, Math.round((deadline.getTime() - now.getTime()) / 60000)) : undefined,
+          recurring: !deadline,
+          withReply: true,
+        };
+      }
+      // Реплику пишем только при создании задачи; при правке названия хватает короткой оценки.
+      const call = await this.call('specificity', {
+        title,
+        ...context,
+      }, userId, undefined, reply ? 5000 : 3000);
       const result = call.value as {
         specific?: unknown;
         size?: unknown;
+        reply?: unknown;
       };
       if (!result || typeof result.specific !== 'boolean' || !['micro', 'medium', 'large'].includes(String(result.size))) {
         await this.markInvalid(call.id);
         throw new Error('Invalid specificity');
       }
-      return result as {
-        specific: boolean;
-        size: 'micro' | 'medium' | 'large';
+      // Сбой реплики не ломает оценку: вместо неё остаётся заготовленная фраза.
+      const text = reply && typeof result.reply === 'string' ? result.reply.trim() : '';
+      // reply не строка (null и т.п.) - это просто нет реплики, а не сбой оценки.
+      const usable = Boolean(text) && text.length <= 300 && !unsafeReply(text);
+      if (text && !usable) {
+        await this.markInvalid(call.id);
+      }
+      return {
+        specific: result.specific,
+        size: result.size as 'micro' | 'medium' | 'large',
+        reply: usable ? text : null,
       };
     } catch {
       throw new AiError(503, 'ai_unavailable');

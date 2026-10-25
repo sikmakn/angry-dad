@@ -51,7 +51,7 @@
 |---|---|---|
 | основной | смена родителя | [UC-7](../specs/mvp/functions/F-2-settings.md#uc-7) |
 | альтернативный | смена пола и часового пояса | [UC-8](../specs/mvp/functions/F-2-settings.md#uc-8) |
-| ошибка | тихие часы длиннее 12 часов | [UC-9](../specs/mvp/functions/F-2-settings.md#uc-9) |
+| ошибка | некорректное время тихих часов | [UC-9](../specs/mvp/functions/F-2-settings.md#uc-9) |
 | граница | удаление аккаунта с ударами | [UC-10](../specs/mvp/functions/F-2-settings.md#uc-10) |
 | права | чужие настройки, данные удалённого | [UC-11](../specs/mvp/functions/F-2-settings.md#uc-11) |
 | пустое состояние | удаление аккаунта без задач и ударов | [UC-12](../specs/mvp/functions/F-2-settings.md#uc-12) |

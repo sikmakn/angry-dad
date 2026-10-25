@@ -25,6 +25,43 @@ describe('Recurring task calendar boundaries', () => {
       deadline: new Date('2026-10-26T19:00:00Z'),
     });
   });
+  it('quietHours start == end: morning of a recurring task is 09:00 local', () => {
+    const noQuiet = {
+      ...owner,
+      quietHours: {
+        start: 0,
+        end: 0,
+      },
+    };
+    const result = recurrence.window(task({ type: 'weekdays' }), noQuiet, new Date('2026-10-24T09:00:00Z'));
+    expect(result.moodFrom).toEqual(new Date('2026-10-26T06:00:00Z'));
+    const same = {
+      ...owner,
+      quietHours: {
+        start: 1320,
+        end: 1320,
+      },
+    };
+    expect(recurrence.window(task({ type: 'weekdays' }), same, new Date('2026-10-24T09:00:00Z')).moodFrom).toEqual(new Date('2026-10-26T06:00:00Z'));
+  });
+  it('quietHours start != end: morning is the quiet end, not 09:00', () => {
+    const result = recurrence.window(task({ type: 'weekdays' }), {
+      ...owner,
+      quietHours: {
+        start: 1320,
+        end: 540,
+      },
+    }, new Date('2026-10-24T09:00:00Z'));
+    expect(result.moodFrom).toEqual(new Date('2026-10-26T06:00:00Z'));
+    const early = recurrence.window(task({ type: 'weekdays' }), {
+      ...owner,
+      quietHours: {
+        start: 1320,
+        end: 420,
+      },
+    }, new Date('2026-10-24T09:00:00Z'));
+    expect(early.moodFrom).toEqual(new Date('2026-10-26T04:00:00Z'));
+  });
   it('first daily period needs fifteen minutes; exact boundary remains today', () => {
     const daily = task({ type: 'daily' });
     expect(recurrence.window(daily, owner, new Date('2026-10-23T18:45:00Z'), true).deadline).toEqual(new Date('2026-10-23T19:00:00Z'));

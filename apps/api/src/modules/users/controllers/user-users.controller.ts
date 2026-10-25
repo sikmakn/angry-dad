@@ -128,6 +128,7 @@ export class UserUsersController {
       role: body.role,
       gender: body.gender,
       timeZone: body.timeZone,
+      quietHours: body.quietHours,
     });
   }
 }

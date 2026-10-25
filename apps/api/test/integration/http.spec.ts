@@ -81,9 +81,146 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       role: 'mother',
       gender: 'female',
       timeZone: 'Europe/Minsk',
+      quietHours: {
+        start: 1320,
+        end: 540,
+      },
     };
     expect((await request('/me/onboarding', u.telegramId, 'POST', input)).status).toBe(200);
     expect((await request('/me/onboarding', u.telegramId, 'POST', input)).status).toBe(409);
+  });
+  describe('onboarding quietHours', () => {
+    const base = {
+      role: 'father',
+      gender: 'male',
+    };
+    async function onboard(extra: Record<string, unknown>) {
+      const u = await user(h.db, { onboarding: 'guest' });
+      const r = await request('/me/onboarding', u.telegramId, 'POST', {
+        ...base,
+        ...extra,
+      });
+      return {
+        u,
+        r,
+      };
+    }
+    it('saves the chosen quietHours and returns them', async () => {
+      const { u, r } = await onboard({
+        quietHours: {
+          start: 1380,
+          end: 420,
+        },
+      });
+      expect(r.status).toBe(200);
+      expect((await r.json()).user.quietHours).toEqual({
+        start: 1380,
+        end: 420,
+      });
+      expect((await h.db.model('User').findById(u._id).lean())!.quietHours).toEqual({
+        start: 1380,
+        end: 420,
+      });
+    });
+    it.each([
+      [0, 1410],
+      [1410, 0],
+      [0, 0],
+    ])('accepts any length and both limits: %i-%i', async (start, end) => {
+      const { r } = await onboard({
+        quietHours: {
+          start,
+          end,
+        },
+      });
+      expect(r.status).toBe(200);
+      expect((await r.json()).user.quietHours).toEqual({
+        start,
+        end,
+      });
+    });
+    it('accepts a very long interval 00:00-23:30 (no 12 hour limit)', async () => {
+      const { r } = await onboard({
+        quietHours: {
+          start: 0,
+          end: 1410,
+        },
+      });
+      expect(r.status).toBe(200);
+    });
+    it('rejects missing quietHours and saves nothing', async () => {
+      const { u, r } = await onboard({});
+      expect(r.status).toBe(400);
+      expect((await h.db.model('User').findById(u._id).lean())!.onboarding).toBe('guest');
+    });
+    it.each([
+      {
+        start: 15,
+        end: 540,
+      },
+      {
+        start: 1320,
+        end: 545,
+      },
+      {
+        start: -30,
+        end: 540,
+      },
+      {
+        start: 1320,
+        end: 1440,
+      },
+      {
+        start: 1320,
+        end: 1411,
+      },
+      {
+        start: 1.5,
+        end: 540,
+      },
+      {
+        start: '1320',
+        end: 540,
+      },
+      {
+        start: null,
+        end: 540,
+      },
+      { start: 1320 },
+      {},
+      null,
+      'ночь',
+      [],
+    ])('rejects invalid quietHours %j', async (quietHours) => {
+      const { u, r } = await onboard({ quietHours });
+      expect(r.status).toBe(400);
+      expect(await r.json()).toMatchObject({ status: 400 });
+      expect((await h.db.model('User').findById(u._id).lean())!.onboarding).toBe('guest');
+    });
+    it('PATCH /me also accepts a long interval and rejects off-step values', async () => {
+      const u = await user(h.db);
+      expect((await request('/me', u.telegramId, 'PATCH', {
+        quietHours: {
+          start: 0,
+          end: 1410,
+        },
+      })).status).toBe(200);
+      expect((await request('/me', u.telegramId, 'PATCH', {
+        quietHours: {
+          start: 10,
+          end: 1410,
+        },
+      })).status).toBe(400);
+    });
+    it('new guest default on the server is 22:00-09:00', async () => {
+      const telegramId = Number.parseInt(uid().replaceAll('-', '').slice(0, 10), 16);
+      const r = await request('/me', telegramId);
+      expect(r.status).toBe(200);
+      expect((await r.json()).quietHours).toEqual({
+        start: 1320,
+        end: 540,
+      });
+    });
   });
   it.each([
     {

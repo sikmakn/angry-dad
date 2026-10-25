@@ -63,8 +63,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -210,8 +210,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -374,8 +374,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -569,8 +569,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -749,8 +749,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -854,8 +854,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -996,8 +996,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1127,8 +1127,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1341,8 +1341,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1437,8 +1437,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1533,8 +1533,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1658,8 +1658,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1858,8 +1858,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -1987,8 +1987,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2092,8 +2092,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2248,8 +2248,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2353,8 +2353,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2494,8 +2494,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2599,8 +2599,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2880,8 +2880,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -2983,8 +2983,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3088,8 +3088,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3239,8 +3239,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3358,8 +3358,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3475,8 +3475,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3595,8 +3595,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3700,8 +3700,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3806,8 +3806,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -3933,8 +3933,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4086,8 +4086,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4219,8 +4219,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4416,8 +4416,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4558,8 +4558,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4700,8 +4700,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4832,8 +4832,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -4964,8 +4964,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5097,8 +5097,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5289,8 +5289,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5392,8 +5392,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5507,8 +5507,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5610,8 +5610,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5723,8 +5723,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -5896,8 +5896,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -6002,8 +6002,8 @@
                     "value": {
                       "errors": [
                         {
-                          "field": "quietHours",
-                          "message": "Quiet hours must not exceed 12 hours"
+                          "field": "timeZone",
+                          "message": "timeZone must be a valid IANA time zone"
                         }
                       ],
                       "status": 400,
@@ -6823,7 +6823,7 @@
                 "$ref": "#/components/schemas/QuietHours"
               }
             ],
-            "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до\nконца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.\n"
+            "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца\n(через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.\n"
           },
           "respect": {
             "description": "Уважение. Экран показывает целую часть с округлением вниз.",
@@ -6951,6 +6951,14 @@
             ],
             "type": "string"
           },
+          "quietHours": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuietHours"
+              }
+            ],
+            "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца\n(через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.\nОбязательно: пользователь выбирает при старте (по умолчанию в приложении с 22:00 до 09:00).\n"
+          },
           "role": {
             "description": "Вредный родитель",
             "enum": [
@@ -6966,7 +6974,8 @@
         },
         "required": [
           "role",
-          "gender"
+          "gender",
+          "quietHours"
         ],
         "type": "object"
       },
@@ -8317,7 +8326,7 @@
                 "$ref": "#/components/schemas/QuietHours"
               }
             ],
-            "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до\nконца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.\n"
+            "description": "Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца\n(через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.\n"
           },
           "role": {
             "description": "Вредный родитель",

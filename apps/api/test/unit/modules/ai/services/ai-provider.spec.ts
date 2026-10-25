@@ -225,6 +225,46 @@ describe('ConfiguredAiProvider real HTTP mode', () => {
     expect((await provider.call('specificity', {}, 1000)).value).toEqual(values.specificity);
   });
 
+  it.each([
+    ['string', 'Ну-ну. Посмотрим.', 'Ну-ну. Посмотрим.'],
+    ['dashes', 'Ну — посмотрим.', 'Ну - посмотрим.'],
+    ['exactly 300', 'а'.repeat(300), 'а'.repeat(300)],
+    ['301 chars', 'а'.repeat(301), ''],
+    ['number', 5, ''],
+    ['null', null, ''],
+    ['array', ['x'], ''],
+    ['object', { a: 1 }, ''],
+    ['boolean', true, ''],
+  ])('specificity reply: %s -> string up to 300 chars, else empty (evaluation kept)', async (_name, reply, expected) => {
+    fetchMock.mockResolvedValue(completion(JSON.stringify({
+      ...values.specificity,
+      reply,
+    })));
+    expect((await provider.call('specificity', {}, 1000)).value).toEqual({
+      ...values.specificity,
+      reply: expected,
+    });
+  });
+
+  it('specificity without reply key stays without it', async () => {
+    fetchMock.mockResolvedValue(completion(JSON.stringify(values.specificity)));
+    expect((await provider.call('specificity', {}, 1000)).value).not.toHaveProperty('reply');
+  });
+
+  it('specificity with an unknown extra key is invalid', async () => {
+    fetchMock.mockResolvedValue(completion(JSON.stringify({
+      ...values.specificity,
+      reply: 'x',
+      extra: 1,
+    })));
+    await expect(provider.call('specificity', {}, 1000)).rejects.toMatchObject({ outcome: 'invalid' });
+  });
+
+  it('actor reply with a link or code is invalid', async () => {
+    fetchMock.mockResolvedValue(completion('Иди сюда https://evil.example'));
+    await expect(provider.call('actor', {}, 1000)).rejects.toMatchObject({ outcome: 'invalid' });
+  });
+
   it('accepts an unknown judge weakSpotHit and preserves its dashes and score boundaries', async () => {
     fetchMock.mockResolvedValue(completion(JSON.stringify(judgeValue)));
     expect((await provider.call('judge', { card: { weakSpots: [{ key: 'known' }] } }, 1000)).value).toEqual(judgeValue);

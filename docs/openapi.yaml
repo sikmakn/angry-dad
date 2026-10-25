@@ -44,8 +44,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -139,8 +139,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -244,8 +244,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -369,8 +369,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -490,8 +490,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -555,8 +555,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -644,8 +644,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -726,8 +726,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -861,8 +861,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -921,8 +921,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -981,8 +981,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1062,8 +1062,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1191,8 +1191,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1279,8 +1279,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1347,8 +1347,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1449,8 +1449,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1516,8 +1516,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1609,8 +1609,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1676,8 +1676,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1866,8 +1866,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -1933,8 +1933,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2000,8 +2000,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2097,8 +2097,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2173,8 +2173,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2248,8 +2248,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2327,8 +2327,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2394,8 +2394,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2462,8 +2462,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2545,8 +2545,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2644,8 +2644,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2730,8 +2730,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2854,8 +2854,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -2943,8 +2943,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3032,8 +3032,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3115,8 +3115,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3198,8 +3198,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3282,8 +3282,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3406,8 +3406,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3471,8 +3471,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3542,8 +3542,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3606,8 +3606,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3676,8 +3676,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3786,8 +3786,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -3852,8 +3852,8 @@ paths:
                 validation:
                   value:
                     errors:
-                      - field: quietHours
-                        message: Quiet hours must not exceed 12 hours
+                      - field: timeZone
+                        message: timeZone must be a valid IANA time zone
                     status: 400
                     title: validation failed
                     type: urn:angry-dad:problem:validation_failed
@@ -4441,8 +4441,8 @@ components:
           allOf:
             - $ref: "#/components/schemas/QuietHours"
           description: |
-            Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до
-            конца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.
+            Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца
+            (через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.
         respect:
           description: Уважение. Экран показывает целую часть с округлением вниз.
           maximum: 100
@@ -4546,6 +4546,13 @@ components:
             - male
             - female
           type: string
+        quietHours:
+          allOf:
+            - $ref: "#/components/schemas/QuietHours"
+          description: |
+            Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца
+            (через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.
+            Обязательно: пользователь выбирает при старте (по умолчанию в приложении с 22:00 до 09:00).
         role:
           description: Вредный родитель
           enum:
@@ -4558,6 +4565,7 @@ components:
       required:
         - role
         - gender
+        - quietHours
       type: object
     OnboardingResponse:
       properties:
@@ -5570,8 +5578,8 @@ components:
           allOf:
             - $ref: "#/components/schemas/QuietHours"
           description: |
-            Тихие часы в минутах от полуночи местного времени, шаг 30. Длина интервала от начала до
-            конца (через полночь тоже) от 0 до 12 часов; длина 0 означает, что тихих часов нет.
+            Тихие часы в минутах от полуночи местного времени, шаг 30. Интервал от начала до конца
+            (через полночь тоже) любой длины; если начало и конец совпадают, тихих часов нет.
         role:
           description: Вредный родитель
           enum:
