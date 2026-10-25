@@ -35,12 +35,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -51,7 +45,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -130,12 +124,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -146,7 +134,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -235,12 +223,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -251,7 +233,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -360,12 +342,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -376,7 +352,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -481,12 +457,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -497,7 +467,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -546,12 +516,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -562,7 +526,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -635,12 +599,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -651,7 +609,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -717,12 +675,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -733,7 +685,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "404":
           content:
             application/problem+json:
@@ -852,12 +804,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -868,7 +814,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -912,12 +858,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -928,7 +868,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -972,12 +912,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -988,7 +922,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1053,12 +987,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1069,7 +997,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1182,12 +1110,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1198,7 +1120,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1270,12 +1192,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1286,7 +1202,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1338,12 +1254,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1354,7 +1264,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1440,12 +1350,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1456,7 +1360,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1507,12 +1411,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1523,7 +1421,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1600,12 +1498,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1616,7 +1508,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1667,12 +1559,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1683,7 +1569,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1857,12 +1743,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1873,7 +1753,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1924,12 +1804,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -1940,7 +1814,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -1991,12 +1865,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2007,7 +1875,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2088,12 +1956,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2104,7 +1966,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2164,12 +2026,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2180,7 +2036,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2239,12 +2095,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2255,7 +2105,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2318,12 +2168,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2334,7 +2178,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2385,12 +2229,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2401,7 +2239,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2453,12 +2291,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2469,7 +2301,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2536,12 +2368,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2552,7 +2378,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2635,12 +2461,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2651,7 +2471,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2721,12 +2541,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2737,7 +2551,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2845,12 +2659,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2861,7 +2669,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный packageId или заголовок Idempotency-Key. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный packageId или заголовок Idempotency-Key. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -2934,12 +2742,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -2950,7 +2752,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3023,12 +2825,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3039,7 +2835,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3106,12 +2902,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3122,7 +2912,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3189,12 +2979,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3205,7 +2989,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3273,12 +3057,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3289,7 +3067,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3397,12 +3175,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3413,7 +3185,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3436,7 +3208,7 @@ paths:
       tags:
         - tasks
     post:
-      description: "Проверяет конкретность названия и определяет размер лёгкой моделью (до 3 с), сохраняет задачу и первый период. one_time требует deadline, recurring требует recurrence и допускает anchorTime. Дедлайн от 15 минут до 365 дней; «Сегодня/Завтра» без времени клиент превращает в 22:00 местного времени. Расплывчатое название: 400 task_vague с reply onVague. Модель недоступна: 503 ai_unavailable, задача не сохранена. Превышение настраиваемого суточного лимита (по умолчанию 50 проверок): 429 daily_limit_reached. Ключа повтора нет: каждый успешный вызов создаёт отдельную задачу. Требует завершённый старт. Уведомления ведёт единый адаптивный планировщик пользователя, а не отдельные серии каждой задачи; обязательных минимумов проверок задачи нет."
+      description: "Сохраняет задачу без ИИ-проверки и суточной квоты проверок. Название после обрезки пробелов — от 1 до 120 символов. Новые задачи получают размер medium. Ответ персонажа выбирается из библиотеки on_task_set. one_time требует deadline, recurring требует recurrence и допускает anchorTime. Дедлайн от 15 минут до 365 дней; «Сегодня/Завтра» без времени клиент превращает в 22:00 местного времени. Ключа повтора нет: каждый успешный вызов создаёт отдельную задачу. Требует завершённый старт. Уведомления ведёт единый адаптивный планировщик пользователя, а не отдельные серии каждой задачи; обязательных минимумов проверок задачи нет."
       operationId: createTask
       parameters: []
       requestBody:
@@ -3462,12 +3234,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3478,7 +3244,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3491,24 +3257,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Problem"
           description: "Forbidden. Нет прав: onboarding_required для гостя, owner_only для не-владельца."
-        "429":
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-          description: "TooManyRequests. Превышен суточный лимит: daily_limit_reached."
         "500":
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
           description: "internal_error: внутренняя ошибка без раскрытия подробностей."
-        "503":
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-          description: "ServiceUnavailable. Временная недоступность: ai_unavailable, share_failed, payment_gateway_unavailable либо сбой обработки вебхука."
       summary: Поставить задачу
       tags:
         - tasks
@@ -3533,12 +3287,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3549,7 +3297,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3597,12 +3345,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3613,7 +3355,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3642,7 +3384,7 @@ paths:
       tags:
         - tasks
     patch:
-      description: "title переименовывает активную задачу с той же проверкой конкретности и суточным лимитом. Дедлайн меняется только продлением. status=stopped останавливает активную повторяющуюся задачу, отменяет сообщения, закрывает период без изменения уважения и возвращает onDelete. Другие переходы не принимаются. Закрытая/остановленная задача: 409 period_not_active. Требует завершённый старт."
+      description: "title переименовывает активную задачу без ИИ-проверки и суточной квоты. Название после обрезки пробелов — от 1 до 120 символов. Размер существующей задачи сохраняется. Дедлайн меняется только продлением. status=stopped останавливает активную повторяющуюся задачу, отменяет сообщения, закрывает период без изменения уважения и возвращает onDelete. Другие переходы не принимаются. Закрытая/остановленная задача: 409 period_not_active. Требует завершённый старт."
       operationId: updateTask
       parameters:
         - in: path
@@ -3667,12 +3409,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3683,7 +3419,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3720,24 +3456,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Problem"
           description: "Conflict. Конфликт состояния: period_not_active, extension_denied, retry_unavailable, already_rated, already_onboarded, last_enabled_phrase, insufficient_strikes, revoke_exceeds_balance, refund_not_allowed, role_mismatch, turn_in_progress, idempotency_key_reused."
-        "429":
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-          description: "TooManyRequests. Превышен суточный лимит: daily_limit_reached."
         "500":
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
           description: "internal_error: внутренняя ошибка без раскрытия подробностей."
-        "503":
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-          description: "ServiceUnavailable. Временная недоступность: ai_unavailable, share_failed, payment_gateway_unavailable либо сбой обработки вебхука."
       summary: Переименовать или остановить задачу
       tags:
         - tasks
@@ -3777,12 +3501,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3793,7 +3511,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:
@@ -3843,12 +3561,6 @@ paths:
           content:
             application/problem+json:
               examples:
-                vague:
-                  value:
-                    reply: Это что за задача? Конкретно.
-                    status: 400
-                    title: task vague
-                    type: urn:angry-dad:problem:task_vague
                 validation:
                   value:
                     errors:
@@ -3859,7 +3571,7 @@ paths:
                     type: urn:angry-dad:problem:validation_failed
               schema:
                 $ref: "#/components/schemas/Problem"
-          description: "validation_failed: update_id должен быть неотрицательным безопасным целым числом. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply."
+          description: "validation_failed: update_id должен быть неотрицательным безопасным целым числом. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors."
         "401":
           content:
             application/problem+json:

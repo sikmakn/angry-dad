@@ -5,6 +5,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { extensionPhrases } from './extension-phrases';
 import { rolePhrases } from './role-phrases';
+import { taskSetPhrases, legacyTaskSetPhrases, legacyRoleTaskSetPhrases } from './task-set-phrases';
 const notStartedReplies = [
   'Даже не начал(а)? Зато кнопку нажать силы нашлись. Начинай.',
   'Ноль сделано, зато планы были грандиозные. Удиви меня: начни.',
@@ -14,7 +15,7 @@ const notStartedReplies = [
 ];
 const phrases: Record<string, string[]> = {
   on_greeting: ['Ну что, опять без дела?', 'Ты ко мне за советом или оправданиями?', 'Заходи. Покажешь, чем занят.', 'Давно тебя не видно. Сделал хоть что-нибудь?', 'Сначала дело, потом разговоры.'],
-  on_task_set: ['Записал. Посмотрим.', 'Вот и проверим, чего стоят твои слова.', 'Теперь у обещания есть срок.', 'Дело назвал - назад не отговоришься.', 'Жду результат, а не красивый план.', 'Хорошо. За язык тебя никто не тянул.', 'Слова услышал. Дальше показывай дело.', 'Посмотрим, доберёшься ли ты до конца.'],
+  on_task_set: taskSetPhrases,
   on_delete: ['Опять бросаешь всё, что начинаешь.', 'Удалить проще, чем сделать, да?', 'Вот и весь твой настрой.', 'Как удобно: нет задачи - нет обещания.', 'Сильный ход. Прямо по кнопке удаления.'],
   on_vague: ['Мечты сюда не пиши. Что конкретно сделаешь?', 'Это туман, а не задача.', 'Как я пойму, что ты закончил(а)?', 'Назови результат, а не настроение.', 'Красиво звучит. А делать-то что?'],
   on_reminder: ['До срока {left}. Где результат?', 'Про {task} помнишь? Осталось {left}.', 'Время идёт. Оправдания уже готовишь?', 'Обещание всё ещё висит. Покажи дело.', 'Часы работают даже тогда, когда ты отдыхаешь.'],
@@ -90,6 +91,17 @@ export class SeedService implements OnModuleInit {
             const source = category === 'on_check_in_reply' && level === 2 ? notStartedReplies : category === 'on_excuse' ? extensionPhrases[level!] : defeatLevel === 'any' ? templates : ['Ладно, после того спора спрошу спокойнее: как {task}?', 'Я помню твой характер. А дело-то движется?'];
             for (const [index, template] of source.entries()) {
               const _id = `seed-${role}-${category}-${level ?? 0}-${defeatLevel}-${index}`;
+              if (category === 'on_task_set') {
+                operations.push({
+                  updateOne: {
+                    filter: {
+                      _id,
+                      template: legacyTaskSetPhrases[index],
+                    },
+                    update: { $set: { template } },
+                  },
+                });
+              }
               if (category === 'on_check_in_reply' && level === 2) {
                 // Upgrade untouched seed text while preserving owner edits and ratings.
                 operations.push({
@@ -139,6 +151,17 @@ export class SeedService implements OnModuleInit {
         const leveled = /^(.*)_([123])$/.exec(key);
         const [category, level] = special[key] ?? (leveled ? [leveled[1], Number(leveled[2])] : [key, undefined]);
         for (const [index, template] of templates.entries()) {
+          if (category === 'on_task_set') {
+            operations.push({
+              updateOne: {
+                filter: {
+                  _id: `seed2-${role}-${key}-${index}`,
+                  template: legacyRoleTaskSetPhrases[role][index],
+                },
+                update: { $set: { template } },
+              },
+            });
+          }
           operations.push({
             updateOne: {
               filter: { _id: `seed2-${role}-${key}-${index}` },

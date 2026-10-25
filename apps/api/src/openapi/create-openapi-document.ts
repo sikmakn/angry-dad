@@ -5,7 +5,7 @@ import { ProblemDto } from './problem.dto';
 import { operationDescriptions } from './operation-descriptions';
 
 const errorDescriptions: Readonly<Record<string, string>> = {
-  400: 'Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply.',
+  400: 'Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors.',
   401: 'Нет или не годятся данные Telegram: unauthorized либо init_data_expired. Получите свежие данные запуска.',
   403: 'Нет прав: onboarding_required для гостя, owner_only для не-владельца.',
   404: 'Ресурс не найден, включая чужой ресурс.',
@@ -130,7 +130,6 @@ const problemExamples: Record<string, Record<string, { value: Record<string, unk
         message: 'timeZone must be a valid IANA time zone',
       }],
     }),
-    vague: problemExample('task_vague', 400, { reply: 'Это что за задача? Конкретно.' }),
   },
   409: {
     closed: problemExample('period_not_active', 409, { periodStatus: 'failed' }),

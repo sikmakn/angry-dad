@@ -8,7 +8,6 @@ import type { Period } from '../../database/schemas/period.schema';
 import type { User } from '../../database/schemas/user.schema';
 import { ApiError } from '../../common/errors/api-error';
 import type { PageInput } from '../../common/utils/presentation';
-import { AiService } from '../ai/ai.service';
 import { PhrasesService } from '../phrases/phrases.service';
 import { EventPublisher } from '../../common/events/event-publisher.service';
 import { RecurrenceService } from './services/recurrence.service';
@@ -18,7 +17,7 @@ import { PeriodsService } from './services/periods.service';
 import { DeadlineSweeperService } from './services/deadline-sweeper.service';
 @Injectable()
 export class TasksService {
-  constructor(private readonly db: DatabaseService, private readonly ai: AiService, private readonly phrases: PhrasesService, private readonly events: EventPublisher, private readonly recurrence: RecurrenceService, private readonly reader: TaskReaderService, private readonly periods: PeriodsService, private readonly sweeper: DeadlineSweeperService, private readonly notifications: NotificationStateService) { }
+  constructor(private readonly db: DatabaseService, private readonly phrases: PhrasesService, private readonly events: EventPublisher, private readonly recurrence: RecurrenceService, private readonly reader: TaskReaderService, private readonly periods: PeriodsService, private readonly sweeper: DeadlineSweeperService, private readonly notifications: NotificationStateService) { }
   async create(user: User, input: CreateTaskRequestView): Promise<TaskActionResponseView> {
     if ((input.kind === 'one_time' && (!input.deadline || input.recurrence || input.anchorTime)) || (input.kind === 'recurring' && (!input.recurrence || input.deadline))) {
       throw ApiError.invalidRequest();
@@ -34,10 +33,6 @@ export class TasksService {
     if (!title) {
       throw ApiError.invalidRequest();
     }
-    const assessment = await this.ai.checkTask(user, title, { deadline });
-    if (!assessment.specific) {
-      throw new TasksError(400, 'task_vague', { reply: assessment.reply ?? (await this.phrases.pick(user, 'on_vague')).text });
-    }
     const committed = await this.db.transaction(async (session) => {
       const exists = await this.db.model('User').findOneAndUpdate({
         _id: user._id,
@@ -50,7 +45,7 @@ export class TasksService {
         userId: user._id,
         title,
         kind: input.kind,
-        size: assessment.size,
+        size: 'medium',
         recurrence: input.recurrence,
         anchorTime: input.anchorTime,
         status: 'active',
@@ -76,8 +71,7 @@ export class TasksService {
         await this.db.model('Task').updateOne({ _id: task._id }, { $set: { currentPeriodId: period._id } }, { session });
       }
       await this.notifications.signal(user._id, session);
-      const phrase: { text: string;
-        phraseId?: string; } = assessment.reply ? { text: assessment.reply } : await this.phrases.pick(user, 'on_task_set', undefined, title, window.deadline, session);
+      const phrase = await this.phrases.pick(user, 'on_task_set', undefined, title, window.deadline, session);
       const response = {
         task: await this.view(task, session),
         reply: phrase.text || null,
@@ -114,11 +108,8 @@ export class TasksService {
     if (task.status !== 'active') {
       throw new TasksError(409, 'period_not_active', { periodStatus: task.status === 'stopped' ? 'stopped' : 'done' });
     }
-    if (input.title) {
-      const result = await this.ai.checkTask(user, input.title.trim());
-      if (!result.specific) {
-        throw new TasksError(400, 'task_vague', { reply: (await this.phrases.pick(user, 'on_vague')).text });
-      }
+    if (input.title !== undefined && !input.title.trim()) {
+      throw ApiError.invalidRequest();
     }
     if (input.status && task.kind !== 'recurring') {
       throw ApiError.invalidRequest();

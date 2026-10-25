@@ -88,10 +88,7 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
   }
   // Optional operation-specific errors keep each status/code pair inside its contract.
   const failure = new URLSearchParams(window.location.search).get('mockFailure');
-  if (failure === 'daily-limit' && (operation === 'createTask' || operation === 'updateTask')) {
-    return problem('urn:angry-dad:problem:daily_limit_reached', 429);
-  }
-  if (failure === 'ai' && (operation === 'createTask' || operation === 'updateTask' || operation === 'createOwnerParaphrases')) {
+  if (failure === 'ai' && operation === 'createOwnerParaphrases') {
     return problem('urn:angry-dad:problem:ai_unavailable', 503);
   }
   if (failure === 'extension' && operation === 'extendPeriod') {
@@ -149,9 +146,6 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       if (data.deadline && (!Number.isFinite(Date.parse(data.deadline)) || Date.parse(data.deadline) < Date.now() + 15 * 60000 || Date.parse(data.deadline) > Date.now() + 365 * 86400000)) {
         return problem('urn:angry-dad:problem:deadline_out_of_range', 400);
       }
-      if (data.title.toLowerCase().includes('стать лучше')) {
-        return problem('urn:angry-dad:problem:task_vague', 400, { reply: 'Это что за задача? Конкретно.' });
-      }
       const task: Task = { ...data, title: data.title.trim(), id: crypto.randomUUID(), status: 'active', size: 'medium', createdAt: now(), currentPeriod: { id: crypto.randomUUID(), startsAt: now(), moodFrom: now(), deadline: data.deadline ?? new Date(Date.now() + 6 * 3600000).toISOString(), status: 'active', retryUsed: false } };
       tasks.unshift(task);
       return HttpResponse.json<Schema<'TaskActionResponse'>>({ task, reply: 'Записал. Посмотрим.' }, { status: 201 });
@@ -169,10 +163,10 @@ async function resolve(operation: ClientOperation, request: Request, params: Rec
       if (data.status && task.kind !== 'recurring') {
         return problem('urn:angry-dad:problem:validation_failed', 400);
       }
-      if (data.title?.includes('стать лучше')) {
-        return problem('urn:angry-dad:problem:task_vague', 400, { reply: 'Это что за задача? Конкретно.' });
+      if (data.title !== undefined && (!data.title.trim() || data.title.trim().length > 120)) {
+        return problem('urn:angry-dad:problem:validation_failed', 400);
       }
-      Object.assign(task, data);
+      Object.assign(task, data, data.title !== undefined ? { title: data.title.trim() } : {});
       if (data.status) {
         delete task.nextPeriodStartsAt;
       }

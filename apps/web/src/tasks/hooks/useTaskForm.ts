@@ -136,7 +136,7 @@ export function useTaskForm(me: Me) {
       rememberTaskSubmission(me.id, { title, schedule });
       await create.run({ body: { title: title.trim(), kind, ...(deadline ? { deadline } : { recurrence, ...(anchorTime ? { anchorTime } : {}) }) } });
     } catch (error) {
-      const knownRejection = error instanceof ApiError && (error.status < 500 || error.problem?.type.endsWith(':ai_unavailable'));
+      const knownRejection = error instanceof ApiError && error.status < 500;
       if (knownRejection) {
         clearTaskSubmission(me.id);
       } else if (mounted.current) {

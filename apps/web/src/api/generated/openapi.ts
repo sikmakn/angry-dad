@@ -810,7 +810,7 @@ export interface paths {
         put?: never;
         /**
          * Поставить задачу
-         * @description Проверяет конкретность названия и определяет размер лёгкой моделью (до 3 с), сохраняет задачу и первый период. one_time требует deadline, recurring требует recurrence и допускает anchorTime. Дедлайн от 15 минут до 365 дней; «Сегодня/Завтра» без времени клиент превращает в 22:00 местного времени. Расплывчатое название: 400 task_vague с reply onVague. Модель недоступна: 503 ai_unavailable, задача не сохранена. Превышение настраиваемого суточного лимита (по умолчанию 50 проверок): 429 daily_limit_reached. Ключа повтора нет: каждый успешный вызов создаёт отдельную задачу. Требует завершённый старт. Уведомления ведёт единый адаптивный планировщик пользователя, а не отдельные серии каждой задачи; обязательных минимумов проверок задачи нет.
+         * @description Сохраняет задачу без ИИ-проверки и суточной квоты проверок. Название после обрезки пробелов — от 1 до 120 символов. Новые задачи получают размер medium. Ответ персонажа выбирается из библиотеки on_task_set. one_time требует deadline, recurring требует recurrence и допускает anchorTime. Дедлайн от 15 минут до 365 дней; «Сегодня/Завтра» без времени клиент превращает в 22:00 местного времени. Ключа повтора нет: каждый успешный вызов создаёт отдельную задачу. Требует завершённый старт. Уведомления ведёт единый адаптивный планировщик пользователя, а не отдельные серии каждой задачи; обязательных минимумов проверок задачи нет.
          */
         post: operations["createTask"];
         delete?: never;
@@ -842,7 +842,7 @@ export interface paths {
         head?: never;
         /**
          * Переименовать или остановить задачу
-         * @description title переименовывает активную задачу с той же проверкой конкретности и суточным лимитом. Дедлайн меняется только продлением. status=stopped останавливает активную повторяющуюся задачу, отменяет сообщения, закрывает период без изменения уважения и возвращает onDelete. Другие переходы не принимаются. Закрытая/остановленная задача: 409 period_not_active. Требует завершённый старт.
+         * @description title переименовывает активную задачу без ИИ-проверки и суточной квоты. Название после обрезки пробелов — от 1 до 120 символов. Размер существующей задачи сохраняется. Дедлайн меняется только продлением. status=stopped останавливает активную повторяющуюся задачу, отменяет сообщения, закрывает период без изменения уважения и возвращает onDelete. Другие переходы не принимаются. Закрытая/остановленная задача: 409 period_not_active. Требует завершённый старт.
          */
         patch: operations["updateTask"];
         trace?: never;
@@ -1644,7 +1644,7 @@ export interface operations {
                     "application/json": components["schemas"]["BattleDialogResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1716,7 +1716,7 @@ export interface operations {
                     "application/json": components["schemas"]["BattleMessageListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1801,7 +1801,7 @@ export interface operations {
                     "application/json": components["schemas"]["TurnResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1897,7 +1897,7 @@ export interface operations {
                     "application/json": components["schemas"]["BattleMessageResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1978,7 +1978,7 @@ export interface operations {
                     "application/json": components["schemas"]["FeedListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2040,7 +2040,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodActionResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2120,7 +2120,7 @@ export interface operations {
                     "application/json": components["schemas"]["FeedMessageResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2195,7 +2195,7 @@ export interface operations {
                     "application/json": components["schemas"]["FeedMessageResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2367,7 +2367,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2427,7 +2427,7 @@ export interface operations {
                     "application/json": components["schemas"]["LeaderboardParticipationResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2487,7 +2487,7 @@ export interface operations {
                     "application/json": components["schemas"]["OnboardingResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2548,7 +2548,7 @@ export interface operations {
                     "application/json": components["schemas"]["StrikeOperationListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2702,7 +2702,7 @@ export interface operations {
                     "application/json": components["schemas"]["GameSettingsResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2764,7 +2764,7 @@ export interface operations {
                     "application/json": components["schemas"]["OwnerJournalListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2823,7 +2823,7 @@ export interface operations {
                     "application/json": components["schemas"]["MetricsResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2932,7 +2932,7 @@ export interface operations {
                     "application/json": components["schemas"]["OwnerPackageResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2994,7 +2994,7 @@ export interface operations {
                     "application/json": components["schemas"]["OwnerPackageResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3066,7 +3066,7 @@ export interface operations {
                     "application/json": components["schemas"]["PaymentListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3128,7 +3128,7 @@ export interface operations {
                     "application/json": components["schemas"]["PaymentResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3268,7 +3268,7 @@ export interface operations {
                     "application/json": components["schemas"]["PhraseListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3330,7 +3330,7 @@ export interface operations {
                     "application/json": components["schemas"]["PhraseResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3392,7 +3392,7 @@ export interface operations {
                     "application/json": components["schemas"]["PhraseResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3474,7 +3474,7 @@ export interface operations {
                     "application/json": components["schemas"]["PhraseItemsResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3550,7 +3550,7 @@ export interface operations {
                     "application/json": components["schemas"]["RoleCardResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3621,7 +3621,7 @@ export interface operations {
                     "application/json": components["schemas"]["RoleCardResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3683,7 +3683,7 @@ export interface operations {
                     "application/json": components["schemas"]["SupportTicketListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3745,7 +3745,7 @@ export interface operations {
                     "application/json": components["schemas"]["SupportTicketResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3812,7 +3812,7 @@ export interface operations {
                     "application/json": components["schemas"]["OwnerUserResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3884,7 +3884,7 @@ export interface operations {
                     "application/json": components["schemas"]["StrikeOperationListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3971,7 +3971,7 @@ export interface operations {
                     "application/json": components["schemas"]["StrikeOperationResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4047,7 +4047,7 @@ export interface operations {
                     "application/json": components["schemas"]["OwnerStrikeBalanceResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4177,7 +4177,7 @@ export interface operations {
                     "application/json": components["schemas"]["InvoiceResponse"];
                 };
             };
-            /** @description Неверный packageId или заголовок Idempotency-Key. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный packageId или заголовок Idempotency-Key. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4262,7 +4262,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodActionResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4342,7 +4342,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodActionResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4418,7 +4418,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodActionResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4494,7 +4494,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodActionResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4572,7 +4572,7 @@ export interface operations {
                     "application/json": components["schemas"]["ShareResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4663,7 +4663,7 @@ export interface operations {
                     "application/json": components["schemas"]["TaskListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4725,7 +4725,7 @@ export interface operations {
                     "application/json": components["schemas"]["TaskActionResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4752,26 +4752,8 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description TooManyRequests. Превышен суточный лимит: daily_limit_reached. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
             /** @description internal_error: внутренняя ошибка без раскрытия подробностей. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description ServiceUnavailable. Временная недоступность: ai_unavailable, share_failed, payment_gateway_unavailable либо сбой обработки вебхука. */
-            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4801,7 +4783,7 @@ export interface operations {
                     "application/json": components["schemas"]["TaskResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4868,7 +4850,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReplyResponse"];
                 };
             };
-            /** @description Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4939,7 +4921,7 @@ export interface operations {
                     "application/json": components["schemas"]["TaskActionResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4984,26 +4966,8 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description TooManyRequests. Превышен суточный лимит: daily_limit_reached. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
             /** @description internal_error: внутренняя ошибка без раскрытия подробностей. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description ServiceUnavailable. Временная недоступность: ai_unavailable, share_failed, payment_gateway_unavailable либо сбой обработки вебхука. */
-            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5038,7 +5002,7 @@ export interface operations {
                     "application/json": components["schemas"]["PeriodListResponse"];
                 };
             };
-            /** @description BadRequest. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description BadRequest. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5107,7 +5071,7 @@ export interface operations {
                     "application/json": components["schemas"]["WebhookAck"];
                 };
             };
-            /** @description validation_failed: update_id должен быть неотрицательным безопасным целым числом. Неверный запрос: validation_failed, task_vague, deadline_out_of_range. Ошибки валидации могут содержать errors; task_vague — reply. */
+            /** @description validation_failed: update_id должен быть неотрицательным безопасным целым числом. Неверный запрос: validation_failed, deadline_out_of_range. Ошибки валидации могут содержать errors. */
             400: {
                 headers: {
                     [name: string]: unknown;

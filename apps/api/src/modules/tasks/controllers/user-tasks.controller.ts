@@ -93,14 +93,6 @@ export class UserTasksController {
     status: 403,
     description: 'Forbidden',
   })
-  @ApiResponse({
-    status: 429,
-    description: 'TooManyRequests',
-  })
-  @ApiResponse({
-    status: 503,
-    description: 'ServiceUnavailable',
-  })
   async createTask(
     @Req()
     request: AuthRequest,
@@ -183,14 +175,6 @@ export class UserTasksController {
   @ApiResponse({
     status: 409,
     description: 'Conflict',
-  })
-  @ApiResponse({
-    status: 429,
-    description: 'TooManyRequests',
-  })
-  @ApiResponse({
-    status: 503,
-    description: 'ServiceUnavailable',
   })
   async updateTask(
     @Req()

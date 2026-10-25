@@ -40,7 +40,7 @@ export function HomeScreen({ me }: { me: Me }) {
       <h2>{`Активные задачи · ${items.length}`}</h2>
       <Feedback pending={tasks.isPending} error={tasks.error} />
       {tasks.isError && <button className="btn ghost" onClick={() => void tasks.refetch()}>Повторить</button>}
-      {!tasks.isPending && !tasks.isError && !items.length && <p className="card">Напиши, что нужно сделать, и к какому сроку или как часто. Расплывчатое («стать лучше») не примут. Проверки, напоминания и упрёки начнутся, как только задача появится.</p>}
+      {!tasks.isPending && !tasks.isError && !items.length && <p className="card">Напиши, что нужно сделать, и к какому сроку или как часто. Проверки, напоминания и упрёки начнутся, как только задача появится.</p>}
       <ul className="list">
         {items.map(task => (
           <li key={task.id}>

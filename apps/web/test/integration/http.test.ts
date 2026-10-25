@@ -43,13 +43,13 @@ describe('typed HTTP transport with MSW', () => {
     expect(errorText(error)).toContain('нажми кнопку «Открыть Батю»');
   });
 
-  it.each([403, 409, 429, 503])('preserves server problem and does not retry HTTP %i', async (status) => {
+  it.each([[403, 'onboarding_required'], [409, 'turn_in_progress'], [429, 'daily_limit_reached'], [503, 'ai_unavailable']] as const)('preserves battle server problem and does not retry HTTP %i', async (status, code) => {
     let calls = 0;
-    server.use(http.post(`${base}/tasks`, () => {
+    server.use(http.post(`${base}/battle/father/messages`, () => {
       calls++;
-      return problem(status, 'urn:angry-dad:problem:ai_unavailable', 'Попробуй позже');
+      return problem(status, `urn:angry-dad:problem:${code}`, 'Попробуй позже');
     }));
-    const failure = await request('createTask', { body: { title: task.title, kind: 'recurring', recurrence: { type: 'daily' } } }).catch((error: unknown) => error);
+    const failure = await request('createBattleMessage', { path: { role: 'father' }, body: { text: 'По делу' }, key: 'attempt-1' }).catch((error: unknown) => error);
     expect(failure).toMatchObject({ status, problem: { reply: 'Попробуй позже' } });
     expect(errorText(failure)).toBe('Попробуй позже');
     expect(calls).toBe(1);

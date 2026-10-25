@@ -22,7 +22,7 @@ export function TaskNewScreen({ me, go }: { me: Me; go: (route: string) => void 
           <span className="tag" data-size={task.size}>{sizeLabels[task.size]}</span>
           {task.currentPeriod && <p>{`Срок${task.kind === 'recurring' ? ' текущего периода' : ''}: ${formatDate(task.currentPeriod.deadline, me.timeZone)}`}</p>}
           {task.kind === 'one_time'
-            ? <p className="small muted">{`Размер определён при постановке, поменять его нельзя. За закрытие: +${rewards[task.size]} к уважению.`}</p>
+            ? <p className="small muted">{`Новые задачи получают средний размер. За закрытие: +${rewards[task.size]} к уважению.`}</p>
             : <p className="small muted">{`Ориентир: ${task.anchorTime ?? 'без ориентира'}. Размер один на все периоды. За каждый закрытый период: +${rewards[task.size]} к уважению.`}</p>}
         </div>
         {form.saved.reply && <Quote text={form.saved.reply} role={me.role} />}
@@ -52,7 +52,7 @@ export function TaskNewScreen({ me, go }: { me: Me; go: (route: string) => void 
         </fieldset>
         {form.validation && <p role="alert" className="banner">{form.validation}</p>}
         <Feedback error={form.error} />
-        <button className="btn" disabled={!form.title.trim() || !!form.scheduleError || form.pending || form.uncertain}>{form.pending ? `${me.role === 'mother' ? 'Мама' : 'Батя'} читает…` : 'Поставить'}</button>
+        <button className="btn" disabled={!form.title.trim() || !!form.scheduleError || form.pending || form.uncertain}>{form.pending ? 'Сохраняем…' : 'Поставить'}</button>
       </form>
       {form.uncertain && (
         <section className="card stack" aria-labelledby="task-unknown-title">

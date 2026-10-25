@@ -43,7 +43,7 @@ describe('task creation through real client', () => {
     fireEvent.change(screen.getByLabelText('Примерно во сколько (необязательно)'), { target: { value: '20:00' } });
     await user.dblClick(screen.getByRole('button', { name: 'Поставить' }));
     await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(screen.getByRole('button', { name: 'Батя читает…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Сохраняем…' })).toBeDisabled();
     expect(bodies[0]).toEqual({ title: 'повторять английский каждый день', kind: 'recurring', recurrence: { type: 'daily' }, anchorTime: '20:00' });
     finish();
     expect(await screen.findByRole('heading', { name: 'Новая задача поставлена' })).toBeVisible();
@@ -71,33 +71,80 @@ describe('task creation through real client', () => {
     expect(body?.deadline).toMatch(/T15:35:00/);
   });
 
-  it('preserves title and schedule after a known AI rejection and allows explicit retry', async () => {
+  it.each(['стать лучше', 'я', 'я'.repeat(120)])('accepts a nonempty arbitrary title of %s and displays the server response', async (title) => {
+    const bodies: unknown[] = [];
+    server.use(http.post(`${base}/tasks`, async ({ request }) => {
+      bodies.push(await request.json());
+      return HttpResponse.json({ task: { ...task, title }, reply: 'Записал. Посмотрим.' } satisfies Schema<'TaskActionResponse'>, { status: 201 });
+    }));
+    newTask();
+    const user = userEvent.setup();
+    const input = screen.getByLabelText('Что нужно сделать');
+    await user.type(input, title.length === 120 ? `${title}лишнее` : `  ${title}  `);
+    if (title.length === 120) {
+      expect(input).toHaveValue(title);
+    }
+    await user.click(screen.getByRole('button', { name: /^Завтра/ }));
+    await user.click(screen.getByRole('button', { name: 'Поставить' }));
+    expect(await screen.findByRole('heading', { name: 'Новая задача поставлена' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: title })).toBeVisible();
+    expect(screen.getByText('Средняя задача')).toBeVisible();
+    expect(screen.getByText('Записал. Посмотрим.')).toBeVisible();
+    expect(bodies).toEqual([{ title, kind: 'one_time', deadline: expect.any(String) }]);
+  });
+
+  it('does not submit whitespace-only titles', async () => {
+    const called = vi.fn();
+    server.use(http.post(`${base}/tasks`, () => {
+      called();
+      return HttpResponse.json({ task, reply: null }, { status: 201 });
+    }));
+    newTask();
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Что нужно сделать'), '   ');
+    expect(screen.getByRole('button', { name: 'Поставить' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Поставить' }));
+    expect(called).not.toHaveBeenCalled();
+  });
+
+  it('preserves title and schedule after a validation rejection and allows explicit retry', async () => {
     let calls = 0;
     server.use(http.post(`${base}/tasks`, () => {
       calls++;
-      return problem(503, 'urn:angry-dad:problem:ai_unavailable', 'Попробуй позже');
+      return calls === 1
+        ? problem(400, 'urn:angry-dad:problem:validation_failed', 'Проверь расписание')
+        : HttpResponse.json({ task: { ...task, kind: 'recurring', recurrence: { type: 'daily' } }, reply: 'Записал.' } satisfies Schema<'TaskActionResponse'>, { status: 201 });
     }));
     newTask();
     const user = await fillRecurring();
     await user.click(screen.getByRole('button', { name: 'Поставить' }));
-    expect(await screen.findByText('Попробуй позже')).toBeVisible();
+    expect(await screen.findByText('Проверь расписание')).toBeVisible();
     expect(screen.getByLabelText('Что нужно сделать')).toHaveValue('повторять английский каждый день');
     expect(screen.getByLabelText('Как часто')).toHaveValue('daily');
     await user.click(screen.getByRole('button', { name: 'Поставить' }));
-    await waitFor(() => expect(calls).toBe(2));
+    expect(await screen.findByRole('heading', { name: 'Новая задача поставлена' })).toBeVisible();
+    expect(calls).toBe(2);
   });
 
-  it('keeps an unknown POST blocked across remount until list review and explicit acknowledgement', async () => {
+  it.each(['network', 500, 502, 503] as const)('keeps an unknown POST (%s) blocked across remount until list review and explicit acknowledgement', async (failure) => {
     let calls = 0;
     server.use(http.post(`${base}/tasks`, () => {
       calls++;
-      return HttpResponse.error();
+      // 502/503 simulate an intermediary failure, not a task-specific API rejection.
+      if (failure === 'network') {
+        return HttpResponse.error();
+      }
+      return failure === 500
+        ? problem(500, 'urn:angry-dad:problem:internal_error')
+        : new HttpResponse(null, { status: failure });
     }));
     const first = newTask();
     const user = await fillRecurring();
     await user.click(screen.getByRole('button', { name: 'Поставить' }));
     await screen.findByRole('heading', { name: 'Результат неизвестен' });
     expect(screen.getByRole('button', { name: 'Поставить' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Поставить' }));
+    expect(calls).toBe(1);
     first.unmount();
     newTask();
     expect(screen.getByRole('heading', { name: 'Результат неизвестен' })).toBeVisible();
@@ -130,6 +177,48 @@ describe('task creation through real client', () => {
     await user.type(screen.getByLabelText('Сколько дней в периоде'), value);
     expect.soft(screen.getByRole('button', { name: 'Поставить' })).toBeDisabled();
     expect.soft(screen.queryByText('От 2 до 30 дней')).toBeVisible();
+  });
+});
+
+describe('task renaming through real client', () => {
+  it.each(['стать лучше', 'я', 'я'.repeat(120)])('renames to %s without changing size and locks pending submission', async (title) => {
+    let current: Task = { ...task, size: 'large' };
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const bodies: unknown[] = [];
+    server.use(
+      http.get(`${base}/tasks/:id`, () => HttpResponse.json(current)),
+      http.patch(`${base}/tasks/:id`, async ({ request }) => {
+        bodies.push(await request.json());
+        await pending;
+        current = { ...current, title };
+        return HttpResponse.json({ task: current, reply: null } satisfies Schema<'TaskActionResponse'>);
+      }),
+    );
+    detail();
+    const user = userEvent.setup();
+    await screen.findByRole('heading', { name: task.title });
+    await user.click(screen.getByText('Другие действия'));
+    await user.click(screen.getByRole('button', { name: 'Изменить название' }));
+    const input = screen.getByLabelText('Что нужно сделать');
+    await user.clear(input);
+    await user.type(input, '   ');
+    expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled();
+    await user.clear(input);
+    await user.type(input, title.length === 120 ? `${title}лишнее` : `  ${title}  `);
+    if (title.length === 120) {
+      expect(input).toHaveValue(title);
+    }
+    await user.dblClick(screen.getByRole('button', { name: 'Сохранить' }));
+    await waitFor(() => expect(bodies).toEqual([{ title }]));
+    expect(screen.getByRole('button', { name: 'Сохранить' })).toBeDisabled();
+    finish();
+    expect(await screen.findByRole('heading', { name: title })).toBeVisible();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByText('Большая задача')).toBeVisible();
+    expect(bodies).toHaveLength(1);
   });
 });
 
