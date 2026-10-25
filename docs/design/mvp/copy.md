@@ -523,7 +523,7 @@
 | settings.quiet.legend | Тихие часы | [Настройки](screens/settings.html) · группа полей |
 | settings.quiet.from | С | [Настройки](screens/settings.html) · подпись поля времени |
 | settings.quiet.to | До | [Настройки](screens/settings.html) · подпись поля времени |
-| settings.quiet.hint | Бот молчит {hours} ч: с {from} до {to}. Шаг 30 минут. Если «с» и «до» совпадают, тихих часов нет. | [Настройки](screens/settings.html) · подсказка под полями |
+| settings.quiet.hint | Бот молчит {hours} ч: с {from} до {to}. Если «с» и «до» совпадают, тихих часов нет. | [Настройки](screens/settings.html) · подсказка под полями |
 | settings.quiet.off | Без тихих часов | [Настройки](screens/settings.html) · текстовая кнопка |
 | settings.quiet.off.title | Тихих часов нет (0 ч). | [Настройки](screens/settings.html) · подсказка, состояние «Без тихих часов», жирное начало |
 | settings.quiet.off.body | Бот может написать в любое время, даже ночью. Утром после провала считаем 08:00. | [Настройки](screens/settings.html) · подсказка, состояние «Без тихих часов» |

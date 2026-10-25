@@ -5193,14 +5193,12 @@ components:
     QuietHours:
       properties:
         end:
-          maximum: 1410
+          maximum: 1439
           minimum: 0
-          multipleOf: 30
           type: integer
         start:
-          maximum: 1410
+          maximum: 1439
           minimum: 0
-          multipleOf: 30
           type: integer
       required:
         - start

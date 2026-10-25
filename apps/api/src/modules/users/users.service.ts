@@ -181,7 +181,7 @@ export class UsersService {
   private validateSettings(input: UpdateMeRequestView): void {
     if (input.quietHours) {
       const { start, end } = input.quietHours;
-      if (![start, end].every(value => Number.isInteger(value) && value >= 0 && value <= 1410 && value % 30 === 0)) {
+      if (![start, end].every(value => Number.isInteger(value) && value >= 0 && value <= 1439)) {
         throw ApiError.invalidRequest();
       }
     }

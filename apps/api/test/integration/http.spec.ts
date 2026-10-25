@@ -126,6 +126,7 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       [0, 1410],
       [1410, 0],
       [0, 0],
+      [15, 1439],
     ])('accepts any length and both limits: %i-%i', async (start, end) => {
       const { r } = await onboard({
         quietHours: {
@@ -155,24 +156,12 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
     });
     it.each([
       {
-        start: 15,
-        end: 540,
-      },
-      {
-        start: 1320,
-        end: 545,
-      },
-      {
         start: -30,
         end: 540,
       },
       {
         start: 1320,
         end: 1440,
-      },
-      {
-        start: 1320,
-        end: 1411,
       },
       {
         start: 1.5,
@@ -197,7 +186,7 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       expect(await r.json()).toMatchObject({ status: 400 });
       expect((await h.db.model('User').findById(u._id).lean())!.onboarding).toBe('guest');
     });
-    it('PATCH /me also accepts a long interval and rejects off-step values', async () => {
+    it('PATCH /me also accepts a long interval and any minute, rejects out-of-range values', async () => {
       const u = await user(h.db);
       expect((await request('/me', u.telegramId, 'PATCH', {
         quietHours: {
@@ -208,7 +197,13 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       expect((await request('/me', u.telegramId, 'PATCH', {
         quietHours: {
           start: 10,
-          end: 1410,
+          end: 1439,
+        },
+      })).status).toBe(200);
+      expect((await request('/me', u.telegramId, 'PATCH', {
+        quietHours: {
+          start: 10,
+          end: 1440,
         },
       })).status).toBe(400);
     });
@@ -234,8 +229,8 @@ describe.each([false, true])('HTTP application (global prefix=%s)', (prefix) => 
       },
     }, {
       quietHours: {
-        start: 1,
-        end: 800,
+        start: 0,
+        end: 1440,
       },
     },
     {

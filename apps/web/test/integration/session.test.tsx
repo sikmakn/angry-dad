@@ -15,7 +15,7 @@ describe('onboarding and session', () => {
     const finished = vi.fn();
     server.use(http.post(`${base}/me/onboarding`, async ({ request }) => {
       calls++;
-      expect(await request.json()).toEqual({ role: 'mother', gender: 'female', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+      expect(await request.json()).toEqual({ role: 'mother', gender: 'female', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, quietHours: { start: 1320, end: 540 } });
       return calls === 1
         ? problem(503, 'urn:angry-dad:problem:ai_unavailable', 'Попробуй позже')
         : HttpResponse.json({ user: { ...me, role: 'mother', gender: 'female' }, replies: ['Соболезнуем Вам. Крепитесь…', 'Опять ничего сама не можешь?', 'Мечты сюда не пиши.'] } satisfies Schema<'OnboardingResponse'>);
